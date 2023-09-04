@@ -53,6 +53,7 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
+include { BWA_ALN                     } from '../modules/nf-core/bwa/aln/'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,6 +112,11 @@ workflow SAMMYSEQ {
 
     TRIMMOMATIC (
        merged_reads 
+    )
+
+    BWA_ALN (
+        TRIMMOMATIC.out.trimmed_reads,
+        PREPARE_GENOME.out.bwa_index
     )
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
