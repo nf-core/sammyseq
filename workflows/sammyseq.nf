@@ -46,6 +46,8 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
+
+include { CAT_FASTQ                   } from '../modules/nf-core/cat/fastq'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -74,11 +76,31 @@ workflow SAMMYSEQ {
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
 
+    // extract fastq to merge by expID
+    INPUT_CHECK.out.reads_to_merge
+            .filter { meta, fastq -> fastq.size() > 1 }    
+            .set { ch_reads_to_process_in_CAT_FASTQ }
+
+    ch_reads_to_process_in_CAT_FASTQ    
+            .flatMap { meta, fastq  -> 
+                    meta.collect { m -> [m,fastq]}
+                }
+            .set { ch_to_CAT }
+
+    CAT_FASTQ (
+        ch_to_CAT
+    ).reads.set { cat_fastq_output }        
+
+    ch_cat_adjusted = CAT_FASTQ.out.reads.map { meta, fastq ->
+        return [meta, [fastq]]
+    } // make fastq of CAT_FASTQ a list of paths
+    merged_reads = INPUT_CHECK.out.reads.mix(ch_cat_adjusted)
+
     //
     // MODULE: Run FastQC
     //
     FASTQC (
-        INPUT_CHECK.out.reads
+        merged_reads
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 

@@ -15,8 +15,27 @@ workflow INPUT_CHECK {
         .map { create_fastq_channel(it) }
         .set { reads }
 
+    reads
+        
+        .map { meta, fastq -> 
+            def expID = meta.expID  // Prendi l'expID da meta
+            meta.remove('fraction') // Rimuovi il campo 'fraction'
+
+            [expID, meta, fastq]
+        }
+        .groupTuple( by:0 )
+        //.view()
+        .map{ expID, meta , fastq ->
+            meta = meta[0].clone()  // Prendi solo la prima mappa e crea una copia
+            meta.id = expID  // Sostituisci il valore nel campo id con expID 
+            [ [meta], fastq.flatten() ]
+            }
+        .set { reads_to_merge }
+
+
     emit:
     reads                                     // channel: [ val(meta), [ reads ] ]
+    reads_to_merge
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
@@ -26,6 +45,8 @@ def create_fastq_channel(LinkedHashMap row) {
     def meta = [:]
     meta.id         = row.sample
     meta.single_end = row.single_end.toBoolean()
+    meta.expID = row.experimentalID
+    meta.fraction = row.fraction
 
     // add path(s) of the fastq file(s) to the meta map
     def fastq_meta = []
