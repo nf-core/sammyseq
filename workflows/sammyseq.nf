@@ -37,6 +37,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
+include { FASTQ_ALIGN_BWAALN  } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +54,7 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
-include { BWA_ALN                     } from '../modules/nf-core/bwa/aln/'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,7 +115,12 @@ workflow SAMMYSEQ {
        merged_reads 
     )
 
-    BWA_ALN (
+    //BWA_ALN (
+    //    TRIMMOMATIC.out.trimmed_reads,
+    //    PREPARE_GENOME.out.bwa_index
+    //)
+
+    FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
         PREPARE_GENOME.out.bwa_index
     )
