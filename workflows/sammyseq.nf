@@ -67,6 +67,7 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
+// include { }
 
 // include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_FILTER     }   from '../modules/nf-core/samtools/view/main'
 // include { SAMTOOLS_SORT as SAMTOOLS_SORT_FILTERED   }   from '../modules/nf-core/samtools/sort/main'
