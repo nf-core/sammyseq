@@ -67,8 +67,8 @@ include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
-// include { }
-
+include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
+ 
 // include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_FILTER     }   from '../modules/nf-core/samtools/view/main'
 // include { SAMTOOLS_SORT as SAMTOOLS_SORT_FILTERED   }   from '../modules/nf-core/samtools/sort/main'
 // include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_FILTERED }   from '../modules/nf-core/samtools/index/main'
@@ -132,6 +132,11 @@ workflow SAMMYSEQ {
        merged_reads 
     )
 
+    if (params.stopAt == 'TRIMMOMATIC') {
+        return
+    }
+
+
     //BWA_ALN (
     //    TRIMMOMATIC.out.trimmed_reads,
     //    PREPARE_GENOME.out.bwa_index
@@ -142,12 +147,19 @@ workflow SAMMYSEQ {
         PREPARE_GENOME.out.bwa_index
     )
 
+    if (params.stopAt == 'FASTQ_ALIGN_BWAALN') {
+        return
+    }
+
+
     // PICARD MARK_DUPLICATES
     // Index Fasta File for Markduplicates
     SAMTOOLS_FAIDX (
             ch_fasta_meta,
              [[], []]
         )
+
+    
 
     // MARK DUPLICATES IN BAM FILE
     BAM_MARKDUPLICATES_PICARD (
@@ -156,6 +168,9 @@ workflow SAMMYSEQ {
         SAMTOOLS_FAIDX.out.fai.collect()
         )
 
+    if (params.stopAt == 'BAM_MARKDUPLICATES_PICARD') {
+        return
+    }
     // SAMTOOLS_VIEW_FILTER (
     //                 ch_bam_sorted.join(ch_bam_sorted_bai),
     //                 ch_fasta_meta,
@@ -163,8 +178,38 @@ workflow SAMMYSEQ {
     //             )
     // ch_versions = ch_versions.mix(SAMTOOLS_VIEW_FILTER.out.versions)
 
-    ch_bam_from_markduplicates = BAM_MARKDUPLICATES_PICARD.bam
+    //ch_bam_from_markduplicates = BAM_MARKDUPLICATES_PICARD.bam
 
+    //BAM_MARKDUPLICATES_PICARD.out.bam.view()
+    //BAM_MARKDUPLICATES_PICARD.out.bai.view()
+
+    //ch_bam_bai_combined = BAM_MARKDUPLICATES_PICARD.out.bam.join(BAM_MARKDUPLICATES_PICARD.out.bai, by: [0])
+
+   ch_bam_bai_combined = BAM_MARKDUPLICATES_PICARD.out.bam
+        .join(BAM_MARKDUPLICATES_PICARD.out.bai, by: [0], remainder: true)
+        .map {
+            meta, bam, bai  ->     
+                    [ meta, bam, bai ]
+             
+        }
+
+    //ch_bam_bai_combined.view()
+
+    //ch_for_bamcoverage = ch_bam_bai_combined.map { meta1, bam, meta2, bai -> 
+    //   tuple(meta1, bam, bai)
+    //}
+
+    //ch_for_bamcoverage.view()
+
+    DEEPTOOLS_BAMCOVERAGE (
+      ch_bam_bai_combined,
+      ch_fasta_meta.map { it[2] }, 
+      SAMTOOLS_FAIDX.out.fai.collect()
+    )
+
+    if (params.stopAt == 'DEEPTOOLS_BAMCOVERAGE') {
+        return
+    }
 
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

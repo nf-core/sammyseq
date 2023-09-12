@@ -12,6 +12,11 @@
             "description": "Define where the pipeline should find input data and save output data.",
             "required": ["input", "outdir"],
             "properties": {
+                "stopAt": {
+                    "type": "string",
+                    "description": "Specify after which step the pipeline should stop.",
+                    "fa_icon": "fas fa-stop-circle"
+                },
                 "input": {
                     "type": "string",
                     "format": "file-path",
