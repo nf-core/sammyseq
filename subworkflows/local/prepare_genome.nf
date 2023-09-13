@@ -19,8 +19,9 @@ include {
 include { BWA_INDEX            } from '../../modules/nf-core/bwa/index/main'
 
 workflow PREPARE_GENOME {
-    //take:
-
+    take:
+    input_fasta
+    input_bwaindex
 
     main:
 
@@ -30,11 +31,11 @@ workflow PREPARE_GENOME {
     // Uncompress genome fasta file if required
     //
     ch_fasta = Channel.empty()
-    if (params.fasta.endsWith('.gz')) {
+    if (input_fasta.endsWith('.gz')) {
         ch_fasta    = GUNZIP_FASTA ( [ [:], params.fasta ] ).gunzip.map{ it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta =  [ [:], file(params.fasta) ] 
+        ch_fasta =  [ [:], file(input_fasta) ] 
     }
 
     //println(ch_fasta)
@@ -56,11 +57,11 @@ workflow PREPARE_GENOME {
     ch_bwa_index = Channel.empty()
     
         if (params.bwa_index) {
-            if (params.bwa_index.endsWith('.tar.gz')) {
-                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa_index ] ).untar.map{ it[1] }
+            if (input_bwaindex.endsWith('.tar.gz')) {
+                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], input_bwaindex ] ).untar.map{ it[1] }
                 ch_versions  = ch_versions.mix(UNTAR_BWA_INDEX.out.versions)
             } else {
-                ch_bwa_index = file(params.bwa_index)
+                ch_bwa_index = file(input_bwaindex)
             }
         } else {
             ch_bwa_index = BWA_INDEX ( ch_fasta ).index

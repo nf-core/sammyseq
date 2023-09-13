@@ -89,7 +89,9 @@ workflow SAMMYSEQ {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    PREPARE_GENOME ()
+    PREPARE_GENOME (params.fasta,
+                    params.bwa_index)
+
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     INPUT_CHECK (
@@ -141,7 +143,7 @@ workflow SAMMYSEQ {
     //    TRIMMOMATIC.out.trimmed_reads,
     //    PREPARE_GENOME.out.bwa_index
     //)
-
+    
     FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
         PREPARE_GENOME.out.bwa_index
@@ -194,17 +196,19 @@ workflow SAMMYSEQ {
         }
 
     //ch_bam_bai_combined.view()
-
-    //ch_for_bamcoverage = ch_bam_bai_combined.map { meta1, bam, meta2, bai -> 
-    //   tuple(meta1, bam, bai)
-    //}
-
-    //ch_for_bamcoverage.view()
+    //ch_fasta_meta.map { it[2] }.view
+    //ch_fasta_meta.collect().view()
+    //SAMTOOLS_FAIDX.out.fai.collect().view()
+    //SAMTOOLS_FAIDX.out.fai.map { it['path'] }.collect().view()
+    ch_fai_path = SAMTOOLS_FAIDX.out.fai.map { it[1] }
+    //ch_fai_path.view()
+    ch_fasta_path = ch_fasta_meta.map { it[1] }
+    //ch_fasta_path.view()
 
     DEEPTOOLS_BAMCOVERAGE (
-      ch_bam_bai_combined,
-      ch_fasta_meta.map { it[2] }, 
-      SAMTOOLS_FAIDX.out.fai.collect()
+        ch_bam_bai_combined,
+        ch_fasta_path,
+        ch_fai_path
     )
 
     if (params.stopAt == 'DEEPTOOLS_BAMCOVERAGE') {
