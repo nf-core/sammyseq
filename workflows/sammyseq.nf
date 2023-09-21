@@ -50,6 +50,7 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
 include { FASTQ_ALIGN_BWAALN  } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard'
+include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,10 +90,22 @@ workflow SAMMYSEQ {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
+
+    RTWOSAMPLESMLE()
+
+    if (params.stopAt == 'BEGIN') {
+        return
+    }
+
+
     PREPARE_GENOME (params.fasta,
                     params.bwa_index)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
+
+    if (params.stopAt == 'PREPARE_GENOME') {
+        return
+    }
 
     INPUT_CHECK (
         file(params.input)
