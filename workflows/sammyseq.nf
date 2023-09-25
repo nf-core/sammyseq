@@ -50,6 +50,7 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
 include { FASTQ_ALIGN_BWAALN  } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard'
+include { CUT_SIZES_GENOME } from "../modules/local/chromosomes_size"
 include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
 
 /*
@@ -90,8 +91,6 @@ workflow SAMMYSEQ {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-
-    RTWOSAMPLESMLE()
 
     if (params.stopAt == 'BEGIN') {
         return
@@ -174,7 +173,9 @@ workflow SAMMYSEQ {
              [[], []]
         )
 
-    
+    ch_fai_for_cut = SAMTOOLS_FAIDX.out.fai.collect()
+
+    CUT_SIZES_GENOME(ch_fai_for_cut)
 
     // MARK DUPLICATES IN BAM FILE
     BAM_MARKDUPLICATES_PICARD (

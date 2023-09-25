@@ -17,6 +17,7 @@ include {
 
 //include { GFFREAD              } from '../../modules/nf-core/gffread/main'
 include { BWA_INDEX            } from '../../modules/nf-core/bwa/index/main'
+//include { SAMTOOLS_FAIDX } from '../../modules/nf-core/samtools/faidx'
 
 workflow PREPARE_GENOME {
     take:
@@ -68,6 +69,10 @@ workflow PREPARE_GENOME {
             ch_versions  = ch_versions.mix(BWA_INDEX.out.versions)
         }
     
+
+    //make chromosome size index
+
+
 
     //
     // Uncompress Bowtie2 index or generate from scratch if required
