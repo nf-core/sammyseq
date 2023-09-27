@@ -10,7 +10,37 @@ require(data.table)
 require(spp)
 require(rtracklayer)
 
-print("Hello World")
+################################################
+## PARAMS
+################################################
+
+# ip_file <- args[1]
+# input_file <- args[2]
+# chromsizes_file <- args[3]
+# mle_output_file <- args[4]
+
+ip_file <- "${bam1}"
+input_file <- "${bam2}"
+chromsizes_file <- "${chromsizes_file}"
+mle_output_file <- "${bam1.baseName}VS${bam2.baseName}_mle.txt"
+
+################################################
+# DEFAULT PARAMETERS
+################################################
+
+remove_anomalies <- FALSE
+debug_mode <- TRUE
+
+################################################
+# CORE PROCESSES
+################################################
+
+if (debug_mode){
+    print(c("ip_file=",ip_file))
+    print(c("input_file=",input_file))
+    print(c("chromsizes_file=",chromsizes_file))
+    print(c("mle_output_file",mle_output_file))
+}
 
 ################################################
 ################################################

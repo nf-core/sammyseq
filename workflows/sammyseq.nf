@@ -109,6 +109,9 @@ workflow SAMMYSEQ {
     INPUT_CHECK (
         file(params.input)
     )
+
+    //INPUT_CHECK.out.reads.view()
+
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
@@ -137,6 +140,9 @@ workflow SAMMYSEQ {
     //
     // MODULE: Run FastQC
     //
+    //merged_reads.view()
+
+
     FASTQC (
         merged_reads
     )
@@ -151,10 +157,7 @@ workflow SAMMYSEQ {
     }
 
 
-    //BWA_ALN (
-    //    TRIMMOMATIC.out.trimmed_reads,
-    //    PREPARE_GENOME.out.bwa_index
-    //)
+    //TRIMMOMATIC.out.trimmed_reads.view()
     
     FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
@@ -176,6 +179,8 @@ workflow SAMMYSEQ {
     ch_fai_for_cut = SAMTOOLS_FAIDX.out.fai.collect()
 
     CUT_SIZES_GENOME(ch_fai_for_cut)
+
+    //FASTQ_ALIGN_BWAALN.out.bam.view()
 
     // MARK DUPLICATES IN BAM FILE
     BAM_MARKDUPLICATES_PICARD (
@@ -228,6 +233,68 @@ workflow SAMMYSEQ {
     if (params.stopAt == 'DEEPTOOLS_BAMCOVERAGE') {
         return
     }
+
+    if (params.comparisonFile) {
+
+        //BAM_MARKDUPLICATES_PICARD.out.bam.view()
+
+        // Declare the dictionary that will store the comparisons
+        def comparisons = [:]
+
+        // Read the CSV file
+        csvFile = file(params.comparisonFile)
+        csvFile.eachLine { line ->
+        // Skip the first line (header)
+            if (line.startsWith("sample1")) {
+                return
+            }
+    
+        // Extract the samples and add the "_T1" suffix
+                def (sample1, sample2) = line.split(',')
+                comparisons[sample1.trim() + "_T1"] = sample2.trim() + "_T1"
+                println("Comparisons Map: $comparisons")
+        }
+
+        //println("Comparisons Map: $comparisons")  // Print the comparison map
+
+        // Filter BAMs using the updated comparisons map
+        
+
+        ch_filtered_bams = BAM_MARKDUPLICATES_PICARD.out.bam
+           .filter { meta, bam -> 
+                boolean isPresent = comparisons.keySet().contains(meta.id) || comparisons.values().contains(meta.id)
+                if (!isPresent) {
+                    //println("BAM not in comparisons list: $bam")  // Print BAMs not in the comparison list
+                }
+                return isPresent
+            }
+
+        // Print filtered BAMs
+        //ch_filtered_bams.view()
+
+        // Create BAM pairs for comparison
+        
+        ch_filtered_bams
+            .groupTuple(by: [0]) // Group by the metadata
+            .map { meta, bams ->
+                def comparisonValue = comparisons[meta.id]
+                println("Comparison Value for ${meta.id}: $comparisonValue")
+            }
+            .filter { it != null } // Remove any null values from the channel
+            .set { ch_bam_pairs_for_comparison }
+        println("Before view")
+
+        ch_bam_pairs_for_comparison.count().view()
+
+        ch_bam_pairs_for_comparison.view()
+
+        println("after view")
+
+        if (params.stopAt == 'RTWOSAMPLESMLE') {
+        return
+        }
+    }
+
 
 
     CUSTOM_DUMPSOFTWAREVERSIONS (

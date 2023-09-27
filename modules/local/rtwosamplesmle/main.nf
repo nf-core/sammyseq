@@ -29,18 +29,22 @@ process RTWOSAMPLESMLE {
     //container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
     //    'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
     //    'biocontainers/YOUR-TOOL-HERE' }"
-    container 'lucidif/r_two_samples_mle:latest'
+
+    //docker pull lucidif/r_two_samples_mle:0.0.1
+    //docker image tag 96ceba68eb6d quay.io/lucidif/r_two_samples_mle:0.0.1
+    container 'lucidif/r_two_samples_mle:0.0.1'
 
 
-    //input:
+    input:
     // TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
     //               MUST be provided as an input via a Groovy Map called "meta".
     //               This information may not be required in some instances e.g. indexing reference genome files:
     //               https://github.com/nf-core/modules/blob/master/modules/nf-core/bwa/index/main.nf
     // TODO nf-core: Where applicable please provide/convert compressed files as input/output
     //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
-    //tuple val(meta), path(bam)
-
+    tuple val(meta1), val(meta2), path(bam1), path(bam2)
+    path chromsizes_file
+    
     //output:
     // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
     //tuple val(meta), path("*.bam"), emit: bam
