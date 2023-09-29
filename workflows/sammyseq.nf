@@ -189,6 +189,12 @@ workflow SAMMYSEQ {
         SAMTOOLS_FAIDX.out.fai.collect()
         )
 
+
+    //BAM_MARKDUPLICATES_PICARD.out.bam.view()
+       
+    ch_mle_in = BAM_MARKDUPLICATES_PICARD.out.bam
+    //ch_mle_in.view()
+
     if (params.stopAt == 'BAM_MARKDUPLICATES_PICARD') {
         return
     }
@@ -206,7 +212,7 @@ workflow SAMMYSEQ {
 
     //ch_bam_bai_combined = BAM_MARKDUPLICATES_PICARD.out.bam.join(BAM_MARKDUPLICATES_PICARD.out.bai, by: [0])
 
-   ch_bam_bai_combined = BAM_MARKDUPLICATES_PICARD.out.bam
+   ch_bam_bai_combined =  BAM_MARKDUPLICATES_PICARD.out.bam
         .join(BAM_MARKDUPLICATES_PICARD.out.bai, by: [0], remainder: true)
         .map {
             meta, bam, bai  ->     
@@ -219,6 +225,12 @@ workflow SAMMYSEQ {
     //ch_fasta_meta.collect().view()
     //SAMTOOLS_FAIDX.out.fai.collect().view()
     //SAMTOOLS_FAIDX.out.fai.map { it['path'] }.collect().view()
+    // println("first BAM_MARKDUPLICATES_PICARD.out.bam.view()") 
+    //     BAM_MARKDUPLICATES_PICARD.out.bam.view()
+    //     ch_bam_bai_combined.view()
+    // println("first END BAM_MARKDUPLICATES_PICARD.out.bam.view()")
+
+
     ch_fai_path = SAMTOOLS_FAIDX.out.fai.map { it[1] }
     //ch_fai_path.view()
     ch_fasta_path = ch_fasta_meta.map { it[1] }
@@ -235,60 +247,144 @@ workflow SAMMYSEQ {
     }
 
     if (params.comparisonFile) {
-
-        //BAM_MARKDUPLICATES_PICARD.out.bam.view()
-
-        // Declare the dictionary that will store the comparisons
+        // Add the suffix "_T1" to each sample ID in the comparison file
         def comparisons = [:]
-
-        // Read the CSV file
+        def isFirstLine = true
         csvFile = file(params.comparisonFile)
         csvFile.eachLine { line ->
-        // Skip the first line (header)
-            if (line.startsWith("sample1")) {
+            if (isFirstLine) {
+                isFirstLine = false
                 return
             }
-    
-        // Extract the samples and add the "_T1" suffix
-                def (sample1, sample2) = line.split(',')
-                comparisons[sample1.trim() + "_T1"] = sample2.trim() + "_T1"
-                println("Comparisons Map: $comparisons")
+            def (sample1, sample2) = line.split(',')
+            comparisons[sample1.trim() + "_T1"] = sample2.trim() + "_T1"
         }
 
-        //println("Comparisons Map: $comparisons")  // Print the comparison map
 
-        // Filter BAMs using the updated comparisons map
+        // ch_filtered_bams = ch_mle_in.filter { meta, bam ->
+        //     boolean isInKeys = comparisons.keySet().contains(meta.id)
+        //     boolean isInValues = comparisons.values().contains(meta.id)
+
+        //     boolean isPresent = isInKeys || isInValues
+
+        //     //println("Is ${meta.id} present? $isPresent")
+
+        //     return isPresent
+        // }
+
         
+def comparison_channels = [:]
 
-        ch_filtered_bams = BAM_MARKDUPLICATES_PICARD.out.bam
-           .filter { meta, bam -> 
-                boolean isPresent = comparisons.keySet().contains(meta.id) || comparisons.values().contains(meta.id)
-                if (!isPresent) {
-                    //println("BAM not in comparisons list: $bam")  // Print BAMs not in the comparison list
-                }
-                return isPresent
-            }
 
-        // Print filtered BAMs
+        // comparisons.each { sample1, sample2 ->
+        //     def ch_name = "${sample1}_VS_${sample2}"
+        //     comparison_channels[ch_name] = ch_mle_in.filter { meta, bam ->
+        //         println("meta.id = $meta.id")
+        //         println("sample1 = $sample1")
+        //         println("sample2 = $sample2")
+        //         meta.id == sample1 || meta.id == sample2
+        //     }
+        // }
+
+        // comparison_channels.each { comparison, channel ->
+        //     println("Checking channel for: $comparison")
+        //     channel.view()
+        // }
+
+        // comparison_channels.each { comparison, channel ->
+        //     channel
+        //     .map { ... }  // Qualsiasi operazione desideri eseguire
+        //     .set { ... }  // Definisci la variabile di output per ulteriori fasi
+        // }
+
+
+        //ch_mle_in.map{meta, bam -> return tuple(meta.id, bam)},set{test_ch}
+
+        //ch_filtered_bams.flatten().view()
+
+        //ch_filtered_bams.toList().transpose().set { all_filtered_bams }
+        
+        //all_filtered_bams.view()
+
+        // 1. Create a Comparisons Channel
+        Channel
+            .fromPath(params.comparisonFile)
+            .splitCsv(header: true, sep: ',')
+            .map { row -> [row.sample1 + "_T1", row.sample2 + "_T1"] }
+            .set { comparisons_ch }
+
+// comparisons_ch.map { sample1, sample2 ->
+//     def filtered_channel = ch_mle_in.filter { meta, bam ->
+//         meta.id == sample1 || meta.id == sample2
+//     }.collect()
+//     return [ "${sample1}_VS_${sample2}", filtered_channel ]
+// }.set { mapped_comparison_channels }
+
+comparisons_ch.map { sample1, sample2 ->
+    def ch_name = "${sample1}_VS_${sample2}"
+    def filtered_channel = ch_mle_in.filter { meta, bam ->
+        meta.id == sample1 || meta.id == sample2
+    }.toList()
+    [ ch_name, filtered_channel ]
+}.set { mapped_comparison_channels }
+
+mapped_comparison_channels.view()
+
+
+        
+        //BAM_MARKDUPLICATES_PICARD.out.bam.view()
         //ch_filtered_bams.view()
+        //all_filtered_bams.view()
 
-        // Create BAM pairs for comparison
+        //test_ch=BAM_MARKDUPLICATES_PICARD.out.bam
         
-        ch_filtered_bams
-            .groupTuple(by: [0]) // Group by the metadata
-            .map { meta, bams ->
-                def comparisonValue = comparisons[meta.id]
-                println("Comparison Value for ${meta.id}: $comparisonValue")
-            }
-            .filter { it != null } // Remove any null values from the channel
-            .set { ch_bam_pairs_for_comparison }
-        println("Before view")
 
-        ch_bam_pairs_for_comparison.count().view()
+        //simplified_ch = channel.fromList ( all_filtered_bams )
+        // simplified_ch = all_filtered_bams.map { it ->
 
-        ch_bam_pairs_for_comparison.view()
+        //         meta=it
+        //         path=it
+        //         println("meta: $meta")
+        //         println("path: $path")
+        //         //println("bamfile: $bamfile")
+        //         return tuple(meta, path)
+        //     }
+        // simplified_ch.view()
 
-        println("after view")
+        //comparisons_ch.view()
+
+        //all_filtered_bams.join(comparisons_ch).view()
+
+
+        // Creiamo una mappa da 'id' a 'path'
+// def filterBamsByComparison(metaList, pathList, comparison) {
+//     def ids = comparison.collect()
+//     def selectedMetas = metaList.findAll { it['id'] in ids }
+//     def selectedPaths = pathList.findAll { path -> 
+//         def matchingMeta = metaList.find { it['id'] in ids }
+//         path.contains(matchingMeta['id'])
+//     }
+//     return tuple(selectedMetas, selectedPaths)
+// }
+
+// Channel
+//     .combine(all_filtered_bams, comparisons_ch)
+//     .map { allMeta, allPath, comparison ->
+//         return filterBamsByComparison(allMeta, allPath, comparison)
+//     } set {iltered_bams_ch}
+
+// filtered_bams_ch.view()  // Solo per debug
+
+
+
+
+        //simplified_ch.view()
+
+
+
+
+
+        //all_filtered_bams.view()
 
         if (params.stopAt == 'RTWOSAMPLESMLE') {
         return
