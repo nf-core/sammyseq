@@ -221,16 +221,6 @@ workflow SAMMYSEQ {
              
         }
 
-    //ch_bam_bai_combined.view()
-    //ch_fasta_meta.map { it[2] }.view
-    //ch_fasta_meta.collect().view()
-    //SAMTOOLS_FAIDX.out.fai.collect().view()
-    //SAMTOOLS_FAIDX.out.fai.map { it['path'] }.collect().view()
-    // println("first BAM_MARKDUPLICATES_PICARD.out.bam.view()") 
-    //     BAM_MARKDUPLICATES_PICARD.out.bam.view()
-    //     ch_bam_bai_combined.view()
-    // println("first END BAM_MARKDUPLICATES_PICARD.out.bam.view()")
-
 
     ch_fai_path = SAMTOOLS_FAIDX.out.fai.map { it[1] }
     //ch_fai_path.view()
@@ -249,6 +239,9 @@ workflow SAMMYSEQ {
 
     if (params.comparisonFile) {
         // Add the suffix "_T1" to each sample ID in the comparison file
+
+        ch_bam_input=BAM_MARKDUPLICATES_PICARD.out.bam
+
         def comparisons = [:]
         def isFirstLine = true
         csvFile = file(params.comparisonFile)
@@ -262,156 +255,60 @@ workflow SAMMYSEQ {
         }
 
 
-        // 1. Create a Comparisons Channel
+        // 1. Create a Comparisons Channels (one for sample 1 in comparison and another for sample 2 in comparison)
 
         Channel
             .fromPath(params.comparisonFile)
-            .splitCsv(header: true, sep: ',')
-            .map { row -> [row.sample1 + "_T1", row.sample2 + "_T1"] }
-            .set { comparisons_ch }
+            .splitCsv(header : true)
+            .map{ row -> 
+                [ row.sample1 + "_T1", row.sample2 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                }
+                .set { comparisons_ch_s1 } 
+                //.view() 
 
-        
+        Channel.fromPath(params.comparisonFile)
+                .splitCsv(header : true)
+                .map{ row -> 
+                    [ row.sample2 + "_T1", row.sample1 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                }
+                .set { comparisons_ch_s2 } 
 
+        //2. convert bam file to input        
 
-        // ch_mle_in.collect { meta, bam -> [meta.id, bam] }
-        //          .toList()
-        //          .set { bam_list_ch }
+        ch_bam_input
+                .map {meta, bam ->
+                    id=meta.subMap('id')
+                    [id.id, bam] 
+                                
+                    }
+                .set { ch_bam_reformat }
 
-        //bam_list_ch.view()
-
-        // bam_list_ch
-        //     .map { it[0].collate(2) } // Raggruppa ogni due elementi
-        //     .set { paired_bam_list_ch }
-
-
-        //paired_bam_list_ch.view()
-
-        // paired_bam_list_ch
-        //         .transpose()
-        //         .set {  bam_pairs_ch }
-
-        // bam_pairs_ch.merge().view()
-        
-ch_bam_input=BAM_MARKDUPLICATES_PICARD.out.bam//.view{"get class : ${it.getClass()}"}
-//comparisons_ch.view()
-//CUT_SIZES_GENOME.out.ch_sizes_genome.view{"get class : ${it.getClass()}"}
-
-
-Channel.fromPath(params.comparisonFile)
-        .splitCsv(header : true)
-        .map{ row -> 
-            //sample1 = [sample1:row.sample1 + "_T1"]
-            //sample2 = [sample2:row.sample2 + "_T1"]
-            [ row.sample1 + "_T1", row.sample2 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-        }
-        .set { comparisons_ch_s1 } 
-        //.view() 
-
-Channel.fromPath(params.comparisonFile)
-        .splitCsv(header : true)
-        .map{ row -> 
-            //sample1 = [sample1:row.sample1 + "_T1"]
-            //sample2 = [sample2:row.sample2 + "_T1"]
-            [ row.sample2 + "_T1", row.sample1 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-        }
-        .set { comparisons_ch_s2 } 
-
-
-//Channel.fromList(ch_bam_input).view()
-
-        // ch_bam_input.collect { meta, bam -> [meta.id, bam] }
-        //          .toList()
-        //          .set { ch_bam_fix }
-
-        
-
-
-ch_bam_input
-        .map {meta, bam ->
-                        id=meta.subMap('id')
-                        [id.id, bam] 
-                        
-                        }
-        //.view{"ch_bam+convert: ${it}"}
-        .set { ch_bam_reformat }
-
-
-//ch_bam_test
-//ch_bam_reformat.combine(comparisons_ch_s1, by:0).view{ "combine: ${it}" }
-
-
-// ch_bam_reformat
-//         .toList()
-//         .flatten()
-//         .set { fix_ch_bam }
-
-        
-
-//comparisons_ch.view{"comparisons_ch= ${it}"}
-//ch_bam_reformat.view{"ch_bam_reformat= ${it}"}
-//ch_bam_input.view{"ch_bam_input= ${it}"}
-
-
-comparisons_ch_s1.combine(ch_bam_reformat , by:0)
+        //3. combine comparison channel with bam list channel
+        comparisons_ch_s1
+                .combine(ch_bam_reformat , by:0)
                 .map { sample1, sample2, comparison, bam ->
                     //[ comparison:comparison, sample1:sample1, sample2:sample2, bam1:bam1]
-                    [ comparison, bam]
-                }.set { bam1_comparison }
+                [ comparison, bam]
+                }
+                .set { bam1_comparison }
 
-                //.view{"join= ${it}"}
-comparisons_ch_s2.combine(ch_bam_reformat, by:0)
+                        //.view{"join= ${it}"}
+        comparisons_ch_s2
+                .combine(ch_bam_reformat, by:0)
                 .map{ sample2, sample1, comparison, bam ->
                     //[ comparison:comparison , sample1:sample1, sample2:sample2 ,bam2:bam2 ]
                     [ comparison, bam]
-                }
+                    }
                 .set{ bam2_comparison }
 
-bam1_comparison.join(bam2_comparison, remainder: false, by: 0 ).set{comparisons_merge_ch}
+        bam1_comparison
+                .join(bam2_comparison, remainder: false, by: 0 )
+                .set{comparisons_merge_ch}
 
-//comparisons_ch_s1.view{ "comparisons_ch_s1: ${it}" }
-//comparisons_ch_s2.view{ "comparisons_ch_s2: ${it}" }
+        //comparisons_merge_ch
+        //        .view{ "comparisons_merge_ch: ${it}" }
 
-//bam1_comparison.view{ "bam1_comparison: ${it}" }
-//bam2_comparison.view{ "bam2_comparison: ${it}" }
-
-
-comparisons_merge_ch.view{ "comparisons_merge_ch: ${it}" }
-
-//ch_bam_reformat.view{ "ch_bam_reformat: ${it}" }
-
-//ch_bam_reformat.join(comparisons_ch, remainder:true ,by:[1]).view{"join= ${it}"}
-
-// canale1.flatten()
-//     .combine(canale2, by: 0)
-//     .groupTuple(by: [0,1])
-//     .map { it.flatten() }
-//     .view()
-
-
-//ch_bam_reformat.view()
-//comparisons_ch.view()
-
-//comparisons_ch.cross( ch_bam_reformat ).view()
-
-// first_join = comparisons_ch
-//     .join(ch_bam_reformat, by: { it[0] }).view()
-//     //.map { it -> [it[0], it[2], it[3]] }.view()
-
-
-// Channel
-//     .of( 'alpha,beta,gamma\n10,20,30\n70,80,90' )
-//     .splitCsv(header: true)
-//     .view { row -> "${row.alpha} - ${row.beta} - ${row.gamma}" }
-
-
-// comparisons_ch
-//     .flatMap { sample1, sample2 -> [ [sample1, sample2] ] } // perché hai bisogno di entrambe le combinazioni?
-//     //.join(ch_bam_input, by: { it[0] })
-//     //.join(ch_bam_input, by: { it[1] })
-//     .set { ch_final_input }
-
-//     ch_final_input.view()
-
+        //4.run rscript
 
         RTWOSAMPLESMLE (comparisons_merge_ch,
                         CUT_SIZES_GENOME.out.ch_sizes_genome
