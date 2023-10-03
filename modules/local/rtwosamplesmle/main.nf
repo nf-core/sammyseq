@@ -31,7 +31,7 @@ process RTWOSAMPLESMLE {
     //    'biocontainers/YOUR-TOOL-HERE' }"
 
     //docker pull lucidif/r_two_samples_mle:0.0.1
-    //docker image tag 96ceba68eb6d quay.io/lucidif/r_two_samples_mle:0.0.1
+    //docker image tag ae028b17f7d3 quay.io/lucidif/r_two_samples_mle:0.0.1
     container 'lucidif/r_two_samples_mle:0.0.1'
 
 
@@ -42,8 +42,10 @@ process RTWOSAMPLESMLE {
     //               https://github.com/nf-core/modules/blob/master/modules/nf-core/bwa/index/main.nf
     // TODO nf-core: Where applicable please provide/convert compressed files as input/output
     //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
-    tuple val(meta1), val(meta2), path(bam1), path(bam2)
+    //tuple val(meta1), val(meta2), path(bam1), path(bam2)
+    tuple val(meta), path(bam1), path(bam2)
     path chromsizes_file
+    
     
     //output:
     // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
@@ -68,6 +70,14 @@ process RTWOSAMPLESMLE {
     //               using the Nextflow "task" variable e.g. "--threads $task.cpus"
     // TODO nf-core: Please replace the example samtools command below with your module's command
     // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
+    
+
+
+    //    bam_list_ch
+    //         .map { it[0].collate(2) } // Raggruppa ogni due elementi
+    //         .set { paired_bam_list_ch }        
+
+    
     template 'two_samples_mle.R'
 
     //stub:
