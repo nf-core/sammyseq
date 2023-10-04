@@ -11,6 +11,20 @@ require(spp)
 require(rtracklayer)
 
 ################################################
+# FUNCTIONS
+################################################
+
+sortbychr <- function(x, chrcol="chr", stcol="start", endcol=NULL, chrorder=paste("chr", c(seq(22), "X", "Y"), sep="")) {
+        if (!(is.null(endcol))) {
+                x <- x[order(x[,endcol]),]
+        }       
+        x <- x[order(x[,stcol]),]
+        chrs <- ordered(x[,chrcol], levels=chrorder)
+        # chrs <- ordered(tmp, levels=paste("chr", c(seq(22), "X", "Y"), sep=""))
+        x <- x[order(chrs),]
+}
+
+################################################
 ## PARAMS
 ################################################
 
@@ -23,6 +37,7 @@ ip_file <- "${bam1}"
 input_file <- "${bam2}"
 chromsizes_file <- "${chromsizes_file}"
 mle_output_file <- "${bam1.baseName}VS${bam2.baseName}_mle.txt"
+remove_anomalies <- FALSE
 
 ################################################
 # DEFAULT PARAMETERS
@@ -42,15 +57,70 @@ if (debug_mode){
     print(c("mle_output_file",mle_output_file))
 }
 
+## PROCESSING
+
+### Make the list of chromosomes
+
+print("first part")
+chromsizes <- fread(chromsizes_file, data.table = FALSE)
+#chromsizes <- sortbychr(chromsizes, chrcol="V1", stcol="V2", chrorder=paste("chr", c(seq(19), "X", "Y"), sep=""))
+#chrs <- as.character(sub('chr', '', chromsizes[, 1]))
+chrs <- chromsizes[, 1]
+
+### Import the data
+
+ip    <- read.bam.tags(ip_file)
+input <- read.bam.tags(input_file)
+
+### Select the informative tags
+ip_tags <- ip[['tags']]
+input_tags <- input[['tags']]
+print("second part")
+### Remove the tags with anomalies
+if(remove_anomalies==TRUE){
+  ip_rm <- remove.local.tag.anomalies(ip_tags[chrs])
+  input_rm <- remove.local.tag.anomalies(input_tags[chrs])
+}else{
+  ip_rm <- ip_tags
+  input_rm <- input_tags
+}
+
+print("third part")
+### Make the smoothing with the loglikelihood function
+print("lane 90")
+#print(paste0("ip_rm=",head(ip_rm)))
+#print(paste0("input_rm=",head(ip_rm)))
+chip_smoothed_mle <- get.smoothed.enrichment.mle(ip_rm, input_rm, tag.shift = 0, background.density.scaling = FALSE)
+print("lane 91")
+#chip_smoothed_mle <- get.smoothed.enrichment.mle(ip_tags, input_tags, tag.shift = 0, background.density.scaling = FALSE)
+
+ccl <- sapply(chip_smoothed_mle, nrow)
+cpos <- unlist(sapply(chip_smoothed_mle, function(csm) csm\$x))
+ccov <- unlist(sapply(chip_smoothed_mle, function(csm) csm\$y))
+print("line 97")
+gr.mle <- GRanges(seqnames = rep(names(chip_smoothed_mle), ccl), ranges = IRanges(start = cpos, end = cpos), strand = Rle('*', sum(ccl)), score = ccov)
+seqlengths(gr.mle) <- chromsizes[, 2]
+
+#rename score col
+col_names <- names(mcols(gr.mle))
+#col_names <- sub("\\..*\$", "", col_names)
+col_names <- "score"
+names(mcols(gr.mle)) <- col_names
+
+print("fouth part")
+#export out file
+export.bw(gr.mle, mle_output_file)
+
+
 ################################################
 ################################################
 ## R SESSION INFO                             ##
 ################################################
 ################################################
 
-##sink(paste(output_prefix, "R_sessionInfo.log", sep = '.'))
-##print(sessionInfo())
-##sink()
+# sink(paste(output_prefix, "R_sessionInfo.log", sep = '.'))
+# print(sessionInfo())
+# sink()
 
 ################################################
 ################################################

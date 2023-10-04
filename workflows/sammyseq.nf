@@ -242,17 +242,17 @@ workflow SAMMYSEQ {
 
         ch_bam_input=BAM_MARKDUPLICATES_PICARD.out.bam
 
-        def comparisons = [:]
-        def isFirstLine = true
-        csvFile = file(params.comparisonFile)
-        csvFile.eachLine { line ->
-            if (isFirstLine) {
-                isFirstLine = false
-                return
-            }
-            def (sample1, sample2) = line.split(',')
-            comparisons[sample1.trim() + "_T1"] = sample2.trim() + "_T1"
-        }
+        // def comparisons = [:]
+        // def isFirstLine = true
+        // csvFile = file(params.comparisonFile)
+        // csvFile.eachLine { line ->
+        //     if (isFirstLine) {
+        //         isFirstLine = false
+        //         return
+        //     }
+        //     def (sample1, sample2) = line.split(',')
+        //     comparisons[sample1.trim() + "_T1"] = sample2.trim() + "_T1"
+        // }
 
 
         // 1. Create a Comparisons Channels (one for sample 1 in comparison and another for sample 2 in comparison)
@@ -261,7 +261,8 @@ workflow SAMMYSEQ {
             .fromPath(params.comparisonFile)
             .splitCsv(header : true)
             .map{ row -> 
-                [ row.sample1 + "_T1", row.sample2 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                //[ row.sample1 + "_T1", row.sample2 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                [ row.sample1 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
                 }
                 .set { comparisons_ch_s1 } 
                 //.view() 
@@ -269,12 +270,13 @@ workflow SAMMYSEQ {
         Channel.fromPath(params.comparisonFile)
                 .splitCsv(header : true)
                 .map{ row -> 
-                    [ row.sample2 + "_T1", row.sample1 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                   // [ row.sample2 + "_T1", row.sample1 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                   [ row.sample2 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
                 }
                 .set { comparisons_ch_s2 } 
 
         //2. convert bam file to input        
-
+        // [[id:ggg, paired:true],path.bam]
         ch_bam_input
                 .map {meta, bam ->
                     id=meta.subMap('id')
@@ -286,7 +288,7 @@ workflow SAMMYSEQ {
         //3. combine comparison channel with bam list channel
         comparisons_ch_s1
                 .combine(ch_bam_reformat , by:0)
-                .map { sample1, sample2, comparison, bam ->
+                .map { sample1, comparison, bam ->
                     //[ comparison:comparison, sample1:sample1, sample2:sample2, bam1:bam1]
                 [ comparison, bam]
                 }
@@ -295,7 +297,7 @@ workflow SAMMYSEQ {
                         //.view{"join= ${it}"}
         comparisons_ch_s2
                 .combine(ch_bam_reformat, by:0)
-                .map{ sample2, sample1, comparison, bam ->
+                .map{ sample2, comparison, bam ->
                     //[ comparison:comparison , sample1:sample1, sample2:sample2 ,bam2:bam2 ]
                     [ comparison, bam]
                     }
@@ -311,8 +313,8 @@ workflow SAMMYSEQ {
         //4.run rscript
 
         RTWOSAMPLESMLE (comparisons_merge_ch,
-                        CUT_SIZES_GENOME.out.ch_sizes_genome
-                        )
+                       CUT_SIZES_GENOME.out.ch_sizes_genome
+                       )
 
         if (params.stopAt == 'RTWOSAMPLESMLE') {
         return
