@@ -46,12 +46,11 @@
                     "fa_icon": "fas fa-file-signature"
                 },
                 "comparisonFile": {
-                    "type" : "string",
+                    "type": "string",
                     "format": "file-path",
                     "description": "Path to comma-separated file containing information about samples comparisons",
                     "mimetype": "text/csv",
                     "help_text": "You will need to create a comparisons file with information about the comparisons in your experiment before running the pipeline. Use this parameter to specify the necessary comparisons. It has to be a comma-separated file with 2 columns, one for the first sample to compair and the second one to sample against which to do it."
-
                 }
             }
         },
