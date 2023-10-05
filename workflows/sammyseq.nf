@@ -242,17 +242,6 @@ workflow SAMMYSEQ {
 
         ch_bam_input=BAM_MARKDUPLICATES_PICARD.out.bam
 
-        // def comparisons = [:]
-        // def isFirstLine = true
-        // csvFile = file(params.comparisonFile)
-        // csvFile.eachLine { line ->
-        //     if (isFirstLine) {
-        //         isFirstLine = false
-        //         return
-        //     }
-        //     def (sample1, sample2) = line.split(',')
-        //     comparisons[sample1.trim() + "_T1"] = sample2.trim() + "_T1"
-        // }
 
 
         // 1. Create a Comparisons Channels (one for sample 1 in comparison and another for sample 2 in comparison)
@@ -341,6 +330,10 @@ workflow SAMMYSEQ {
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.idxstats.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),

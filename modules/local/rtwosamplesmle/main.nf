@@ -26,14 +26,14 @@ process RTWOSAMPLESMLE {
     
     //conda "YOUR-TOOL-HERE"
     
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-       'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
-       'biocontainers/YOUR-TOOL-HERE' }"
+    //container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    //   'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
+    //   'biocontainers/YOUR-TOOL-HERE' }"
 
     //docker pull lucidif/r_two_samples_mle:0.0.1
     //docker image tag ae028b17f7d3 quay.io/lucidif/r_two_samples_mle:0.0.1
-    container 'lucidif/r_two_samples_mle:0.0.1'
-
+    //container 'lucidif/r_two_samples_mle:0.0.1'
+    //container 'https://registry-1.docker.io/v2/lucidif/r_two_samples_mle/blobs/sha256:038e9a5189bd7f946bc85db99ea5c43cce8b643c4e3723d52a2a763b8cf21304'
 
     input:
     // TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
