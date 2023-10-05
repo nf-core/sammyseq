@@ -1,5 +1,16 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    VALIDATE INPUTS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+if (params.fasta) { ch_fasta =  Channel.fromPath(params.fasta) } else { exit 1, 'Fasta reference genome not specified!' }
+
+// Modify fasta channel to include meta data
+ch_fasta_meta = ch_fasta.map{ it -> [[id:it[0].baseName], it] }.collect()
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     PRINT PARAMS SUMMARY
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -37,6 +48,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
+include { FASTQ_ALIGN_BWAALN  } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
+include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard'
+include { CUT_SIZES_GENOME } from "../modules/local/chromosomes_size"
+include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +68,12 @@ include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
-include { BWA_ALN                     } from '../modules/nf-core/bwa/aln/'
+include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
+include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
+ 
+// include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_FILTER     }   from '../modules/nf-core/samtools/view/main'
+// include { SAMTOOLS_SORT as SAMTOOLS_SORT_FILTERED   }   from '../modules/nf-core/samtools/sort/main'
+// include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_FILTERED }   from '../modules/nf-core/samtools/index/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,12 +91,27 @@ workflow SAMMYSEQ {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    PREPARE_GENOME ()
+
+    if (params.stopAt == 'BEGIN') {
+        return
+    }
+
+
+    PREPARE_GENOME (params.fasta,
+                    params.bwa_index)
+
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
+
+    if (params.stopAt == 'PREPARE_GENOME') {
+        return
+    }
 
     INPUT_CHECK (
         file(params.input)
     )
+
+    //INPUT_CHECK.out.reads.view()
+
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
@@ -105,6 +140,9 @@ workflow SAMMYSEQ {
     //
     // MODULE: Run FastQC
     //
+    //merged_reads.view()
+
+
     FASTQC (
         merged_reads
     )
@@ -114,10 +152,165 @@ workflow SAMMYSEQ {
        merged_reads 
     )
 
-    BWA_ALN (
+    if (params.stopAt == 'TRIMMOMATIC') {
+        return
+    }
+
+
+    //TRIMMOMATIC.out.trimmed_reads.view()
+    
+    FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
         PREPARE_GENOME.out.bwa_index
     )
+
+    if (params.stopAt == 'FASTQ_ALIGN_BWAALN') {
+        return
+    }
+
+
+    // PICARD MARK_DUPLICATES
+    // Index Fasta File for Markduplicates
+    SAMTOOLS_FAIDX (
+            ch_fasta_meta,
+             [[], []]
+        )
+
+    ch_fai_for_cut = SAMTOOLS_FAIDX.out.fai.collect()
+
+    CUT_SIZES_GENOME(ch_fai_for_cut)
+    //CUT_SIZES_GENOME.out.ch_sizes_genome.view()
+
+    //FASTQ_ALIGN_BWAALN.out.bam.view()
+
+    // MARK DUPLICATES IN BAM FILE
+    BAM_MARKDUPLICATES_PICARD (
+        FASTQ_ALIGN_BWAALN.out.bam,
+        ch_fasta_meta,
+        SAMTOOLS_FAIDX.out.fai.collect()
+        )
+
+
+    //BAM_MARKDUPLICATES_PICARD.out.bam.view()
+       
+    ch_mle_in = BAM_MARKDUPLICATES_PICARD.out.bam
+    //ch_mle_in.view()
+
+    if (params.stopAt == 'BAM_MARKDUPLICATES_PICARD') {
+        return
+    }
+    // SAMTOOLS_VIEW_FILTER (
+    //                 ch_bam_sorted.join(ch_bam_sorted_bai),
+    //                 ch_fasta_meta,
+    //                 []
+    //             )
+    // ch_versions = ch_versions.mix(SAMTOOLS_VIEW_FILTER.out.versions)
+
+    //ch_bam_from_markduplicates = BAM_MARKDUPLICATES_PICARD.bam
+
+    //BAM_MARKDUPLICATES_PICARD.out.bam.view()
+    //BAM_MARKDUPLICATES_PICARD.out.bai.view()
+
+    //ch_bam_bai_combined = BAM_MARKDUPLICATES_PICARD.out.bam.join(BAM_MARKDUPLICATES_PICARD.out.bai, by: [0])
+
+   ch_bam_bai_combined =  BAM_MARKDUPLICATES_PICARD.out.bam
+        .join(BAM_MARKDUPLICATES_PICARD.out.bai, by: [0], remainder: true)
+        .map {
+            meta, bam, bai  ->     
+                    [ meta, bam, bai ]
+             
+        }
+
+
+    ch_fai_path = SAMTOOLS_FAIDX.out.fai.map { it[1] }
+    //ch_fai_path.view()
+    ch_fasta_path = ch_fasta_meta.map { it[1] }
+    //ch_fasta_path.view()
+
+    DEEPTOOLS_BAMCOVERAGE (
+        ch_bam_bai_combined,
+        ch_fasta_path,
+        ch_fai_path
+    )
+
+    if (params.stopAt == 'DEEPTOOLS_BAMCOVERAGE') {
+        return
+    }
+
+    if (params.comparisonFile) {
+        // Add the suffix "_T1" to each sample ID in the comparison file
+
+        ch_bam_input=BAM_MARKDUPLICATES_PICARD.out.bam
+
+
+
+        // 1. Create a Comparisons Channels (one for sample 1 in comparison and another for sample 2 in comparison)
+
+        Channel
+            .fromPath(params.comparisonFile)
+            .splitCsv(header : true)
+            .map{ row -> 
+                //[ row.sample1 + "_T1", row.sample2 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                [ row.sample1 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                }
+                .set { comparisons_ch_s1 } 
+                //.view() 
+
+        Channel.fromPath(params.comparisonFile)
+                .splitCsv(header : true)
+                .map{ row -> 
+                   // [ row.sample2 + "_T1", row.sample1 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                   [ row.sample2 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                }
+                .set { comparisons_ch_s2 } 
+
+        //2. convert bam file to input        
+        // [[id:ggg, paired:true],path.bam]
+        ch_bam_input
+                .map {meta, bam ->
+                    id=meta.subMap('id')
+                    [id.id, bam] 
+                                
+                    }
+                .set { ch_bam_reformat }
+
+        //3. combine comparison channel with bam list channel
+        comparisons_ch_s1
+                .combine(ch_bam_reformat , by:0)
+                .map { sample1, comparison, bam ->
+                    //[ comparison:comparison, sample1:sample1, sample2:sample2, bam1:bam1]
+                [ comparison, bam]
+                }
+                .set { bam1_comparison }
+
+                        //.view{"join= ${it}"}
+        comparisons_ch_s2
+                .combine(ch_bam_reformat, by:0)
+                .map{ sample2, comparison, bam ->
+                    //[ comparison:comparison , sample1:sample1, sample2:sample2 ,bam2:bam2 ]
+                    [ comparison, bam]
+                    }
+                .set{ bam2_comparison }
+
+        bam1_comparison
+                .join(bam2_comparison, remainder: false, by: 0 )
+                .set{comparisons_merge_ch}
+
+        //comparisons_merge_ch
+        //        .view{ "comparisons_merge_ch: ${it}" }
+
+        //4.run rscript
+
+        RTWOSAMPLESMLE (comparisons_merge_ch,
+                       CUT_SIZES_GENOME.out.ch_sizes_genome
+                       )
+
+        if (params.stopAt == 'RTWOSAMPLESMLE') {
+        return
+        }
+    }
+
+
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
@@ -137,6 +330,10 @@ workflow SAMMYSEQ {
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.idxstats.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),
