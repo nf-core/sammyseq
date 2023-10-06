@@ -13,10 +13,11 @@
 
 ## Introduction
 
-**nf-core/sammyseq** is a bioinformatics pipeline for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state as described in:  
+**nf-core/sammyseq** is a bioinformatics pipeline for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state as described in:
+
 > Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). https://doi.org/10.1038/s41467-020-20048-9. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
 
-*Warning*: Please note thata this pipeline is under active development and has not been released yet. 
+_Warning_: Please note thata this pipeline is under active development and has not been released yet.
 
 Here is an outline of the analysis steps:
 
@@ -68,7 +69,7 @@ nextflow run nf-core/sammyseq \
    --outdir <OUTDIR>
 ```
 
-or 
+or
 
 ```bash
 nextflow run nf-core/sammyseq \
