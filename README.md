@@ -13,20 +13,26 @@
 
 ## Introduction
 
-**nf-core/sammyseq** is a bioinformatics pipeline that ...
+**nf-core/sammyseq** is a bioinformatics pipeline for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state as described in:
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+> Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). https://doi.org/10.1038/s41467-020-20048-9. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
+
+_Warning_: Please note thata this pipeline is under active development and has not been released yet.
+
+Here is an outline of the analysis steps:
+
+1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+2. Trim reads to remove adapter sequences and low quality ends ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
+3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/))
+4. Remove duplicates ([`picard Markduplicates`])
+5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
+6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
+7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired samples pairs ([`spp`])
+8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
-
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
@@ -37,20 +43,20 @@ with `-profile test` before running the workflow on actual data.
 :::
 
 <!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
+     Explain what rows and columns represent. For instance (please edit as appropriate -->
 
 First, prepare a samplesheet with your input data that looks as follows:
 
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,fastq_1,fastq_2,experimentalID,fraction
+CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2
+CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3
+CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), `experimentalID` represents the biological specimen of interest and `sample` the library produced for each fraction, it usually is a unique combination of `experimentalID` and `fraction`.
 
 Now, you can run the pipeline using:
 
@@ -63,7 +69,25 @@ nextflow run nf-core/sammyseq \
    --outdir <OUTDIR>
 ```
 
-:::warning
+or
+
+```bash
+nextflow run nf-core/sammyseq \
+   -profile <docker/singularity/.../institute> \
+   --input samplesheet.csv \
+   --outdir <OUTDIR> \
+   --conparisonFile comparisons.csv
+```
+
+`comparisons.csv`:
+
+```csv
+sample1,sample2
+CTRL004_S2,CTRL004_S3
+CTRL004_S2,CTRL004_S4
+```
+
+::: warning
 Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
 provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
@@ -79,7 +103,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/sammyseq was originally written by Margherita Mutarelli.
+nf-core/sammyseq was written by Margherita Mutarelli and Lucio Di Filippo and was based on the original pipeline developed _in-house_ by SAMMY-seq creators. <!-- TODO retreive all names and github usernames -->
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
