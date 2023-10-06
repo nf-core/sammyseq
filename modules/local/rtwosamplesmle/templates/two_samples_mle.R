@@ -17,7 +17,7 @@ require(rtracklayer)
 sortbychr <- function(x, chrcol="chr", stcol="start", endcol=NULL, chrorder=paste("chr", c(seq(22), "X", "Y"), sep="")) {
         if (!(is.null(endcol))) {
                 x <- x[order(x[,endcol]),]
-        }       
+        }
         x <- x[order(x[,stcol]),]
         chrs <- ordered(x[,chrcol], levels=chrorder)
         # chrs <- ordered(tmp, levels=paste("chr", c(seq(22), "X", "Y"), sep=""))
@@ -78,11 +78,11 @@ input_tags <- input[['tags']]
 print("second part")
 ### Remove the tags with anomalies
 if(remove_anomalies==TRUE){
-  ip_rm <- remove.local.tag.anomalies(ip_tags[chrs])
-  input_rm <- remove.local.tag.anomalies(input_tags[chrs])
+    ip_rm <- remove.local.tag.anomalies(ip_tags[chrs])
+    input_rm <- remove.local.tag.anomalies(input_tags[chrs])
 }else{
-  ip_rm <- ip_tags
-  input_rm <- input_tags
+    ip_rm <- ip_tags
+    input_rm <- input_tags
 }
 
 print("third part")
