@@ -17,17 +17,19 @@
 
 > Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). https://doi.org/10.1038/s41467-020-20048-9. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
 
-_Warning_: Please note thata this pipeline is under active development and has not been released yet.
+:::warning
+Please note thata this pipeline is under active development and has not been released yet.
+:::
 
 Here is an outline of the analysis steps:
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Trim reads to remove adapter sequences and low quality ends ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/))
-4. Remove duplicates ([`picard Markduplicates`])
+4. Remove duplicate reads ([`picard Markduplicates`])
 5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
-7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired samples pairs ([`spp`])
+7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`])
 8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
@@ -87,7 +89,7 @@ CTRL004_S2,CTRL004_S3
 CTRL004_S2,CTRL004_S4
 ```
 
-::: warning
+:::warning
 Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
 provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
 see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
@@ -108,6 +110,10 @@ nf-core/sammyseq was written by Margherita Mutarelli and Lucio Di Filippo and wa
 We thank the following people for their extensive assistance in the development of this pipeline:
 
 <!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+
+## Acknowledgements
+
+The initial development of this pipeline was funded thanks to the projects Progetti@CNR Myo-CoV-2, AFM Téléthon EDMD-GenomeSCAN B53C22009260007 and PIR01_00011 I.Bi.S.Co. Infrastruttura per Big data e Scientific COmputing (PON 2014-2020).
 
 ## Contributions and Support
 
