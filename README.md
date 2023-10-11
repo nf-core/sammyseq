@@ -26,7 +26,7 @@ Here is an outline of the analysis steps:
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Trim reads to remove adapter sequences and low quality ends ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/))
-4. Remove duplicate reads ([`picard Markduplicates`])
+4. Remove duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
 5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
 7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`])
