@@ -42,9 +42,10 @@ workflow PREPARE_GENOME {
     //println(ch_fasta)
     // Make fasta file available if reference saved or IGV is run
     //if (params.save_reference || !params.skip_igv) {
-    //    file("${params.outdir}/genome/").mkdirs()
-    //    ch_fasta.copyTo("${params.outdir}/genome/")
-    //}
+    if (params.save_reference) {    
+        file("${params.outdir}/genome/").mkdirs()
+        ch_fasta.copyTo("${params.outdir}/genome/")
+    }
 
 
     //
@@ -58,16 +59,17 @@ workflow PREPARE_GENOME {
     ch_bwa_index = Channel.empty()
     
         if (params.bwa_index) {
-            if (input_bwaindex.endsWith('.tar.gz')) {
-                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], input_bwaindex ] ).untar.map{ it[1] }
+            if (params.bwa_index.endsWith('.tar.gz')) {
+                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa_index ] ).untar
                 ch_versions  = ch_versions.mix(UNTAR_BWA_INDEX.out.versions)
             } else {
-                ch_bwa_index = file(input_bwaindex)
+                ch_bwa_index = [ [:], file(params.bwa_index) ]
             }
         } else {
             ch_bwa_index = BWA_INDEX ( ch_fasta ).index
             ch_versions  = ch_versions.mix(BWA_INDEX.out.versions)
         }
+    
     
 
     //make chromosome size index
