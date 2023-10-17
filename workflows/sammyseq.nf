@@ -112,30 +112,68 @@ workflow SAMMYSEQ {
 
     //INPUT_CHECK.out.reads.view()
 
+    // merge fastq with same lane
+    ch_merge_lane = INPUT_CHECK.out.reads
+                     .groupTuple()
+                     .map{ meta , path -> //if paired end ?
+                        meta = meta
+                        path = path.flatten()
+                        [meta , path]
+                     }
+
+    ch_merge_lane.view{"ch_merge_lane ${it}"}
+
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+
+    if (params.stopAt == 'INPUT_CHECK') {
+        return
+    }
+
+    CAT_FASTQ (
+           ch_merge_lane
+    ).reads.set { cat_lane_output }
+
+    //cat_lane_output.view()     
+
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
 
     // extract fastq to merge by expID
-    INPUT_CHECK.out.reads_to_merge
+
+
+    if(params.combine_fractions){
+
+            INPUT_CHECK.out.reads_to_merge
             .filter { meta, fastq -> fastq.size() > 1 }    
             .set { ch_reads_to_process_in_CAT_FASTQ }
 
-    ch_reads_to_process_in_CAT_FASTQ    
+            ch_reads_to_process_in_CAT_FASTQ    
             .flatMap { meta, fastq  -> 
                     meta.collect { m -> [m,fastq]}
                 }
             .set { ch_to_CAT }
 
-    CAT_FASTQ (
-        ch_to_CAT
-    ).reads.set { cat_fastq_output }        
+            //ch_to_CAT.view{"ch_to_CAT : ${it}"}
 
-    ch_cat_adjusted = CAT_FASTQ.out.reads.map { meta, fastq ->
-        return [meta, [fastq]]
-    } // make fastq of CAT_FASTQ a list of paths
-    merged_reads = INPUT_CHECK.out.reads.mix(ch_cat_adjusted)
+            CAT_FASTQ (
+                    ch_to_CAT
+            ).reads.set { cat_fastq_output }        
+
+            ch_cat_adjusted = CAT_FASTQ.out.reads.map { meta, fastq ->
+                    return [meta, [fastq]]
+            } // make fastq of CAT_FASTQ a list of paths
+            merged_reads = INPUT_CHECK.out.reads.mix(ch_cat_adjusted)
+
+    } else {
+        //merged_reads = INPUT_CHECK.out.reads
+        merged_reads = cat_lane_output
+    }
+
+    if (params.stopAt == 'CAT_FASTQ') {
+        return
+    }
 
     //
     // MODULE: Run FastQC
@@ -242,7 +280,7 @@ workflow SAMMYSEQ {
 
         ch_bam_input=BAM_MARKDUPLICATES_PICARD.out.bam
 
-
+        ch_bam_input.view()
 
         // 1. Create a Comparisons Channels (one for sample 1 in comparison and another for sample 2 in comparison)
 
@@ -251,16 +289,18 @@ workflow SAMMYSEQ {
             .splitCsv(header : true)
             .map{ row -> 
                 //[ row.sample1 + "_T1", row.sample2 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-                [ row.sample1 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                //[ row.sample1 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                [ row.sample1 , row.sample1 + "_VS_" + row.sample2 ]
                 }
                 .set { comparisons_ch_s1 } 
-                //.view() 
+                 
 
         Channel.fromPath(params.comparisonFile)
                 .splitCsv(header : true)
                 .map{ row -> 
                    // [ row.sample2 + "_T1", row.sample1 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-                   [ row.sample2 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                   //[ row.sample2 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
+                   [ row.sample2 , row.sample1 + "_VS_" + row.sample2 ]
                 }
                 .set { comparisons_ch_s2 } 
 
