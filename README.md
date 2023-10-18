@@ -36,10 +36,6 @@ Here is an outline of the analysis steps:
     <img title="sammyseq scheme" src="docs/images/nf-core-sammyseq_tubemap.png" width=70%>
 </p>
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
-
 ## Usage
 
 :::note
@@ -82,7 +78,7 @@ nextflow run nf-core/sammyseq \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR> \
-   --conparisonFile comparisons.csv
+   --comparisonFile comparisons.csv
 ```
 
 `comparisons.csv`:
