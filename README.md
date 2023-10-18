@@ -18,7 +18,9 @@
 > Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). https://doi.org/10.1038/s41467-020-20048-9. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
 
 :::warning
+
 Please note that this pipeline is under active development and has not been released yet.
+
 :::
 
 Here is an outline of the analysis steps:
