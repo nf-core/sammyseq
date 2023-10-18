@@ -18,7 +18,9 @@
 > Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). https://doi.org/10.1038/s41467-020-20048-9. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
 
 :::warning
-Please note thata this pipeline is under active development and has not been released yet.
+
+Please note that this pipeline is under active development and has not been released yet.
+
 :::
 
 Here is an outline of the analysis steps:
@@ -35,10 +37,6 @@ Here is an outline of the analysis steps:
 <p align="center">
     <img title="sammyseq scheme" src="docs/images/nf-core-sammyseq_tubemap.png" width=70%>
 </p>
-
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
 ## Usage
 
@@ -82,7 +80,7 @@ nextflow run nf-core/sammyseq \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR> \
-   --conparisonFile comparisons.csv
+   --comparisonFile comparisons.csv
 ```
 
 `comparisons.csv`:
