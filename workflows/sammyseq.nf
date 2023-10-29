@@ -112,16 +112,7 @@ workflow SAMMYSEQ {
 
     //INPUT_CHECK.out.reads.view()
 
-    // merge fastq with same lane
-    // ch_merge_lane = INPUT_CHECK.out.reads
-    //                  .groupTuple()
-    //                  .map{ meta , path -> //if paired end ?
-    //                     meta = meta
-    //                     path = path.flatten()
-    //                     [meta , path]
-    //                  }
-
-    //TODO th
+    //TODO use branch
 
     ch_notmerge_lane = INPUT_CHECK.out.reads
                      .map{ meta, path -> 
@@ -151,11 +142,14 @@ workflow SAMMYSEQ {
                      .groupTuple()
                      .filter{ it[1].size() == 2 } //filtra per numero di meta presenti dopo il tupla se hai due meta vuol dire che devi unire due campioni 
                      .map{ id, meta, path -> 
-                          meta = meta[0]
-                        def readsSample1 = [path[0][0], path[0][1]]
-                        def readsSample2 = [path[1][0], path[1][1]]
-                        [meta, readsSample1, readsSample2]
-                        
+                        meta = meta[0]
+                        def readsSample1 = [path[0][0], path[0][1]].findAll()
+                        def readsSample2 = [path[1][0], path[1][1]].findAll()
+                        if(readsSample1.size() == 1 && readsSample2.size() == 1) {
+                            [meta, readsSample1 + readsSample2] 
+                        } else {
+                            [meta, readsSample1, readsSample2]
+                        }
                       }
 
     //ch_merge_lane.view{"ch_merge_lane ${it}"}
@@ -166,7 +160,7 @@ workflow SAMMYSEQ {
         return
     }
 
-    ch_merge_lane.view{"ch_merge_lane : ${it}"}
+    //ch_merge_lane.view{"ch_merge_lane : ${it}"}
 
     CAT_FASTQ (
            ch_merge_lane
