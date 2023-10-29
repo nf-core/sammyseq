@@ -113,15 +113,52 @@ workflow SAMMYSEQ {
     //INPUT_CHECK.out.reads.view()
 
     // merge fastq with same lane
-    ch_merge_lane = INPUT_CHECK.out.reads
+    // ch_merge_lane = INPUT_CHECK.out.reads
+    //                  .groupTuple()
+    //                  .map{ meta , path -> //if paired end ?
+    //                     meta = meta
+    //                     path = path.flatten()
+    //                     [meta , path]
+    //                  }
+
+    //TODO th
+
+    ch_notmerge_lane = INPUT_CHECK.out.reads
+                     .map{ meta, path -> 
+                        id=meta.subMap('id')
+                        meta=meta
+                        path=path
+                        [id.id, meta, path]
+                      }
                      .groupTuple()
-                     .map{ meta , path -> //if paired end ?
-                        meta = meta
-                        path = path.flatten()
-                        [meta , path]
+                     .filter{ it[1].size() == 1 }
+                     .map{ id, meta, path -> 
+                        meta_notmerge=meta[0]
+                        path_notmerge=path[0]
+                        [meta_notmerge, path_notmerge]
                      }
 
-    ch_merge_lane.view{"ch_merge_lane ${it}"}
+    //INPUT_CHECK.out.reads.view{"INPUT_CHECK.out.reads : ${it}"}
+    //ch_notmerge_lane.view{"ch_notmerge_lane: ${it}"}
+
+    ch_merge_lane = INPUT_CHECK.out.reads
+                     .map{ meta, path -> 
+                        id=meta.subMap('id')
+                        meta=meta
+                        path=path
+                        [id.id, meta, path]
+                      }
+                     .groupTuple()
+                     .filter{ it[1].size() == 2 } //filtra per numero di meta presenti dopo il tupla se hai due meta vuol dire che devi unire due campioni 
+                     .map{ id, meta, path -> 
+                          meta = meta[0]
+                        def readsSample1 = [path[0][0], path[0][1]]
+                        def readsSample2 = [path[1][0], path[1][1]]
+                        [meta, readsSample1, readsSample2]
+                        
+                      }
+
+    //ch_merge_lane.view{"ch_merge_lane ${it}"}
 
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
@@ -129,11 +166,20 @@ workflow SAMMYSEQ {
         return
     }
 
+    ch_merge_lane.view{"ch_merge_lane : ${it}"}
+
     CAT_FASTQ (
            ch_merge_lane
     ).reads.set { cat_lane_output }
 
     //cat_lane_output.view()     
+    ch_starter = cat_lane_output.mix(ch_notmerge_lane)
+
+    //ch_starter.view()
+
+    if (params.stopAt == 'CAT_FASTQ_line') {
+        return
+    }
 
 
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
@@ -168,8 +214,10 @@ workflow SAMMYSEQ {
 
     } else {
         //merged_reads = INPUT_CHECK.out.reads
-        merged_reads = cat_lane_output
+        merged_reads = ch_starter
     }
+
+    //merged_reads.view()
 
     if (params.stopAt == 'CAT_FASTQ') {
         return
@@ -178,7 +226,7 @@ workflow SAMMYSEQ {
     //
     // MODULE: Run FastQC
     //
-    //merged_reads.view()
+
 
 
     FASTQC (
@@ -187,15 +235,17 @@ workflow SAMMYSEQ {
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
     TRIMMOMATIC (
+        //INPUT_CHECK.out.reads
+        //ch_notmerge_lane
        merged_reads 
     )
+
+    //TRIMMOMATIC.out.trimmed_reads.view()
 
     if (params.stopAt == 'TRIMMOMATIC') {
         return
     }
 
-
-    //TRIMMOMATIC.out.trimmed_reads.view()
     
     FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
