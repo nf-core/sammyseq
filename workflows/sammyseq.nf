@@ -221,20 +221,34 @@ workflow SAMMYSEQ {
     // MODULE: Run FastQC
     //
 
-
-
-    FASTQC (
-        merged_reads
-    )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-
     TRIMMOMATIC (
-        //INPUT_CHECK.out.reads
-        //ch_notmerge_lane
        merged_reads 
     )
 
     //TRIMMOMATIC.out.trimmed_reads.view()
+
+
+    //a channel is created for the trimmed files and the id is renamed to meta, so that when passed to fastqc it does not overwrite the output files with non-trimmed ones
+    ch_fastqc_trim=TRIMMOMATIC.out.trimmed_reads
+                   .map{ meta, path ->
+                        def id=meta.subMap('id')
+                        newid=id.id + "_trim"
+                        sng=meta.subMap('single_end').single_end
+                        newmeta=[id: newid, single_end: sng]
+                        [ newmeta ,path]
+                    } 
+
+    //trimmed and untrimmed fastq channels are merged and the resulting channel is passed to FASTQC
+    ch_fastqc_in = ch_fastqc_trim.mix(merged_reads)
+    //ch_fastqc_in.view()
+    FASTQC (
+        ch_fastqc_in
+        //merged_reads
+    )
+
+    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+
+
 
     if (params.stopAt == 'TRIMMOMATIC') {
         return
