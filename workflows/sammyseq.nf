@@ -140,19 +140,15 @@ workflow SAMMYSEQ {
                         [id.id, meta, path]
                       }
                      .groupTuple()
-                     .filter{ it[1].size() == 2 } //filtra per numero di meta presenti dopo il tupla se hai due meta vuol dire che devi unire due campioni 
+                     .filter{ it[1].size() >= 2 } //filtra per numero di meta presenti dopo il tupla se hai due meta vuol dire che devi unire due campioni 
                      .map{ id, meta, path -> 
+                        single = meta[0].subMap('single_end')
                         meta = meta[0]
-                        def readsSample1 = [path[0][0], path[0][1]].findAll()
-                        def readsSample2 = [path[1][0], path[1][1]].findAll()
-                        if(readsSample1.size() == 1 && readsSample2.size() == 1) {
-                            [meta, readsSample1 + readsSample2] 
-                        } else {
-                            [meta, readsSample1, readsSample2]
-                        }
+                        def flatPath = path.flatten()
+                        [ meta , flatPath ]
                       }
 
-    //ch_merge_lane.view{"ch_merge_lane ${it}"}
+    ch_merge_lane.view{"ch_merge_lane ${it}"}
 
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
@@ -171,7 +167,7 @@ workflow SAMMYSEQ {
 
     //ch_starter.view()
 
-    if (params.stopAt == 'CAT_FASTQ_line') {
+    if (params.stopAt == 'CAT_FASTQ_lane') {
         return
     }
 
@@ -430,6 +426,7 @@ workflow SAMMYSEQ {
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.metrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.idxstats.collect{it[1]}.ifEmpty([]))
 
