@@ -49,9 +49,11 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
 include { FASTQ_ALIGN_BWAALN  } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
+include { CAT_FRACTIONS } from '../subworkflows/local/cat_fractions'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard'
 include { CUT_SIZES_GENOME } from "../modules/local/chromosomes_size"
 include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -148,7 +150,7 @@ workflow SAMMYSEQ {
                         [ meta , flatPath ]
                       }
 
-    ch_merge_lane.view{"ch_merge_lane ${it}"}
+    //ch_merge_lane.view{"ch_merge_lane ${it}"}
 
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
@@ -165,7 +167,7 @@ workflow SAMMYSEQ {
     //cat_lane_output.view()     
     ch_starter = cat_lane_output.mix(ch_notmerge_lane)
 
-    //ch_starter.view()
+    //ch_starter.view{"ch_starter : ${it}"}
 
     if (params.stopAt == 'CAT_FASTQ_lane') {
         return
@@ -181,35 +183,19 @@ workflow SAMMYSEQ {
 
     if(params.combine_fractions){
 
-            INPUT_CHECK.out.reads_to_merge
-            .filter { meta, fastq -> fastq.size() > 1 }    
-            .set { ch_reads_to_process_in_CAT_FASTQ }
-
-            ch_reads_to_process_in_CAT_FASTQ    
-            .flatMap { meta, fastq  -> 
-                    meta.collect { m -> [m,fastq]}
-                }
-            .set { ch_to_CAT }
-
-            //ch_to_CAT.view{"ch_to_CAT : ${it}"}
-
-            CAT_FASTQ (
-                    ch_to_CAT
-            ).reads.set { cat_fastq_output }        
-
-            ch_cat_adjusted = CAT_FASTQ.out.reads.map { meta, fastq ->
-                    return [meta, [fastq]]
-            } // make fastq of CAT_FASTQ a list of paths
-            merged_reads = INPUT_CHECK.out.reads.mix(ch_cat_adjusted)
+        merged_reads = CAT_FRACTIONS(//INPUT_CHECK.out.reads_to_merge,
+                                    //INPUT_CHECK.out.reads
+                                    ch_starter
+                                    )//.out.merged_reads
 
     } else {
         //merged_reads = INPUT_CHECK.out.reads
         merged_reads = ch_starter
     }
 
-    //merged_reads.view()
+    //merged_reads.view{"merged_reads: ${it}"}
 
-    if (params.stopAt == 'CAT_FASTQ') {
+    if (params.stopAt == 'CAT_FRACTIONS') {
         return
     }
 
