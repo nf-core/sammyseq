@@ -256,6 +256,10 @@ workflow SAMMYSEQ {
 
     ch_fai_for_cut = SAMTOOLS_FAIDX.out.fai.collect()
 
+    if (params.stopAt == 'SAMTOOLS_FAIDX') {
+        return
+    }
+
     CUT_SIZES_GENOME(ch_fai_for_cut)
     //CUT_SIZES_GENOME.out.ch_sizes_genome.view()
 
