@@ -329,7 +329,7 @@
         }
     ],
     "properties": {
-        "blackListFile" : {
+        "blackListFile": {
             "type": "string",
             "format": "file-path",
             "description": "A BED or GTF file containing regions that should be excluded from all analyses",
