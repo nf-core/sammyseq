@@ -116,17 +116,6 @@
                 }
             }
         },
-        "bam options":{
-            "title": "option for the generation of bam",
-            "properties": {
-                "blackListFile" : {
-                    "type": "string",
-                    "format": "file-path",
-                    "description": "A BED or GTF file containing regions that should be excluded from all analyses",
-                    "help_text": "Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. Please note that you should adjust the effective genome size, if relevant"
-                }
-            }
-        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -338,5 +327,13 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "blackListFile" : {
+            "type": "string",
+            "format": "file-path",
+            "description": "A BED or GTF file containing regions that should be excluded from all analyses",
+            "help_text": "Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. Please note that you should adjust the effective genome size, if relevant"
+        }
+    }
 }
