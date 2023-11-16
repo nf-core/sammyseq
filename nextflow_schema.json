@@ -15,7 +15,20 @@
                 "stopAt": {
                     "type": "string",
                     "description": "Specify after which step the pipeline should stop.",
-                    "fa_icon": "fas fa-stop-circle"
+                    "fa_icon": "fas fa-stop-circle",
+                    "enum": [
+                        "BEGIN",
+                        "PREPARE_GENOME",
+                        "INPUT_CHECK",
+                        "CAT_FASTQ_lane",
+                        "CAT_FRACTIONS",
+                        "TRIMMOMATIC",
+                        "FASTQ_ALIGN_BWAALN",
+                        "SAMTOOLS_FAIDX",
+                        "BAM_MARKDUPLICATES_PICARD",
+                        "DEEPTOOLS_BAMCOVERAGE",
+                        "RTWOSAMPLESMLE"
+                    ]
                 },
                 "input": {
                     "type": "string",
@@ -100,6 +113,17 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                }
+            }
+        },
+        "bam options":{
+            "title": "option for the generation of bam",
+            "properties": {
+                "blackListFile" : {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "A BED or GTF file containing regions that should be excluded from all analyses",
+                    "help_text": "Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. Please note that you should adjust the effective genome size, if relevant"
                 }
             }
         },
