@@ -16,12 +16,18 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Mark Duplicate reads](#mark-duplicate-reads)
 - [Signal track generation](#signal-track-generation)
 - [Comparisons](#comparisons)
-- [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
-- [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+- [MultiQC](#multiqc)
+- [Pipeline information](#pipeline-information)
 
-### FastQC
+### Read quality check
+
+#### FastQC
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about the sequenced reads. It provides information about the quality score distribution across reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+
+#### Trim reads
+
+[`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic) is a software used to trim adapter sequences and low quality bases from the end of reads and quality check after this step is performed again with Fastqc.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -29,15 +35,13 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - `fastqc/`
   - `*_fastqc.html`: FastQC report containing quality metrics.
   - `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
+  - `*_trim_fastqc.html`: FastQC report containing quality metrics for trimmed reads.
+  - `*_trim_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images for trimmed reads.
 
 </details>
 
-#### Trim reads
-
-[`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic) is a software used to trim adapter sequences and low quality bases from the end of reads and quality check after this step is performed again with Fastqc.
-
 :::note
-The FastQC plots displayed in the MultiQC report shows both _untrimmed_ and _trimmed_ reads. They can be compared to check removal of adapter sequence and potentially regions with low quality after the trimming step.
+The FastQC plots displayed in the MultiQC report shows both _untrimmed_ and _trimmed_ reads so they can be directly compared.
 :::
 
 ### Alignment on Reference
@@ -54,6 +58,8 @@ The alignment is performed using [BWA](https://github.com/lh3/bwa) and the align
 
 ### Mark Duplicate reads
 
+Read pairs that are likely to have originated from duplicates of the same original DNA fragments through some artificial processes are identified. These are considered to be non-independent observations, so all but a single read pair within each set of duplicates are marked, not removed from the bam file.
+
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -64,9 +70,9 @@ The alignment is performed using [BWA](https://github.com/lh3/bwa) and the align
 
 </details>
 
-Read pairs that are likely to have originated from duplicates of the same original DNA fragments through some artificial processes are identified. These are considered to be non-independent observations, so all but a single read pair within each set of duplicates are marked, not removed from the bam file.
-
 ### Signal track generation
+
+[deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) is used to generate single fraction signals in [bigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) format, an indexed binary format useful for displaying dense, continuous data in Genome Browsers such as the [UCSC](https://genome.ucsc.edu/cgi-bin/hgTracks) and [IGV](http://software.broadinstitute.org/software/igv/). The bigWig format is also supported by various bioinformatics software for downstream processing such as meta-profile plotting.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -76,11 +82,9 @@ Read pairs that are likely to have originated from duplicates of the same origin
 
 </details>
 
-[deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) is used to generate single fraction signals in [bigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) format, an indexed binary format useful for displaying dense, continuous data in Genome Browsers such as the [UCSC](https://genome.ucsc.edu/cgi-bin/hgTracks) and [IGV](http://software.broadinstitute.org/software/igv/). The bigWig format is also supported by various bioinformatics software for downstream processing such as meta-profile plotting.
-
 ### Comparisons
 
-When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat. Biotech. doi:10.1038/nbt.1508
+When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile smoothed by the Gaussian kernel is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat. Biotech. doi:10.1038/nbt.1508
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -108,19 +112,19 @@ Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQ
 
 ### Reference genome files
 
+A number of genome-specific files if required by some of the analysis steps. If the `--save_reference` parameter is provided then the alignment indices generated by the pipeline will be saved in this directory.
+
 <details markdown="1">
 <summary>Output files</summary>
 
 - `genome/`
-
-  - A number of genome-specific files are generated by the pipeline in order to aid in the filtering of the data, and because they are required by standard tools such as BEDTools. These can be found in this directory.
   - `bwa/`: Directory containing BWA indices.
-
-  - If the `--save_reference` parameter is provided then the alignment indices generated by the pipeline will be saved in this directory. This can be quite a time-consuming process so it permits their reuse for future runs of the pipeline or for other purposes.
 
 </details>
 
 ### Pipeline information
+
+[Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -132,5 +136,3 @@ Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQ
   - Parameters used by the pipeline run: `params.json`.
 
 </details>
-
-[Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
