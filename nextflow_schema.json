@@ -80,6 +80,7 @@
             "type": "object",
             "fa_icon": "fas fa-dna",
             "description": "Reference genome related files and options required for the workflow.",
+            "required": ["fasta"],
             "properties": {
                 "genome": {
                     "type": "string",
@@ -115,7 +116,15 @@
                     "description": "Do not load the iGenomes reference config.",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                    "default": true,
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`. You can run `sammyseq` by specifying at least a FASTA genome file."
+                },
+                "blackListFile": {
+                    "type": "string",
+                    "format": "file-path",
+                    "fa_icon": "fas fa-ban",
+                    "description": "A BED or GTF file containing regions that should be excluded from all analyses",
+                    "help_text": "Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. Please note that you should adjust the effective genome size, if relevant"
                 }
             }
         },
@@ -330,13 +339,5 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ],
-    "properties": {
-        "blackListFile": {
-            "type": "string",
-            "format": "file-path",
-            "description": "A BED or GTF file containing regions that should be excluded from all analyses",
-            "help_text": "Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. Please note that you should adjust the effective genome size, if relevant"
-        }
-    }
+    ]
 }

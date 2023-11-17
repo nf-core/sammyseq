@@ -6,55 +6,18 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
-
-## Samplesheet input
-
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
-
-```bash
---input '[path to samplesheet file]'
-```
-
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 2 lanes:
-
-```console
-sample,fastq_1,fastq_2,experimentalID,fraction
-CONTROL_REP1_S2,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,CONTROL,S2
-CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,CONTROL,S2
-```
-
-### Full samplesheet
-
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 5 columns to match those defined in the table below.
-
-<!-- A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice. -->
-
-```console
-ssample,fastq_1,fastq_2,experimentalID,fraction
-CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2
-CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3
-CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
-```
-
-| Column           | Description                                                                                                                                                                            |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`         | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1`        | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2`        | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `experimentalID` | Experimental sample identifier. This represents the biological specimen of interest and will be the same for all fractions exctracted.                                                 |
-| `fraction`       | Fraction derived from SAMMY protocol, e.g. depending on the protocol it can be S2, S2L, S2S, S3, S4 .                                                                                  |
-
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+sammyseqis a workflow designed for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state in cells. SAMMY-seq is an innovative technique based on the separation of chromatin in fractions, each progressively based on their solubility and accessibility, and extraction and sequencing of the DNA present in each of them.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/sammyseq --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/sammyseq -r dev \
+    -profile docker \
+    --fasta ./reference_genome.fa\
+    --input ./samplesheet.csv \
+    --outdir ./results
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -87,11 +50,78 @@ with `params.yaml` containing:
 ```yaml
 input: './samplesheet.csv'
 outdir: './results/'
-genome: 'GRCh37'
+fasta: './genome.fa'
 <...>
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
+
+## Samplesheet input
+
+Before running the pipeline, you will need to create a samplesheet with information about the samples you would like to analyze. Use this parameter to specify its location:
+
+```bash
+--input '[full path to samplesheet file]'
+```
+
+It has to be a comma-separated file with 5 columns, and a header row as shown in the examples below.
+
+### Multiple runs of the same sample
+
+The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample fraction sequenced across 2 lanes:
+
+```console
+sample,fastq_1,fastq_2,experimentalID,fraction
+CONTROL_REP1_S2,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,CONTROL_REP1,S2
+CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,CONTROL_REP1,S2
+```
+
+### Full samplesheet
+
+The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can contain a mixture of single- and paired-end but in case of multiple runs of the same `sample` they have to be of the same type to be correctly merged. There can be additional columns but the first 5 have to match those defined in the table below.
+
+```console
+ssample,fastq_1,fastq_2,experimentalID,fraction
+CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2
+CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3
+CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
+```
+
+| Column           | Description                                                                                                                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`         | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
+| `fastq_1`        | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| `fastq_2`        | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| `experimentalID` | Experimental sample identifier. This represents the biological specimen of interest and will be the same for all fractions exctracted.                                                 |
+| `fraction`       | Fraction derived from SAMMY protocol, e.g. depending on the protocol it can be S2, S2L, S2S, S3, S4.                                                                                   |
+
+An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+
+### Pairwise comparisons
+
+It is possible to generate pairwise comparisons between two samples by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
+
+`comparisons.csv`:
+
+```csv
+sample1,sample2
+CTRL004_S2,CTRL004_S3
+CTRL004_S2,CTRL004_S4
+```
+
+It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file. When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat. Biotech. doi:10.1038/nbt.1508
+
+### Combine fractions
+
+Optionally, the fractions extracted from the same `experimentalID` can be combined together for later use by setting the parameter `--combine_fractions`.
+
+## Reference genome files
+
+The minimum reference genome requirements is the FASTA file, provided with the mandatory parameter `--fasta`, the bwa index will be generated by the pipeline and can be saved for later reuse if the `--save_reference` parameter is passed. The index building step can be quite a time-consuming process and it permits their reuse for future runs of the pipeline to save disk space, if already present it can be passed using the `--bwa_index '/path/to/bwa/index/'` parameter.
+
+## Blacklist bed files
+
+A blacklist of regions that will be excluded by signal tracks can be provided using the optional parameter `--blackListFile` with full path to a coordinate file in bed format. Blacklist files for several genome builds can be found in the [ENCODE Blacklist Project](https://github.com/Boyle-Lab/Blacklist).
 
 ### Updating the pipeline
 
