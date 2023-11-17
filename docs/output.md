@@ -11,11 +11,11 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 - [FastQC](#fastqc)
-- [Trim adapters](#trim-adapters)
-- [Align to Reference](#align-to-reference)
-- [Mark Duplicates](#mark-duplicates)
-- [`Signal track generation`](#signal-track-generation)
-- [`Comparisons`](#comparisons)
+- [Trim reads](#trim-adapters)
+- [Alignment on Reference](#align-to-reference)
+- [Mark Duplicate reads](#mark-duplicates)
+- [Signal track generation](#signal-track-generation)
+- [Comparisons](#comparisons)
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
