@@ -42,10 +42,11 @@ workflow PREPARE_GENOME {
     //println(ch_fasta)
     // Make fasta file available if reference saved or IGV is run
     //if (params.save_reference || !params.skip_igv) {
-    if (params.save_reference) {    
-        file("${params.outdir}/genome/").mkdirs()
-        ch_fasta.copyTo("${params.outdir}/genome/")
-    }
+
+    // if (params.save_reference) {    
+    //     file("${params.outdir}/genome/").mkdirs()
+    //     ch_fasta.copyTo("${params.outdir}/genome/")
+    // }
 
 
     //

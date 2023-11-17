@@ -48,11 +48,12 @@ process RTWOSAMPLESMLE {
     path chromsizes_file
 
 
-    //output:
+    output:
     // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
     //tuple val(meta), path("*.bam"), emit: bam
     // TODO nf-core: List additional required output channels/values here
     //path "versions.yml"           , emit: versions
+    tuple val(meta), path("*_mle.bw")              , emit: results
 
     when:
     task.ext.when == null || task.ext.when

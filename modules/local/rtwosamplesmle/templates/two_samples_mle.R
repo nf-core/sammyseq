@@ -14,15 +14,15 @@ require(rtracklayer)
 # FUNCTIONS
 ################################################
 
-sortbychr <- function(x, chrcol="chr", stcol="start", endcol=NULL, chrorder=paste("chr", c(seq(22), "X", "Y"), sep="")) {
-        if (!(is.null(endcol))) {
-                x <- x[order(x[,endcol]),]
-        }
-        x <- x[order(x[,stcol]),]
-        chrs <- ordered(x[,chrcol], levels=chrorder)
-        # chrs <- ordered(tmp, levels=paste("chr", c(seq(22), "X", "Y"), sep=""))
-        x <- x[order(chrs),]
-}
+# sortbychr <- function(x, chrcol="chr", stcol="start", endcol=NULL, chrorder=paste("chr", c(seq(22), "X", "Y"), sep="")) {
+#         if (!(is.null(endcol))) {
+#                 x <- x[order(x[,endcol]),]
+#         }
+#         x <- x[order(x[,stcol]),]
+#         chrs <- ordered(x[,chrcol], levels=chrorder)
+#         # chrs <- ordered(tmp, levels=paste("chr", c(seq(22), "X", "Y"), sep=""))
+#         x <- x[order(chrs),]
+# }
 
 ################################################
 ## PARAMS
@@ -36,8 +36,7 @@ sortbychr <- function(x, chrcol="chr", stcol="start", endcol=NULL, chrorder=past
 ip_file <- "${bam1}"
 input_file <- "${bam2}"
 chromsizes_file <- "${chromsizes_file}"
-mle_output_file <- "${bam1.baseName}VS${bam2.baseName}_mle.txt"
-remove_anomalies <- FALSE
+mle_output_file <- "${bam1.baseName}_VS_${bam2.baseName}_mle.bw"
 
 ################################################
 # DEFAULT PARAMETERS
@@ -45,6 +44,7 @@ remove_anomalies <- FALSE
 
 remove_anomalies <- FALSE
 debug_mode <- TRUE
+stebp = 50
 
 ################################################
 # CORE PROCESSES
@@ -66,6 +66,7 @@ chromsizes <- fread(chromsizes_file, data.table = FALSE)
 #chromsizes <- sortbychr(chromsizes, chrcol="V1", stcol="V2", chrorder=paste("chr", c(seq(19), "X", "Y"), sep=""))
 #chrs <- as.character(sub('chr', '', chromsizes[, 1]))
 chrs <- chromsizes[, 1]
+rownames(chromsizes) <- chrs
 
 ### Import the data
 
@@ -75,31 +76,40 @@ input <- read.bam.tags(input_file)
 ### Select the informative tags
 ip_tags <- ip[['tags']]
 input_tags <- input[['tags']]
+
 print("second part")
 ### Remove the tags with anomalies
 if(remove_anomalies==TRUE){
     ip_rm <- remove.local.tag.anomalies(ip_tags[chrs])
     input_rm <- remove.local.tag.anomalies(input_tags[chrs])
 }else{
-    ip_rm <- ip_tags
-    input_rm <- input_tags
+    ip_rm <- ip_tags[chrs]
+    input_rm <- input_tags[chrs]
 }
 
 print("third part")
 ### Make the smoothing with the loglikelihood function
-print("lane 90")
+print("line 90")
 #print(paste0("ip_rm=",head(ip_rm)))
 #print(paste0("input_rm=",head(ip_rm)))
-chip_smoothed_mle <- get.smoothed.enrichment.mle(ip_rm, input_rm, tag.shift = 0, background.density.scaling = FALSE)
-print("lane 91")
+# chip_smoothed_mle <- get.smoothed.enrichment.mle(ip_rm, input_rm, tag.shift = 0, background.density.scaling = FALSE)
+ip_chrs <- names(ip_rm)[sapply(ip_rm, length) > 10]
+input_chrs <- names(input_rm)[sapply(input_rm, length) > 10]
+chr2keep <- intersect(ip_chrs, input_chrs)
+# length(chr2keep)
+
+chip_smoothed_mle <- get.smoothed.enrichment.mle(ip_rm[chr2keep], input_rm[chr2keep], tag.shift = 0, background.density.scaling = FALSE, step = stebp)
+
+print("line 91")
 #chip_smoothed_mle <- get.smoothed.enrichment.mle(ip_tags, input_tags, tag.shift = 0, background.density.scaling = FALSE)
 
 ccl <- sapply(chip_smoothed_mle, nrow)
 cpos <- unlist(sapply(chip_smoothed_mle, function(csm) csm\$x))
+cend <- cpos + stebp - 1
 ccov <- unlist(sapply(chip_smoothed_mle, function(csm) csm\$y))
 print("line 97")
-gr.mle <- GRanges(seqnames = rep(names(chip_smoothed_mle), ccl), ranges = IRanges(start = cpos, end = cpos), strand = Rle('*', sum(ccl)), score = ccov)
-seqlengths(gr.mle) <- chromsizes[, 2]
+gr.mle <- GRanges(seqnames = rep(names(chip_smoothed_mle), ccl), ranges = IRanges(start = cpos, end = cend), strand = Rle('*', sum(ccl)), score = ccov)
+seqlengths(gr.mle) <- chromsizes[chr2keep, 2]
 
 #rename score col
 col_names <- names(mcols(gr.mle))

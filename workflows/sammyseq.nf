@@ -49,9 +49,11 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
 include { FASTQ_ALIGN_BWAALN  } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
+include { CAT_FRACTIONS } from '../subworkflows/local/cat_fractions'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard'
 include { CUT_SIZES_GENOME } from "../modules/local/chromosomes_size"
 include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,16 +114,43 @@ workflow SAMMYSEQ {
 
     //INPUT_CHECK.out.reads.view()
 
-    // merge fastq with same lane
-    ch_merge_lane = INPUT_CHECK.out.reads
+    //TODO use branch
+
+    ch_notmerge_lane = INPUT_CHECK.out.reads
+                     .map{ meta, path -> 
+                        id=meta.subMap('id')
+                        meta=meta
+                        path=path
+                        [id.id, meta, path]
+                      }
                      .groupTuple()
-                     .map{ meta , path -> //if paired end ?
-                        meta = meta
-                        path = path.flatten()
-                        [meta , path]
+                     .filter{ it[1].size() == 1 }
+                     .map{ id, meta, path -> 
+                        meta_notmerge=meta[0]
+                        path_notmerge=path[0]
+                        [meta_notmerge, path_notmerge]
                      }
 
-    ch_merge_lane.view{"ch_merge_lane ${it}"}
+    //INPUT_CHECK.out.reads.view{"INPUT_CHECK.out.reads : ${it}"}
+    //ch_notmerge_lane.view{"ch_notmerge_lane: ${it}"}
+
+    ch_merge_lane = INPUT_CHECK.out.reads
+                     .map{ meta, path -> 
+                        id=meta.subMap('id')
+                        meta=meta
+                        path=path
+                        [id.id, meta, path]
+                      }
+                     .groupTuple()
+                     .filter{ it[1].size() >= 2 } //filtra per numero di meta presenti dopo il tupla se hai due meta vuol dire che devi unire due campioni 
+                     .map{ id, meta, path -> 
+                        single = meta[0].subMap('single_end')
+                        meta = meta[0]
+                        def flatPath = path.flatten()
+                        [ meta , flatPath ]
+                      }
+
+    //ch_merge_lane.view{"ch_merge_lane ${it}"}
 
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
@@ -129,11 +158,20 @@ workflow SAMMYSEQ {
         return
     }
 
+    //ch_merge_lane.view{"ch_merge_lane : ${it}"}
+
     CAT_FASTQ (
            ch_merge_lane
     ).reads.set { cat_lane_output }
 
     //cat_lane_output.view()     
+    ch_starter = cat_lane_output.mix(ch_notmerge_lane)
+
+    //ch_starter.view{"ch_starter : ${it}"}
+
+    if (params.stopAt == 'CAT_FASTQ_lane') {
+        return
+    }
 
 
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
@@ -145,57 +183,59 @@ workflow SAMMYSEQ {
 
     if(params.combine_fractions){
 
-            INPUT_CHECK.out.reads_to_merge
-            .filter { meta, fastq -> fastq.size() > 1 }    
-            .set { ch_reads_to_process_in_CAT_FASTQ }
-
-            ch_reads_to_process_in_CAT_FASTQ    
-            .flatMap { meta, fastq  -> 
-                    meta.collect { m -> [m,fastq]}
-                }
-            .set { ch_to_CAT }
-
-            //ch_to_CAT.view{"ch_to_CAT : ${it}"}
-
-            CAT_FASTQ (
-                    ch_to_CAT
-            ).reads.set { cat_fastq_output }        
-
-            ch_cat_adjusted = CAT_FASTQ.out.reads.map { meta, fastq ->
-                    return [meta, [fastq]]
-            } // make fastq of CAT_FASTQ a list of paths
-            merged_reads = INPUT_CHECK.out.reads.mix(ch_cat_adjusted)
+        merged_reads = CAT_FRACTIONS(//INPUT_CHECK.out.reads_to_merge,
+                                    //INPUT_CHECK.out.reads
+                                    ch_starter
+                                    )//.out.merged_reads
 
     } else {
         //merged_reads = INPUT_CHECK.out.reads
-        merged_reads = cat_lane_output
+        merged_reads = ch_starter
     }
 
-    if (params.stopAt == 'CAT_FASTQ') {
+    //merged_reads.view{"merged_reads: ${it}"}
+
+    if (params.stopAt == 'CAT_FRACTIONS') {
         return
     }
 
     //
     // MODULE: Run FastQC
     //
-    //merged_reads.view()
-
-
-    FASTQC (
-        merged_reads
-    )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
     TRIMMOMATIC (
        merged_reads 
     )
 
+    //TRIMMOMATIC.out.trimmed_reads.view()
+
+
+    //a channel is created for the trimmed files and the id is renamed to meta, so that when passed to fastqc it does not overwrite the output files with non-trimmed ones
+    ch_fastqc_trim=TRIMMOMATIC.out.trimmed_reads
+                   .map{ meta, path ->
+                        def id=meta.subMap('id')
+                        newid=id.id + "_trim"
+                        sng=meta.subMap('single_end').single_end
+                        newmeta=[id: newid, single_end: sng]
+                        [ newmeta ,path]
+                    } 
+
+    //trimmed and untrimmed fastq channels are merged and the resulting channel is passed to FASTQC
+    ch_fastqc_in = ch_fastqc_trim.mix(merged_reads)
+    //ch_fastqc_in.view()
+    FASTQC (
+        ch_fastqc_in
+        //merged_reads
+    )
+
+    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+
+
+
     if (params.stopAt == 'TRIMMOMATIC') {
         return
     }
 
-
-    //TRIMMOMATIC.out.trimmed_reads.view()
     
     FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
@@ -215,6 +255,10 @@ workflow SAMMYSEQ {
         )
 
     ch_fai_for_cut = SAMTOOLS_FAIDX.out.fai.collect()
+
+    if (params.stopAt == 'SAMTOOLS_FAIDX') {
+        return
+    }
 
     CUT_SIZES_GENOME(ch_fai_for_cut)
     //CUT_SIZES_GENOME.out.ch_sizes_genome.view()
@@ -372,6 +416,7 @@ workflow SAMMYSEQ {
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
 
     ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.metrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.idxstats.collect{it[1]}.ifEmpty([]))
 

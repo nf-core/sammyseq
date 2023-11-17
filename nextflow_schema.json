@@ -15,7 +15,21 @@
                 "stopAt": {
                     "type": "string",
                     "description": "Specify after which step the pipeline should stop.",
-                    "fa_icon": "fas fa-stop-circle"
+                    "fa_icon": "fas fa-stop-circle",
+                    "hidden": true,
+                    "enum": [
+                        "BEGIN",
+                        "PREPARE_GENOME",
+                        "INPUT_CHECK",
+                        "CAT_FASTQ_lane",
+                        "CAT_FRACTIONS",
+                        "TRIMMOMATIC",
+                        "FASTQ_ALIGN_BWAALN",
+                        "SAMTOOLS_FAIDX",
+                        "BAM_MARKDUPLICATES_PICARD",
+                        "DEEPTOOLS_BAMCOVERAGE",
+                        "RTWOSAMPLESMLE"
+                    ]
                 },
                 "input": {
                     "type": "string",
@@ -24,7 +38,7 @@
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/sammyseq/usage#samplesheet-input).",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 5 columns, and a header row. See [usage docs](https://nf-co.re/sammyseq/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -48,14 +62,16 @@
                 "comparisonFile": {
                     "type": "string",
                     "format": "file-path",
-                    "description": "Path to comma-separated file containing information about samples comparisons",
+                    "description": "Path to comma-separated file containing the sample names for the desired paired comparisons",
                     "mimetype": "text/csv",
-                    "help_text": "You will need to create a comparisons file with information about the comparisons in your experiment before running the pipeline. Use this parameter to specify the necessary comparisons. It has to be a comma-separated file with 2 columns, one for the first sample to compair and the second one to sample against which to do it."
+                    "help_text": "You will need to create a comparisons file with information about the desired comparisons in your experiment before running the pipeline. It has to be a comma-separated file with 2 columns: one for the first sample to compare and the second one to sample against which to do it. The sample names must correspond to sample names present in the first column of the samplesheet (--input parameter)",
+                    "fa_icon": "fas fa-file-csv"
                 },
                 "combine_fractions": {
                     "type": "boolean",
                     "description": "when combined, the fastqs of individual fractions from the same samples will be merged into a new fastq.",
-                    "help_text": "the combined fastq file can be used in order to obtain information on the whole sample or to perform additional analyses not included"
+                    "help_text": "the combined fastq file can be used in order to obtain information on the whole sample or to perform additional analyses not included",
+                    "fa_icon": "fas fa-merge"
                 }
             }
         },
@@ -64,6 +80,7 @@
             "type": "object",
             "fa_icon": "fas fa-dna",
             "description": "Reference genome related files and options required for the workflow.",
+            "required": ["fasta"],
             "properties": {
                 "genome": {
                     "type": "string",
@@ -99,7 +116,15 @@
                     "description": "Do not load the iGenomes reference config.",
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                    "default": true,
+                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`. You can run `sammyseq` by specifying at least a FASTA genome file."
+                },
+                "blackListFile": {
+                    "type": "string",
+                    "format": "file-path",
+                    "fa_icon": "fas fa-ban",
+                    "description": "A BED or GTF file containing regions that should be excluded from all analyses",
+                    "help_text": "Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. Please note that you should adjust the effective genome size, if relevant"
                 }
             }
         },
