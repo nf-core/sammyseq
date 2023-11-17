@@ -11,9 +11,9 @@ The directories listed below will be created in the results directory after the 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
 - [FastQC](#fastqc)
-- [Trim reads](#trim-adapters)
-- [Alignment on Reference](#align-to-reference)
-- [Mark Duplicate reads](#mark-duplicates)
+- [Trim reads](#trim-reads)
+- [Alignment on Reference](#alignment-on-reference)
+- [Mark Duplicate reads](#mark-duplicate-reads)
 - [Signal track generation](#signal-track-generation)
 - [Comparisons](#comparisons)
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
@@ -32,30 +32,17 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 </details>
 
-#### Trim adapters
+#### Trim reads
 
-[`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic) is a software for read trimming, which means it trims all reads in the front or the tail. This function is useful since sometimes you want to drop some cycles of a sequencing run. In the current implementation in Sarek
-`--detect_adapter_for_pe` is set by default which enables auto-detection of adapter sequences. For more information on how to fine-tune adapter trimming, take a look into the parameter docs.
-
-The resulting files are intermediate and by default not kept in the final files delivered to users. Set `--save_trimmed` to enable publishing of the files in:
-
-<details markdown="1">
-<summary>Output files for all samples</summary>
-
-**Output directory: `{outdir}/preprocessing/fastp/<sample>`**
-
-- `<sample>_<lane>_{1,2}.fastp.fastq.gz>`
-  - Bgzipped FastQ file
-
-</details>
+[`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic) is a software used to trim adapter sequences and low quality bases from the end of reads and quality check after this step is performed again with Fastqc.
 
 :::note
 The FastQC plots displayed in the MultiQC report shows both _untrimmed_ and _trimmed_ reads. They can be compared to check removal of adapter sequence and potentially regions with low quality after the trimming step.
 :::
 
-### Align to Reference
+### Alignment on Reference
 
-[BWA](https://github.com/lh3/bwa) is a software package for mapping low-divergent sequences against a large reference genome. The aligned reads are then sorted with [samtools](https://www.htslib.org/doc/samtools.html).
+The alignment is performed using [BWA](https://github.com/lh3/bwa) and the aligned reads are then sorted by chromosome coordinates with [samtools](https://www.htslib.org/doc/samtools.html).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -65,7 +52,7 @@ The FastQC plots displayed in the MultiQC report shows both _untrimmed_ and _tri
 
 </details>
 
-### Mark Duplicates
+### Mark Duplicate reads
 
 <details markdown="1">
 <summary>Output files</summary>
