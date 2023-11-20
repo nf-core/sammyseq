@@ -98,7 +98,7 @@
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"
                 },
-                "bwa_index": {
+                "bwa": {
                     "type": "string",
                     "format": "path",
                     "exists": true,
@@ -119,7 +119,7 @@
                     "default": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`. You can run `sammyseq` by specifying at least a FASTA genome file."
                 },
-                "blackListFile": {
+                "blacklist": {
                     "type": "string",
                     "format": "file-path",
                     "fa_icon": "fas fa-ban",

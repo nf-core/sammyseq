@@ -100,7 +100,7 @@ workflow SAMMYSEQ {
 
 
     PREPARE_GENOME (params.fasta,
-                    params.bwa_index)
+                    params.bwa)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
