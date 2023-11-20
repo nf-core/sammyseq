@@ -59,12 +59,12 @@ workflow PREPARE_GENOME {
     //
     ch_bwa_index = Channel.empty()
     
-        if (params.bwa_index) {
-            if (params.bwa_index.endsWith('.tar.gz')) {
-                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa_index ] ).untar
+        if (params.bwa) {
+            if (params.bwa.endsWith('.tar.gz')) {
+                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa ] ).untar
                 ch_versions  = ch_versions.mix(UNTAR_BWA_INDEX.out.versions)
             } else {
-                ch_bwa_index = [ [:], file(params.bwa_index) ]
+                ch_bwa_index = [ [:], file(params.bwa) ]
             }
         } else {
             ch_bwa_index = BWA_INDEX ( ch_fasta ).index
@@ -91,7 +91,7 @@ workflow PREPARE_GENOME {
 
     emit:
     fasta         = ch_fasta                  //    path: genome.fasta
-    bwa_index     = ch_bwa_index              //    path: bwa/index/
+    bwa           = ch_bwa_index              //    path: bwa/index/
  
     versions    = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }

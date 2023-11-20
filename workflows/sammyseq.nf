@@ -239,7 +239,7 @@ workflow SAMMYSEQ {
     
     FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
-        PREPARE_GENOME.out.bwa_index
+        PREPARE_GENOME.out.bwa
     )
 
     if (params.stopAt == 'FASTQ_ALIGN_BWAALN') {
