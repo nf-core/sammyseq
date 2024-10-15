@@ -15,7 +15,9 @@
 
 **nf-core/sammyseq** is a bioinformatics pipeline for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state as described in:
 
-> Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). https://doi.org/10.1038/s41467-020-20048-9. [Pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
+> Lucini F, Petrini C, Salviato E, Pal K, Rosti V, Gorini F, Santarelli P, Quadri R, Lembo G, Graziano G, Di Patrizio Soldateschi E, Tagliaferri I, Pinatel E, Sebestyén E, Rotta L, Gentile F, Vaira V, Lanzuolo C, Ferrari F. Biochemical properties of chromatin domains define genome compartmentalization. Nucleic Acids Res. 2024 Jul 8;52(12):e54. [doi](https://doi.org/10.1093/nar/gkae454) [pubmed](https://pubmed.ncbi.nlm.nih.gov/38808669/)
+
+> Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). [doi](https://doi.org/10.1038/s41467-020-20048-9) [pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
 
 :::warning
 
@@ -99,7 +101,7 @@ For more details about the output files and reports, please refer to the
 
 nf-core/sammyseq was written by Lucio Di Filippo and Margherita Mutarelli and was based on the original pipeline developed _in-house_ by SAMMY-seq creators. <!-- TODO retreive all names and github usernames -->
 
-We thank the following people for their extensive assistance in the development of this pipeline:
+<!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
 
 <!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
