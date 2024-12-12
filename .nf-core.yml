@@ -1,18 +1,14 @@
-bump_version: null
 lint:
   multiqc_config:
     - report_comment
-nf_core_version: 3.0.2
-org_path: null
+nf_core_version: 3.1.0
 repository_type: pipeline
 template:
-  author: Margherita Mutarelli
-  description: analysis pipeline for SAMMY-seq
+  author: Margherita Mutarelli, Lucio Di Filippo
+  description: Analysis pipeline for SAMMY-seq
   force: false
   is_nfcore: true
   name: sammyseq
   org: nf-core
   outdir: .
-  skip_features: null
   version: 0.01dev
-update: null
