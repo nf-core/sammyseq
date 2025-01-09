@@ -104,6 +104,8 @@ The orginal pipeline backbone was mainly he result of work by Cristiano Petrini 
 
 The data analysis pipeline was then implemented into the Nextflow framework (nf-core/sammyseq ) by Lucio Di Filippo (ISASI-CNR, Pozzuoli) and Margherita Mutarelli (ISASI-CNR).
 
+<!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
+
 ## Acknowledgements
 
 The development of this pipeline was made possible thanks to the projects Progetti@CNR Myo-CoV-2 B93C20046330005, AFM Téléthon EDMD-GenomeSCAN B53C22009260007 and PIR01_00011 I.Bi.S.Co. Infrastruttura per Big data e Scientific COmputing (PON 2014-2020).
