@@ -99,11 +99,12 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/sammyseq was written by Lucio Di Filippo and Margherita Mutarelli and was based on the original pipeline developed _in-house_ by SAMMY-seq creators. <!-- TODO retreive all names and github usernames -->
+The SAMMY-seq data analysis procedure was originally developed by the laboratory of Francesco Ferrari (IFOM-ETS, Milan; IGM-CNR, Pavia) in collaboration with the laboratory of Chiara Lanzuolo (INGM, Milan; ITB-CNR, Milan).
+The orginal pipeline backbone was mainly he result of work by Cristiano Petrini (IFOM) and Endre Sebestyén (IFOM), with significant contributions by Ilario Tagliaferri (IFOM), Giovanni Lembo (IFOM) and Emanuele Di Patrizio Soldateschi (INGM). The project also benefited from the collaboration and input by Eva Pinatel (ITB-CNR). The product of this effort resulted in a first pipeline implemented in bash and adapted to work on Sun Grid Engine (SGE) scheduler.
+
+The data analysis pipeline was then implemented into the Nextflow framework (nf-core/sammyseq ) by Lucio Di Filippo (ISASI-CNR, Pozzuoli) and Margherita Mutarelli (ISASI-CNR).
 
 <!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
-
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
 ## Acknowledgements
 
