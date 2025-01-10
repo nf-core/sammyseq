@@ -28,7 +28,9 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_samm
 
 //   This is an example of how to use getGenomeAttribute() to fetch parameters
 //   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
+params.fasta     = getGenomeAttribute('fasta')
+params.bwa       = getGenomeAttribute('bwa')
+// params.blacklist = getGenomeAttribute('blacklist')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,9 +1,7 @@
-bump_version: null
 lint:
   multiqc_config:
     - report_comment
-nf_core_version: 3.0.2
-org_path: null
+nf_core_version: 3.1.1
 repository_type: pipeline
 template:
   author: Margherita Mutarelli, Lucio Di Filippo
@@ -14,5 +12,5 @@ template:
   org: nf-core
   outdir: .
   skip_features: null
-  version: 0.01dev
+  version: 1.0dev
 update: null
