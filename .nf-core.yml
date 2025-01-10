@@ -11,4 +11,6 @@ template:
   name: sammyseq
   org: nf-core
   outdir: .
-  version: 0.01dev
+  skip_features: null
+  version: 1.0dev
+update: null
