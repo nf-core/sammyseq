@@ -30,6 +30,8 @@ process DEEPTOOLS_BAMCOVERAGE {
     def is_cram = input.Extension == "cram" ? true : false
     def input_out = is_cram ? input.BaseName + ".bam" : "${input}"
     def fai_reference = fasta_fai ? "--fai-reference ${fasta_fai}" : ""
+    def extendReads = (params.extendReads != null && params.extendReads > 0) ? "--extendReads ${params.extendReads}" : ''
+    
 
     if (is_cram){
         """
@@ -39,6 +41,7 @@ process DEEPTOOLS_BAMCOVERAGE {
         bamCoverage \\
             --bam $input_out \\
             $args \\
+            $extendReads \\
             --numberOfProcessors ${task.cpus} \\
             --outFileName ${prefix}.${extension}
 
@@ -54,6 +57,7 @@ process DEEPTOOLS_BAMCOVERAGE {
         bamCoverage \\
             --bam $input_out \\
             $args \\
+            $extendReads \\
             --numberOfProcessors ${task.cpus} \\
             --outFileName ${prefix}.${extension}
 

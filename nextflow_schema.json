@@ -275,6 +275,10 @@
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
+                },
+                "extendReads": {
+                    "type": "integer",
+                    "description": "Defines how much the reads should be extended"
                 }
             }
         }
