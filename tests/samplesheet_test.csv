@@ -1,0 +1,4 @@
+sample,fastq_1,fastq_2,experimentalID,fraction
+CTRL004_S2,https://genome.isasi.cnr.it/biocomp/test-datasets/sammyseq/testdata/chr22_tinier/CTRL004_S2_chr22_tinieronly.fq.gz,,CTRL004,S2
+CTRL004_S3,https://genome.isasi.cnr.it/biocomp/test-datasets/sammyseq/testdata/chr22_tinier/CTRL004_S3_chr22_tinieronly.fq.gz,,CTRL004,S3
+CTRL004_S4,https://genome.isasi.cnr.it/biocomp/test-datasets/sammyseq/testdata/chr22_tinier/CTRL004_S4_chr22_tinieronly.fq.gz,,CTRL004,S4
