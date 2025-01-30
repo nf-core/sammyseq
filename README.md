@@ -3,7 +3,9 @@
     <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-sammyseq_logo_dark.png">
     <img alt="nf-core/sammyseq" src="docs/images/nf-core-sammyseq_logo_light.png">
   </picture>
-</h1>[![GitHub Actions CI Status](https://github.com/nf-core/sammyseq/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/sammyseq/actions/workflows/ci.yml)
+</h1>
+
+[![GitHub Actions CI Status](https://github.com/nf-core/sammyseq/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/sammyseq/actions/workflows/ci.yml)
 [![GitHub Actions Linting Status](https://github.com/nf-core/sammyseq/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/sammyseq/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/sammyseq/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
@@ -117,7 +119,7 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 ## Citations
 
 <!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use  nf-core/sammyseq for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+<!-- If you use nf-core/sammyseq for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
 <!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 
