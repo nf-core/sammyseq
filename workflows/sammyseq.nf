@@ -38,6 +38,7 @@ include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
 include { CAT_FRACTIONS } from '../subworkflows/local/cat_fractions'
 include { CUT_SIZES_GENOME } from "../modules/local/chromosomes_size"
 include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
+include { FILTER_BAM_SAMTOOLS } from '../subworkflows/local/filter_bam_samtools'
 
 
 /*
@@ -337,13 +338,28 @@ workflow SAMMYSEQ {
         }
 
 
+    FILTER_BAM_SAMTOOLS(
+        ch_bam_bai_combined,
+        ch_fasta_meta
+    )
+
+   // ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
+
+    ch_bam_bai_filtered = FILTER_BAM_SAMTOOLS.out.bam
+        .join(FILTER_BAM_SAMTOOLS.out.bai, by: [0], remainder: true)
+        .map {
+            meta, bam, bai  ->
+                    [ meta, bam, bai ]
+
+        }
+
     ch_fai_path = SAMTOOLS_FAIDX.out.fai.map { it[1] }
     //ch_fai_path.view()
     ch_fasta_path = ch_fasta_meta.map { it[1] }
     //ch_fasta_path.view()
 
     DEEPTOOLS_BAMCOVERAGE (
-        ch_bam_bai_combined,
+        ch_bam_bai_filtered,
         ch_fasta_path,
         ch_fai_path
     )
@@ -357,7 +373,7 @@ workflow SAMMYSEQ {
     if (params.comparisonFile) {
         // Add the suffix "_T1" to each sample ID in the comparison file
 
-        ch_bam_input=BAM_MARKDUPLICATES_PICARD.out.bam
+        ch_bam_input=FILTER_BAM_SAMTOOLS.out.bam
 
         ch_bam_input.view()
 
@@ -471,10 +487,14 @@ workflow SAMMYSEQ {
         )
     )
 
-    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.stats.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.metrics.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.idxstats.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.idxstats.collect{it[1]}.ifEmpty([]))
+
+    ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.idxstats.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),

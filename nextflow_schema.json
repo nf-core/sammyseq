@@ -279,6 +279,42 @@
                 "extendReads": {
                     "type": "integer",
                     "description": "Defines how much the reads should be extended"
+                },
+                "binSize": {
+                    "type": "integer",
+                    "description": "Binsize (expressed in base pairs) for genome coverage calculation (e.g. 50)",
+                    "default": 1
+                },
+                "normalizeUsing": {
+                    "type": "string",
+                    "description": "Method selecte to perform the normalizazion",
+                    "default": "RPKM"
+                },
+                "effectiveGenomeSize": {
+                    "type": "integer",
+                    "description": "Estimated genome size to performing the normalization"
+                },
+                "ignoreForNormalization": {
+                    "type": "string",
+                    "description": "A list of space-delimited chromosome names containing those chromosomes that should be excluded for computing the normalization"
+                },
+                "ignoreDuplicates": {
+                    "type": "boolean",
+                    "description": "If set, reads that have the same orientation and start position will be considered only once. If reads are paired, the mate\\u2019s position also has to coincide to ignore a read"
+                },
+                "filter_bed": {
+                    "type": "string",
+                    "description": "-L options filter the alignments that will be included in the output to only those alignments that match certain criteria."
+                },
+                "q_score": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "kip alignments with MAPQ smaller than 'value' (1 default)."
+                },
+                "flag": {
+                    "type": "integer",
+                    "default": 1540,
+                    "description": "If set filter reads based on specific flags. Flags represent various properties of a read, such as whether it's mapped, paired, or properly aligned (default 1540)"
                 }
             }
         }
