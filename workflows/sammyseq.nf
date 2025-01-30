@@ -343,7 +343,7 @@ workflow SAMMYSEQ {
         ch_fasta_meta
     )
 
-   // ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
+//ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
 
     ch_bam_bai_filtered = FILTER_BAM_SAMTOOLS.out.bam
         .join(FILTER_BAM_SAMTOOLS.out.bai, by: [0], remainder: true)
