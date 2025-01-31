@@ -288,7 +288,8 @@
                 "normalizeUsing": {
                     "type": "string",
                     "description": "Method selecte to perform the normalizazion",
-                    "default": "RPKM"
+                    "default": "RPKM",
+                    "enum": ["RPKM", "CPM", "BPM", "RPGC"]
                 },
                 "effectiveGenomeSize": {
                     "type": "integer",
