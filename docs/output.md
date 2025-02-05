@@ -14,6 +14,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Trim reads](#trim-reads)
 - [Alignment on Reference](#alignment-on-reference)
 - [Mark Duplicate reads](#mark-duplicate-reads)
+- [Reads filtering](#read-filtering)
 - [Signal track generation](#signal-track-generation)
 - [Comparisons](#comparisons)
 - [MultiQC](#multiqc)
@@ -49,10 +50,6 @@ The FastQC plots displayed in the MultiQC report shows both _untrimmed_ and _tri
 The alignment is performed using [BWA](https://github.com/lh3/bwa) and the aligned reads are then sorted by chromosome coordinates with [samtools](https://www.htslib.org/doc/samtools.html).
 
 <details markdown="1">
-<summary>Output files</summary>
-
-- `alignment/bwa/`
-  - `<sample>.bam` and `<sample>.bam.bai`
 
 </details>
 
@@ -70,15 +67,30 @@ Read pairs that are likely to have originated from duplicates of the same origin
 
 </details>
 
+### Mark Duplicate reads
+
+The BAM files generated are further processed with SAMtools for filtering (based on samtools flags and quality score) and indexing, as well as to generate read mapping statistics.
+<details markdown="1">
+<summary>Output files</summary>
+
+- `alignment/filtered/`
+  - `<sample>.<q_score>.bam` and `<sample>.<q_score>.bam.bai`
+- `/reports/samtools_stats/<sample>/filtered/`
+  - `<sample>/filtered.idxstats`
+  - `<sample>/filtered.flagstat`
+  - `<sample>/filtered.stats`
+</details>
+
 ### Signal track generation
 
 [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) is used to generate single fraction signals in [bigWig](https://genome.ucsc.edu/goldenpath/help/bigWig.html) format, an indexed binary format useful for displaying dense, continuous data in Genome Browsers such as the [UCSC](https://genome.ucsc.edu/cgi-bin/hgTracks) and [IGV](http://software.broadinstitute.org/software/igv/). The bigWig format is also supported by various bioinformatics software for downstream processing such as meta-profile plotting.
+The generated signal tracks represent read coverage and can be normalized using different methods: RPKM (default option),CPM, BPM and RPGC.
 
 <details markdown="1">
 <summary>Output files</summary>
 
 - `single_tracks/deeptools/`
-  - `<sample>.bigWig`
+  - `<sample>.<q_score>.<normalizeUsing>.bw`
 
 </details>
 
