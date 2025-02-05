@@ -70,6 +70,7 @@ Read pairs that are likely to have originated from duplicates of the same origin
 ### Mark Duplicate reads
 
 The BAM files generated are further processed with SAMtools for filtering (based on samtools flags and quality score) and indexing, as well as to generate read mapping statistics.
+
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -79,7 +80,7 @@ The BAM files generated are further processed with SAMtools for filtering (based
   - `<sample>/filtered.idxstats`
   - `<sample>/filtered.flagstat`
   - `<sample>/filtered.stats`
-</details>
+  </details>
 
 ### Signal track generation
 
