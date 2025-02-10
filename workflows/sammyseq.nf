@@ -397,13 +397,6 @@ workflow SAMMYSEQ {
     }
     ch_versions = ch_versions.mix(DEEPTOOLS_QC.out.versions)
 
-    //BIGWIG_PLOT_DEEPTOOLS (
-    //    DEEPTOOLS_BAMCOVERAGE.out.bigwig
-    //    PREPARE_GENOME.out.gene_bed
-    //    PREPARE_GENOME.out.tss_bed
-    //)
-    //ch_versions = ch_versions.mix(BIGWIG_PLOT_DEEPTOOLS.out.versions)
-
     if (params.comparisonFile) {
         // Add the suffix "_T1" to each sample ID in the comparison file
 

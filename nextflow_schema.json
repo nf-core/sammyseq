@@ -309,7 +309,7 @@
                     "description": "If set, reads that have the same orientation and start position will be considered only once. If reads are paired, the mate\\u2019s position also has to coincide to ignore a read",
                     "fa_icon": "fas fa-align-justify"
                 },
-                "filter_bed": {
+                "keep_regions_bed": {
                     "type": "string",
                     "description": "-L options filter the alignments that will be included in the output to only those alignments that match certain criteria.",
                     "fa_icon": "fas fa-align-justify"

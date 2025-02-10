@@ -92,7 +92,7 @@ The generated signal tracks represent read coverage and can be normalized using 
 <summary>Output files</summary>
 
 - `single_tracks/deeptools/`
-  - `<sample>.<q_score>.<normalizeUsing>.bw`
+  - `<sample>.<q_score>.<normalizeUsing>.bigWig`
 
 </details>
 
