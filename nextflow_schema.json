@@ -88,7 +88,7 @@
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes"
                 },
-                "bwa": {
+                "bwa_index": {
                     "type": "string",
                     "description": "Path to directory or tar.gz archive for pre-built BWA index.",
                     "fa_icon": "fas fa-book",
@@ -278,44 +278,84 @@
                 },
                 "extendReads": {
                     "type": "integer",
-                    "description": "Defines how much the reads should be extended"
+                    "description": "Defines how much the reads should be extended",
+                    "fa_icon": "fas fa-align-justify"
                 },
                 "binSize": {
                     "type": "integer",
                     "description": "Binsize (expressed in base pairs) for genome coverage calculation (e.g. 50)",
-                    "default": 1
+                    "default": 1,
+                    "fa_icon": "fas fa-align-justify"
                 },
                 "normalizeUsing": {
                     "type": "string",
                     "description": "Method selecte to perform the normalizazion",
                     "default": "RPKM",
-                    "enum": ["RPKM", "CPM", "BPM", "RPGC"]
+                    "enum": ["RPKM", "CPM", "BPM", "RPGC"],
+                    "fa_icon": "fas fa-align-justify"
                 },
                 "effectiveGenomeSize": {
                     "type": "integer",
-                    "description": "Estimated genome size to performing the normalization"
+                    "description": "Estimated genome size to performing the normalization",
+                    "fa_icon": "fas fa-align-justify"
                 },
                 "ignoreForNormalization": {
                     "type": "string",
-                    "description": "A list of space-delimited chromosome names containing those chromosomes that should be excluded for computing the normalization"
+                    "description": "A list of space-delimited chromosome names containing those chromosomes that should be excluded for computing the normalization",
+                    "fa_icon": "fas fa-align-justify"
                 },
                 "ignoreDuplicates": {
                     "type": "boolean",
-                    "description": "If set, reads that have the same orientation and start position will be considered only once. If reads are paired, the mate\\u2019s position also has to coincide to ignore a read"
+                    "description": "If set, reads that have the same orientation and start position will be considered only once. If reads are paired, the mate\\u2019s position also has to coincide to ignore a read",
+                    "fa_icon": "fas fa-align-justify"
                 },
-                "filter_bed": {
+                "keep_regions_bed": {
                     "type": "string",
-                    "description": "-L options filter the alignments that will be included in the output to only those alignments that match certain criteria."
+                    "description": "-L options filter the alignments that will be included in the output to only those alignments that match certain criteria.",
+                    "fa_icon": "fas fa-align-justify"
                 },
                 "q_score": {
                     "type": "integer",
                     "default": 1,
-                    "description": "kip alignments with MAPQ smaller than 'value' (1 default)."
+                    "description": "kip alignments with MAPQ smaller than 'value' (1 default).",
+                    "fa_icon": "fas fa-align-justify"
                 },
                 "flag": {
                     "type": "integer",
                     "default": 1540,
-                    "description": "If set filter reads based on specific flags. Flags represent various properties of a read, such as whether it's mapped, paired, or properly aligned (default 1540)"
+                    "description": "If set filter reads based on specific flags. Flags represent various properties of a read, such as whether it's mapped, paired, or properly aligned (default 1540)",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "region": {
+                    "type": "string",
+                    "description": "Region of the genome to limit the operation to - this is useful when testing parameters to reduce the computing time. The format is chr:start:end, for example \u2013region chr10 or \u2013region chr10:456700:891000.",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "numberOfSamples": {
+                    "type": "integer",
+                    "default": 500000,
+                    "description": "The number of bins that are sampled from the genome, for which the overlapping number of reads is computed. (Default: 500000)",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "bam_binsize": {
+                    "type": "integer",
+                    "default": 50000,
+                    "description": "Deeptools multiBamSummary bam bin size (Default 50000).",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "corr_method": {
+                    "type": "string",
+                    "default": "pearson",
+                    "enum": ["pearson", "spearman"],
+                    "description": "Deeptools Correlation Plot statistical calculation method",
+                    "fa_icon": "fas fa-bars"
+                },
+                "fragment_size": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Fragment size parameter for single-end data. When set to a positive value, it enables the --extendReads option in DeepTools, extending reads to the specified length. This parameter is only used for single-end data processing and does not affect paired-end data analysis.",
+                    "fa_icon": "fas fa-align-justify",
+                    "hidden": true
                 }
             }
         }

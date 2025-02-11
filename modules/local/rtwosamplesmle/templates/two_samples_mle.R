@@ -42,7 +42,7 @@ mle_output_file <- "${bam1.baseName}_VS_${bam2.baseName}_mle.bw"
 # DEFAULT PARAMETERS
 ################################################
 
-remove_anomalies <- FALSE
+remove_anomalies <- TRUE #changed from FALSE
 debug_mode <- TRUE
 stebp = 50
 

@@ -24,6 +24,16 @@ include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamco
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
+include { DEEPTOOLS_MULTIBAMSUMMARY } from '../modules/nf-core/deeptools/multibamsummary/main'
+include { DEEPTOOLS_PLOTCORRELATION } from '../modules/nf-core/deeptools/plotcorrelation/main'
+include { DEEPTOOLS_PLOTPCA } from '../modules/nf-core/deeptools/plotpca/main'
+include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_GLOBAL } from '../modules/nf-core/deeptools/plotfingerprint/main'
+include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_REGION } from '../modules/nf-core/deeptools/plotfingerprint/main'
+
+include { DEEPTOOLS_COMPUTEMATRIX } from '../modules/nf-core/deeptools/computematrix/main'
+include { DEEPTOOLS_PLOTPROFILE } from '../modules/nf-core/deeptools/plotprofile/main'
+include { DEEPTOOLS_PLOTHEATMAP } from '../modules/nf-core/deeptools/plotheatmap/main'
+
 // include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_FILTER     }   from '../modules/nf-core/samtools/view/main'
 // include { SAMTOOLS_SORT as SAMTOOLS_SORT_FILTERED   }   from '../modules/nf-core/samtools/sort/main'
 // include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_FILTERED }   from '../modules/nf-core/samtools/index/main'
@@ -39,6 +49,8 @@ include { CAT_FRACTIONS } from '../subworkflows/local/cat_fractions'
 include { CUT_SIZES_GENOME } from "../modules/local/chromosomes_size"
 include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
 include { FILTER_BAM_SAMTOOLS } from '../subworkflows/local/filter_bam_samtools'
+include { BIGWIG_PLOT_DEEPTOOLS } from '../subworkflows/local/bigwig_plot_deeptools'
+include { DEEPTOOLS_QC } from '../subworkflows/local/deeptools_qc'
 
 
 /*
@@ -90,7 +102,8 @@ workflow SAMMYSEQ {
 
 
     PREPARE_GENOME (params.fasta,
-                    params.bwa)
+                    params.bwa_index,
+                    params.blacklist)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
@@ -268,7 +281,7 @@ workflow SAMMYSEQ {
     FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
         // TRIMGALORE.out.reads,
-        PREPARE_GENOME.out.bwa
+        PREPARE_GENOME.out.bwa_index
     )
 
     ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
@@ -369,6 +382,21 @@ workflow SAMMYSEQ {
     if (params.stopAt == 'DEEPTOOLS_BAMCOVERAGE') {
         return
     }
+
+    DEEPTOOLS_QC (
+    FILTER_BAM_SAMTOOLS.out.bam,
+    FILTER_BAM_SAMTOOLS.out.bai,
+    params.corr_method
+)
+    ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
+    ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
+    ch_dt_fpmatrix_global = DEEPTOOLS_QC.out.fingerprint_matrix_global
+    ch_dt_fpmetrics_global = DEEPTOOLS_QC.out.fingerprint_metrics_global
+    if (params.region) {
+        ch_dt_fpmatrix_region = DEEPTOOLS_QC.out.fingerprint_matrix_region
+        ch_dt_fpmetrics_region = DEEPTOOLS_QC.out.fingerprint_metrics_region
+    }
+    ch_versions = ch_versions.mix(DEEPTOOLS_QC.out.versions)
 
     if (params.comparisonFile) {
         // Add the suffix "_T1" to each sample ID in the comparison file
@@ -495,6 +523,13 @@ workflow SAMMYSEQ {
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.idxstats.collect{it[1]}.ifEmpty([]))
+
+    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.correlation_matrix.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.pca_data.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.correlation_matrix.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.pca_data.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_matrix_global.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_metrics_global.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect(),

@@ -14,8 +14,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Trim reads](#trim-reads)
 - [Alignment on Reference](#alignment-on-reference)
 - [Mark Duplicate reads](#mark-duplicate-reads)
-- [Reads filtering](#read-filtering)
+- [SAMtools reads filtering](#read-filtering)
 - [Signal track generation](#signal-track-generation)
+- [DeepTools-based QC](#DeepTools-basedQC)
 - [Comparisons](#comparisons)
 - [MultiQC](#multiqc)
 - [Pipeline information](#pipeline-information)
@@ -67,7 +68,7 @@ Read pairs that are likely to have originated from duplicates of the same origin
 
 </details>
 
-### Mark Duplicate reads
+### Samtools reads filtering
 
 The BAM files generated are further processed with SAMtools for filtering (based on samtools flags and quality score) and indexing, as well as to generate read mapping statistics.
 
@@ -91,7 +92,75 @@ The generated signal tracks represent read coverage and can be normalized using 
 <summary>Output files</summary>
 
 - `single_tracks/deeptools/`
-  - `<sample>.<q_score>.<normalizeUsing>.bw`
+  - `<sample>.<q_score>.<normalizeUsing>.bigWig`
+
+</details>
+
+### DeepTools -based QC
+
+DeepTools-based QC
+
+DeepTools is used to perform quality control analysis at the aligned fraction level. The pipeline uses several DeepTools commands to generate comprehensive QC metrics and visualizations.
+
+### MultiBAMSummary
+
+The process starts with multiBamSummary, which computes the read coverage over the entire genome (or a specified region) for multiple BAM files. This creates a matrix of read counts that serves as input for the subsequent analyses. By default, the bin size is set to 50000, but you can adjust this using the --bam_binsize parameter.
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/multibamsummary/
+        ${meta.id}.npz: Binary file containing the read coverage matrix
+        outRawCounts.txt: Text file with raw read counts
+
+</details>
+
+### PCA (Principal Component Analysis)
+
+PCA is used to analyze and visualize variability in high-dimensional datasets. In the context of sequencing data analysis, PCA helps to determine if samples show greater variability between experimental conditions than between replicates of the same treatment.
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/plotpca/
+        ${meta.id}.pdf: PCA plot
+        ${meta.id}.tab: Table with PCA coordinates
+
+</details>
+
+### Correlation Heatmap
+
+The correlation analysis computes the overall similarity between samples based on read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') if the parameter qc_corr_method is provided (default is pearson)
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/plotcorrelation/
+        ${meta.id}.pdf: Correlation heatmap
+        ${meta.id}.tab: Table with correlation coefficients
+
+</details>
+
+### Fingerprint Plot
+
+The fingerprint plot helps determine how well the signal in the sample can be differentiated from the background distribution of reads in the control sample. This plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
+
+Two types of fingerprint plots are generated:
+
+    Global Fingerprint Plot: Covers the entire genome
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/plotfingerprint/global/
+        ${meta.id}_global.pdf: Global fingerprint plot
+        ${meta.id}_global.raw.txt: Raw data for the global fingerprint plot
+
+</details>
+
+    Region-specific Fingerprint Plot: Focuses on a user-specified genomic region (if --region parameter is provided (e.g., 'chr1', 'chr2:1000000-2000000'))
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/plotfingerprint/${params.region}/
+        ${meta.id}_region_${params.region}.pdf: Region-specific fingerprint plot
+        ${meta.id}_region_${params.region}.raw.txt: Raw data for the region-specific fingerprint plot
 
 </details>
 
