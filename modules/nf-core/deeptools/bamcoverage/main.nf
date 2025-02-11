@@ -30,7 +30,6 @@ process DEEPTOOLS_BAMCOVERAGE {
     def is_cram = input.Extension == "cram" ? true : false
     def input_out = is_cram ? input.BaseName + ".bam" : "${input}"
     def fai_reference = fasta_fai ? "--fai-reference ${fasta_fai}" : ""
-    
 
     if (is_cram){
         """

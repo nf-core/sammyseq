@@ -102,7 +102,8 @@ workflow SAMMYSEQ {
 
 
     PREPARE_GENOME (params.fasta,
-                    params.bwa)
+                    params.bwa_index,
+                    params.blacklist)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
@@ -280,7 +281,7 @@ workflow SAMMYSEQ {
     FASTQ_ALIGN_BWAALN (
         TRIMMOMATIC.out.trimmed_reads,
         // TRIMGALORE.out.reads,
-        PREPARE_GENOME.out.bwa
+        PREPARE_GENOME.out.bwa_index
     )
 
     ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
