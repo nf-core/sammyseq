@@ -97,6 +97,7 @@ The generated signal tracks represent read coverage and can be normalized using 
 </details>
 
 ### DeepTools -based QC
+
 DeepTools-based QC
 
 DeepTools is used to perform quality control analysis at the aligned fraction level. The pipeline uses several DeepTools commands to generate comprehensive QC metrics and visualizations.
@@ -104,6 +105,7 @@ DeepTools is used to perform quality control analysis at the aligned fraction le
 ### MultiBAMSummary
 
 The process starts with multiBamSummary, which computes the read coverage over the entire genome (or a specified region) for multiple BAM files. This creates a matrix of read counts that serves as input for the subsequent analyses. By default, the bin size is set to 50000, but you can adjust this using the --bam_binsize parameter.
+
 <details markdown="1"> <summary>Output files</summary>
 
     deeptools/quality_control/multibamsummary/
@@ -115,6 +117,7 @@ The process starts with multiBamSummary, which computes the read coverage over t
 ### PCA (Principal Component Analysis)
 
 PCA is used to analyze and visualize variability in high-dimensional datasets. In the context of sequencing data analysis, PCA helps to determine if samples show greater variability between experimental conditions than between replicates of the same treatment.
+
 <details markdown="1"> <summary>Output files</summary>
 
     deeptools/quality_control/plotpca/
@@ -126,6 +129,7 @@ PCA is used to analyze and visualize variability in high-dimensional datasets. I
 ### Correlation Heatmap
 
 The correlation analysis computes the overall similarity between samples based on read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') if the parameter qc_corr_method is provided (default is pearson)
+
 <details markdown="1"> <summary>Output files</summary>
 
     deeptools/quality_control/plotcorrelation/
