@@ -28,9 +28,8 @@ workflow PREPARE_GENOME {
     take:
 //    genome             //  string: genome name
 //    genomes            //     map: genome attributes
-//    prepare_tool_index            // string  : tool to prepare index for
     fasta              //    path: path to genome fasta file
-    aligner
+    aligner            //    string: aligner name
 //    gtf                //    file: /path/to/genome.gtf
 //    gff                //    file: /path/to/genome.gff
     blacklist          //    file: /path/to/blacklist.bed
