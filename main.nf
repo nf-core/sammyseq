@@ -18,6 +18,7 @@
 include { SAMMYSEQ  } from './workflows/sammyseq'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_sammyseq_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_sammyseq_pipeline'
+include { PREPARE_GENOME          } from './subworkflows/local/prepare_genome'
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_sammyseq_pipeline'
 
 /*
@@ -30,7 +31,7 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_samm
 //   from igenomes.config using `--genome`
 params.fasta         = getGenomeAttribute('fasta')
 params.bwa_index     = getGenomeAttribute('bwa')
-//params.bowtie2_index = getGenomeAttribute('bowtie2')
+params.bowtie2_index = getGenomeAttribute('bowtie2')
 //params.gtf           = getGenomeAttribute('gtf')
 //params.gff           = getGenomeAttribute('gff')
 //params.gene_bed      = getGenomeAttribute('gene_bed')
@@ -56,7 +57,7 @@ workflow NFCORE_SAMMYSEQ {
     // WORKFLOW: Run pipeline
     //
     SAMMYSEQ (
-        samplesheet
+        samplesheet,
     )
     emit:
     multiqc_report = SAMMYSEQ.out.multiqc_report // channel: /path/to/multiqc_report.html

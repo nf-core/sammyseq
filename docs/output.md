@@ -14,9 +14,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Trim reads](#trim-reads)
 - [Alignment on Reference](#alignment-on-reference)
 - [Mark Duplicate reads](#mark-duplicate-reads)
-- [SAMtools reads filtering](#read-filtering)
+- [Samtools reads filtering](#read-filtering)
 - [Signal track generation](#signal-track-generation)
-- [DeepTools-based QC](#DeepTools-basedQC)
+- [DeepTools based QC](#DeepTools-basedQC)
 - [Comparisons](#comparisons)
 - [MultiQC](#multiqc)
 - [Pipeline information](#pipeline-information)
@@ -96,7 +96,7 @@ The generated signal tracks represent read coverage and can be normalized using 
 
 </details>
 
-### DeepTools -based QC
+### DeepTools based QC
 
 DeepTools-based QC
 

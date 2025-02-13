@@ -18,23 +18,25 @@ include { UNTARFILES           } from '../../modules/nf-core/untarfiles/main'
 include { GFFREAD              } from '../../modules/nf-core/gffread/main'
 include { CUSTOM_GETCHROMSIZES } from '../../modules/nf-core/custom/getchromsizes/main'
 include { BWA_INDEX            } from '../../modules/nf-core/bwa/index/main'
+include { BOWTIE2_BUILD        } from '../../modules/nf-core/bowtie2/build/main'
 
 include { GTF2BED                  } from '../../modules/local/gtf2bed'
 include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
 
 workflow PREPARE_GENOME {
+
     take:
 //    genome             //  string: genome name
 //    genomes            //     map: genome attributes
-//    prepare_tool_index // string  : tool to prepare index for
+//    prepare_tool_index            // string  : tool to prepare index for
     fasta              //    path: path to genome fasta file
+    aligner
 //    gtf                //    file: /path/to/genome.gtf
 //    gff                //    file: /path/to/genome.gff
     blacklist          //    file: /path/to/blacklist.bed
 //    gene_bed           //    file: /path/to/gene.bed
     bwa_index          //    file: /path/to/bwa/index/
-//    bowtie2_index      //    file: /path/to/bowtie2/index/
-
+    bowtie2_index      //    file: /path/to/bowtie2/index/
 
     main:
 
@@ -121,6 +123,7 @@ workflow PREPARE_GENOME {
         }
     }
 */
+
     //
     // Create chromosome sizes file
     //
@@ -141,34 +144,42 @@ workflow PREPARE_GENOME {
     ch_genome_filtered_bed = GENOME_BLACKLIST_REGIONS.out.bed
     ch_versions = ch_versions.mix(GENOME_BLACKLIST_REGIONS.out.versions)
 
+
     //
-    // Uncompress BWA index or generate from scratch if required
+    // Prepare BWA index
     //
     ch_bwa_index = Channel.empty()
-
-        if (params.bwa_index) {
-            if (params.bwa_index.endsWith('.tar.gz')) {
-                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa_index ] ).untar
+    if (params.aligner == 'bwa') {
+        if (bwa_index) {
+            if (bwa_index.endsWith('.tar.gz')) {
+                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], bwa_index ] ).untar
                 ch_versions  = ch_versions.mix(UNTAR_BWA_INDEX.out.versions)
             } else {
-                ch_bwa_index = [ [:], file(params.bwa_index) ]
+                ch_bwa_index = [ [:], file(bwa_index) ]
             }
         } else {
             ch_bwa_index = BWA_INDEX ( ch_fasta.map { [ [:], it ] } ).index
             ch_versions  = ch_versions.mix(BWA_INDEX.out.versions)
         }
-
-
-
-    //make chromosome size index
-
-
+    }
 
     //
     // Uncompress Bowtie2 index or generate from scratch if required
     //
-
-
+    ch_bowtie2_index = Channel.empty()
+    if (params.aligner == 'bowtie2') {
+        if (bowtie2_index) {
+            if (bowtie2_index.endsWith('.tar.gz')) {
+                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX ( [ [:], bowtie2_index ] ).untar
+                ch_versions  = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
+            } else {
+                ch_bowtie2_index = [ [:], file(bowtie2_index) ]
+            }
+        } else {
+            ch_bowtie2_index = BOWTIE2_BUILD ( ch_fasta.map { [ [:], it ] } ).index
+            ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
+        }
+    }
     //
     // Uncompress CHROMAP index or generate from scratch if required
     //
@@ -184,7 +195,6 @@ workflow PREPARE_GENOME {
     chrom_sizes   = ch_chrom_sizes            //    path: genome.sizes
     filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
     bwa_index     = ch_bwa_index              //    path: bwa/index/
-//    bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
-
+    bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
     versions    = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }
