@@ -149,12 +149,12 @@ workflow PREPARE_GENOME {
     //
     ch_bwa_index = Channel.empty()
     if (params.aligner == 'bwa') {
-        if (bwa_index) {
-            if (bwa_index.endsWith('.tar.gz')) {
-                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], bwa_index ] ).untar
+        if (params.bwa_index) {
+            if (params.bwa_index.endsWith('.tar.gz')) {
+                ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa_index ] ).untar
                 ch_versions  = ch_versions.mix(UNTAR_BWA_INDEX.out.versions)
             } else {
-                ch_bwa_index = [ [:], file(bwa_index) ]
+                ch_bwa_index = [ [:], file(params.bwa_index) ]
             }
         } else {
             ch_bwa_index = BWA_INDEX ( ch_fasta.map { [ [:], it ] } ).index
@@ -167,12 +167,12 @@ workflow PREPARE_GENOME {
     //
     ch_bowtie2_index = Channel.empty()
     if (params.aligner == 'bowtie2') {
-        if (bowtie2_index) {
-            if (bowtie2_index.endsWith('.tar.gz')) {
-                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX ( [ [:], bowtie2_index ] ).untar
+        if (params.bowtie2_index) {
+            if (params.bowtie2_index.endsWith('.tar.gz')) {
+                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX ( [ [:], params.bowtie2_index ] ).untar
                 ch_versions  = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
-                ch_bowtie2_index = [ [:], file(bowtie2_index) ]
+                ch_bowtie2_index = [ [:], file(params.bowtie2_index) ]
             }
         } else {
             ch_bowtie2_index = BOWTIE2_BUILD ( ch_fasta.map { [ [:], it ] } ).index
