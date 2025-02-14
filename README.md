@@ -106,7 +106,7 @@ The nf-core pipeline (nf-core/sammyseq) is being implemented by [Lucio Di Filipp
 
 <!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
 
-Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu) and [Júlia Mir Pedrol](https://github.com/mirpedrol). 
+Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu) and [Júlia Mir Pedrol](https://github.com/mirpedrol).
 
 ## Acknowledgements
 
