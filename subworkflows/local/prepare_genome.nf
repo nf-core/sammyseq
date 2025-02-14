@@ -45,11 +45,11 @@ workflow PREPARE_GENOME {
     // Uncompress genome fasta file if required
     //
     ch_fasta = Channel.empty()
-    if (fasta.endsWith('.gz')) {
-        ch_fasta    = GUNZIP_FASTA ( [ [:], fasta ] ).gunzip.map{ it[1] }
+    if (params.fasta.endsWith('.gz')) {
+        ch_fasta    = GUNZIP_FASTA ( [ [:], params.fasta ] ).gunzip.map{ it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = Channel.value(file(fasta))
+        ch_fasta = Channel.value(file(params.fasta))
     }
 
     //println(ch_fasta)
@@ -86,12 +86,12 @@ workflow PREPARE_GENOME {
     // Uncompress blacklist file if required
     //
     ch_blacklist = Channel.empty()
-    if (blacklist) {
-        if (blacklist.endsWith('.gz')) {
-            ch_blacklist = GUNZIP_BLACKLIST ( [ [:], blacklist ] ).gunzip.map{ it[1] }
+    if (params.blacklist) {
+        if (params.blacklist.endsWith('.gz')) {
+            ch_blacklist = GUNZIP_BLACKLIST ( [ [:], params.blacklist ] ).gunzip.map{ it[1] }
             ch_versions  = ch_versions.mix(GUNZIP_BLACKLIST.out.versions)
         } else {
-            ch_blacklist = Channel.value(file(blacklist))
+            ch_blacklist = Channel.value(file(params.blacklist))
         }
     }
 /*
