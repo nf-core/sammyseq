@@ -9,6 +9,7 @@ process DEEPTOOLS_MULTIBAMSUMMARY {
 
     input:
     tuple val(meta), path(bams), path(bais), val(labels)
+    path(blacklist)
 
     output:
     tuple val(meta), path("*.npz") , emit: matrix
@@ -18,13 +19,15 @@ process DEEPTOOLS_MULTIBAMSUMMARY {
     task.ext.when == null || task.ext.when
 
     script:
-    def args   = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "all_bam"
-    def label  = labels ? "--labels ${labels.join(' ')}" : ''
+    def args      = task.ext.args ?: ''
+    def prefix    = task.ext.prefix ?: "all_bam"
+    def label     = labels ? "--labels ${labels.join(' ')}" : ''
+    def blacklist = blacklist ? "--blackListFileName ${blacklist}" : ""
     """
     multiBamSummary bins \\
         $args \\
         $label \\
+        $blacklist \\
         --bamfiles ${bams.join(' ')} \\
         --numberOfProcessors $task.cpus \\
         --outFileName ${prefix}.bamSummary.npz

@@ -35,7 +35,7 @@ Here is an outline of the analysis steps:
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Trim reads to remove adapter sequences and low quality ends ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
-3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/))
+3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 4. Remove duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
 5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
@@ -99,12 +99,14 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-The SAMMY-seq data analysis procedure was originally developed by the laboratory of Francesco Ferrari (IFOM-ETS, Milan; IGM-CNR, Pavia) in collaboration with the laboratory of Chiara Lanzuolo (INGM, Milan; ITB-CNR, Milan).
-The orginal pipeline backbone was mainly he result of work by Cristiano Petrini (IFOM) and Endre Sebestyén (IFOM), with significant contributions by Ilario Tagliaferri (IFOM), Giovanni Lembo (IFOM) and Emanuele Di Patrizio Soldateschi (INGM). The project also benefited from the collaboration and input by Eva Pinatel (ITB-CNR). The product of this effort resulted in a first pipeline implemented in bash and adapted to work on Sun Grid Engine (SGE) scheduler.
+The SAMMY-seq data analysis procedure was originally developed by the laboratory of Francesco Ferrari (IFOM-ETS, Milan; IGM-CNR, Pavia) in collaboration with the laboratory of Chiara Lanzuolo (INGM, Milan; ITB-CNR, Segrate).
+The orginal pipeline backbone was mainly the result of work by Cristiano Petrini (IFOM) and Endre Sebestyén (IFOM), with significant contributions by Ilario Tagliaferri (IFOM), Giovanni Lembo (IFOM) and Emanuele Di Patrizio Soldateschi (INGM). The project also benefited from the collaboration and input by Eva Maria Pinatel (ITB-CNR). The product of this effort resulted in a first pipeline implemented in bash and adapted to work on Sun Grid Engine (SGE) scheduler.
 
-The data analysis pipeline was then implemented into the Nextflow framework (nf-core/sammyseq ) by Lucio Di Filippo (ISASI-CNR, Pozzuoli) and Margherita Mutarelli (ISASI-CNR).
+The nf-core pipeline (nf-core/sammyseq) is being implemented by [Lucio Di Filippo](https://github.com/lucidif) (ISASI-CNR, Pozzuoli; IBBTEC, Santander), [Ugo Maria Iannacchero](https://github.com/ugoiannacchero) (ITB-CNR) and [Margherita Mutarelli](https://github.com/daisymut) (ISASI-CNR).
 
 <!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
+
+Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu), [Júlia Mir-Pedrol](https://github.com/mirpedrol) and [Marcel Ribeiro-Dantas](https://github.com/mribeirodantas).
 
 ## Acknowledgements
 

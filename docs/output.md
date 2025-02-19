@@ -14,9 +14,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Trim reads](#trim-reads)
 - [Alignment on Reference](#alignment-on-reference)
 - [Mark Duplicate reads](#mark-duplicate-reads)
-- [SAMtools reads filtering](#read-filtering)
+- [Samtools reads filtering](#samtools-reads-filtering)
 - [Signal track generation](#signal-track-generation)
-- [DeepTools-based QC](#DeepTools-basedQC)
+- [DeepTools based QC](#deeptools-based-qc)
 - [Comparisons](#comparisons)
 - [MultiQC](#multiqc)
 - [Pipeline information](#pipeline-information)
@@ -96,9 +96,7 @@ The generated signal tracks represent read coverage and can be normalized using 
 
 </details>
 
-### DeepTools -based QC
-
-DeepTools-based QC
+### DeepTools based QC
 
 DeepTools is used to perform quality control analysis at the aligned fraction level. The pipeline uses several DeepTools commands to generate comprehensive QC metrics and visualizations.
 

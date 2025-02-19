@@ -18,23 +18,24 @@ include { UNTARFILES           } from '../../modules/nf-core/untarfiles/main'
 include { GFFREAD              } from '../../modules/nf-core/gffread/main'
 include { CUSTOM_GETCHROMSIZES } from '../../modules/nf-core/custom/getchromsizes/main'
 include { BWA_INDEX            } from '../../modules/nf-core/bwa/index/main'
+include { BOWTIE2_BUILD        } from '../../modules/nf-core/bowtie2/build/main'
 
 include { GTF2BED                  } from '../../modules/local/gtf2bed'
 include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
 
 workflow PREPARE_GENOME {
+
     take:
 //    genome             //  string: genome name
 //    genomes            //     map: genome attributes
-//    prepare_tool_index // string  : tool to prepare index for
     fasta              //    path: path to genome fasta file
+    aligner            //    string: aligner name
 //    gtf                //    file: /path/to/genome.gtf
 //    gff                //    file: /path/to/genome.gff
     blacklist          //    file: /path/to/blacklist.bed
 //    gene_bed           //    file: /path/to/gene.bed
     bwa_index          //    file: /path/to/bwa/index/
-//    bowtie2_index      //    file: /path/to/bowtie2/index/
-
+    bowtie2_index      //    file: /path/to/bowtie2/index/
 
     main:
 
@@ -44,11 +45,11 @@ workflow PREPARE_GENOME {
     // Uncompress genome fasta file if required
     //
     ch_fasta = Channel.empty()
-    if (fasta.endsWith('.gz')) {
-        ch_fasta    = GUNZIP_FASTA ( [ [:], fasta ] ).gunzip.map{ it[1] }
+    if (params.fasta.endsWith('.gz')) {
+        ch_fasta    = GUNZIP_FASTA ( [ [:], params.fasta ] ).gunzip.map{ it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = Channel.value(file(fasta))
+        ch_fasta = Channel.value(file(params.fasta))
     }
 
     //println(ch_fasta)
@@ -85,12 +86,12 @@ workflow PREPARE_GENOME {
     // Uncompress blacklist file if required
     //
     ch_blacklist = Channel.empty()
-    if (blacklist) {
-        if (blacklist.endsWith('.gz')) {
-            ch_blacklist = GUNZIP_BLACKLIST ( [ [:], blacklist ] ).gunzip.map{ it[1] }
+    if (params.blacklist) {
+        if (params.blacklist.endsWith('.gz')) {
+            ch_blacklist = GUNZIP_BLACKLIST ( [ [:], params.blacklist ] ).gunzip.map{ it[1] }
             ch_versions  = ch_versions.mix(GUNZIP_BLACKLIST.out.versions)
         } else {
-            ch_blacklist = Channel.value(file(blacklist))
+            ch_blacklist = Channel.value(file(params.blacklist))
         }
     }
 /*
@@ -121,6 +122,7 @@ workflow PREPARE_GENOME {
         }
     }
 */
+
     //
     // Create chromosome sizes file
     //
@@ -141,11 +143,12 @@ workflow PREPARE_GENOME {
     ch_genome_filtered_bed = GENOME_BLACKLIST_REGIONS.out.bed
     ch_versions = ch_versions.mix(GENOME_BLACKLIST_REGIONS.out.versions)
 
+
     //
-    // Uncompress BWA index or generate from scratch if required
+    // Prepare BWA index
     //
     ch_bwa_index = Channel.empty()
-
+    if (params.aligner == 'bwa') {
         if (params.bwa_index) {
             if (params.bwa_index.endsWith('.tar.gz')) {
                 ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa_index ] ).untar
@@ -157,18 +160,25 @@ workflow PREPARE_GENOME {
             ch_bwa_index = BWA_INDEX ( ch_fasta.map { [ [:], it ] } ).index
             ch_versions  = ch_versions.mix(BWA_INDEX.out.versions)
         }
-
-
-
-    //make chromosome size index
-
-
+    }
 
     //
     // Uncompress Bowtie2 index or generate from scratch if required
     //
-
-
+    ch_bowtie2_index = Channel.empty()
+    if (params.aligner == 'bowtie2') {
+        if (params.bowtie2_index) {
+            if (params.bowtie2_index.endsWith('.tar.gz')) {
+                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX ( [ [:], params.bowtie2_index ] ).untar
+                ch_versions  = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
+            } else {
+                ch_bowtie2_index = [ [:], file(params.bowtie2_index) ]
+            }
+        } else {
+            ch_bowtie2_index = BOWTIE2_BUILD ( ch_fasta.map { [ [:], it ] } ).index
+            ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
+        }
+    }
     //
     // Uncompress CHROMAP index or generate from scratch if required
     //
@@ -184,7 +194,7 @@ workflow PREPARE_GENOME {
     chrom_sizes   = ch_chrom_sizes            //    path: genome.sizes
     filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
     bwa_index     = ch_bwa_index              //    path: bwa/index/
-//    bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
-
-    versions    = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
+    bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
+    blacklist     = ch_blacklist
+    versions      = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }

@@ -22,6 +22,7 @@ include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
+include { FASTQ_ALIGN_BOWTIE2         } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
 include { DEEPTOOLS_MULTIBAMSUMMARY } from '../modules/nf-core/deeptools/multibamsummary/main'
@@ -64,7 +65,6 @@ if (params.fasta) { ch_fasta =  Channel.fromPath(params.fasta) } else { exit 1, 
 // Modify fasta channel to include meta data
 ch_fasta_meta = ch_fasta.map{ it -> [[id:it[0].baseName], it] }.collect()
 
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
@@ -102,7 +102,9 @@ workflow SAMMYSEQ {
 
 
     PREPARE_GENOME (params.fasta,
+                    params.aligner,
                     params.bwa_index,
+                    params.bowtie2_index,
                     params.blacklist)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
@@ -277,18 +279,30 @@ workflow SAMMYSEQ {
         return
     }
 
+    def ch_aligned_bam
 
-    FASTQ_ALIGN_BWAALN (
-        TRIMMOMATIC.out.trimmed_reads,
-        // TRIMGALORE.out.reads,
-        PREPARE_GENOME.out.bwa_index
-    )
-
-    ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
-
-    if (params.stopAt == 'FASTQ_ALIGN_BWAALN') {
-        return
+    if (params.aligner == 'bwa') {
+        FASTQ_ALIGN_BWAALN(
+            TRIMMOMATIC.out.trimmed_reads,
+            PREPARE_GENOME.out.bwa_index
+        )
+        ch_aligned_bam = FASTQ_ALIGN_BWAALN.out.bam
+        ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
+    } else if (params.aligner == 'bowtie2') {
+        FASTQ_ALIGN_BOWTIE2(
+            TRIMMOMATIC.out.trimmed_reads,
+            PREPARE_GENOME.out.bowtie2_index,
+            params.save_unaligned,
+            false,
+            PREPARE_GENOME.out.fasta.map{ fasta_ -> [ [ id:'fasta' ], fasta_ ] }
+        )
+        ch_aligned_bam = FASTQ_ALIGN_BOWTIE2.out.bam
+        ch_versions = ch_versions.mix(FASTQ_ALIGN_BOWTIE2.out.versions)
     }
+
+if (params.stopAt == 'ALIGNMENT') {
+    return
+}
 
 
     // PICARD MARK_DUPLICATES
@@ -313,7 +327,7 @@ workflow SAMMYSEQ {
 
     // MARK DUPLICATES IN BAM FILE
     BAM_MARKDUPLICATES_PICARD (
-        FASTQ_ALIGN_BWAALN.out.bam,
+        ch_aligned_bam,
         ch_fasta_meta,
         SAMTOOLS_FAIDX.out.fai.collect()
         )
@@ -374,7 +388,8 @@ workflow SAMMYSEQ {
     DEEPTOOLS_BAMCOVERAGE (
         ch_bam_bai_filtered,
         ch_fasta_path,
-        ch_fai_path
+        ch_fai_path,
+        PREPARE_GENOME.out.blacklist
     )
 
     ch_versions = ch_versions.mix(DEEPTOOLS_BAMCOVERAGE.out.versions)
@@ -384,10 +399,11 @@ workflow SAMMYSEQ {
     }
 
     DEEPTOOLS_QC (
-    FILTER_BAM_SAMTOOLS.out.bam,
-    FILTER_BAM_SAMTOOLS.out.bai,
-    params.corr_method
-)
+        FILTER_BAM_SAMTOOLS.out.bam,
+        FILTER_BAM_SAMTOOLS.out.bai,
+        params.corr_method,
+        PREPARE_GENOME.out.blacklist
+    )
     ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
     ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
     ch_dt_fpmatrix_global = DEEPTOOLS_QC.out.fingerprint_matrix_global
@@ -466,6 +482,7 @@ workflow SAMMYSEQ {
 
         RTWOSAMPLESMLE (comparisons_merge_ch,
                         CUT_SIZES_GENOME.out.ch_sizes_genome
+                        // PREPARE_GENOME.out.chrom_sizes
                         )
 
         if (params.stopAt == 'RTWOSAMPLESMLE') {
