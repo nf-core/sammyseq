@@ -13,6 +13,7 @@ workflow DEEPTOOLS_QC {
     bam         // channel: [ val(meta), [ bam ] ]
     bai         // channel: [ val(meta), [ bai ] ]
     corr_method // val
+    ch_blacklist   // channel
 
     main:
     ch_versions = Channel.empty()
@@ -51,7 +52,10 @@ workflow DEEPTOOLS_QC {
     /*
     * MODULE: Summarise bams into bins
     */
-    DEEPTOOLS_MULTIBAMSUMMARY(ch_bam_bai_all)
+    DEEPTOOLS_MULTIBAMSUMMARY(
+        ch_bam_bai_all,
+        ch_blacklist
+)
     ch_versions = ch_versions.mix(DEEPTOOLS_MULTIBAMSUMMARY.out.versions)
 
     /*

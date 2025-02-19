@@ -195,5 +195,6 @@ workflow PREPARE_GENOME {
     filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
     bwa_index     = ch_bwa_index              //    path: bwa/index/
     bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
-    versions    = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
+    blacklist     = ch_blacklist
+    versions      = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }

@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { SAMMYSEQ  } from './workflows/sammyseq'
+include { SAMMYSEQ                } from './workflows/sammyseq'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_sammyseq_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_sammyseq_pipeline'
 include { PREPARE_GENOME          } from './subworkflows/local/prepare_genome'
