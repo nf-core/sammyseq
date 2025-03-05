@@ -389,7 +389,7 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_bam_bai_filtered,
         ch_fasta_path,
         ch_fai_path,
-        PREPARE_GENOME.out.blacklist
+        params.blacklist ? PREPARE_GENOME.out.blacklist : []
     )
 
     ch_versions = ch_versions.mix(DEEPTOOLS_BAMCOVERAGE.out.versions)
@@ -402,7 +402,7 @@ if (params.stopAt == 'ALIGNMENT') {
         FILTER_BAM_SAMTOOLS.out.bam,
         FILTER_BAM_SAMTOOLS.out.bai,
         params.corr_method,
-        PREPARE_GENOME.out.blacklist
+        params.blacklist ? PREPARE_GENOME.out.blacklist : []
     )
     ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
     ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
