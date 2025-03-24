@@ -17,7 +17,7 @@ include { UTILS_NFCORE_PIPELINE       } from '../subworkflows/nf-core/utils_nfco
 
 include { CAT_FASTQ                   } from '../modules/nf-core/cat/fastq'
 include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
-// include { TRIMGALORE                  } from '../modules/nf-core/trimgalore/main'
+include { TRIMGALORE                  } from '../modules/nf-core/trimgalore/main'
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
 include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewindows/main'
@@ -238,22 +238,22 @@ workflow SAMMYSEQ {
         return
     }
 
+    ///
+    //  TRIMMING!
     //
-    // MODULE: Run TrimGalore!
-    //
-    // if (!params.skip_trimming) {
-        // TRIMGALORE(merged_reads)
-        // reads = TRIMGALORE.out.reads
-
-    //
-    // MODULE: Run TRIMMOMATIC
-    //
-
-    TRIMMOMATIC(merged_reads)
-    reads = TRIMMOMATIC.out.trimmed_reads
-    ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions)
-    // TRIMMOMATIC.out.trimmed_reads.view()
-
+    if (params.skip_trimming) {
+        return
+    } else if (params.trimmer == 'TRIMGALORE') {
+        TRIMGALORE(merged_reads)
+        reads = TRIMGALORE.out.reads
+        ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
+    } else if (params.trimmer == 'TRIMMOMATIC') {
+        TRIMMOMATIC(merged_reads)
+        reads = TRIMMOMATIC.out.trimmed_reads
+        ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions)
+    } else {
+        error "Invalid trimmer specified: ${params.trimmer}. Use 'TRIMGALORE' or 'TRIMMOMATIC'."
+    }
 
     //
     // MODULE: Run FastQC
