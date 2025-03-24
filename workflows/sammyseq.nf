@@ -20,6 +20,8 @@ include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
 // include { TRIMGALORE                  } from '../modules/nf-core/trimgalore/main'
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
+include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewindows/main'
+include { BIN_BY_CHROMOSOME           } from '../modules/local/bin_by_chromosome'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
 include { FASTQ_ALIGN_BOWTIE2         } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
@@ -105,7 +107,8 @@ workflow SAMMYSEQ {
                     params.aligner,
                     params.bwa_index,
                     params.bowtie2_index,
-                    params.blacklist)
+                    params.blacklist,
+                    params.binsize)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 

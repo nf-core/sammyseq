@@ -36,6 +36,7 @@ params.bowtie2_index = getGenomeAttribute('bowtie2')
 //params.gff           = getGenomeAttribute('gff')
 //params.gene_bed      = getGenomeAttribute('gene_bed')
 params.blacklist     = getGenomeAttribute('blacklist')
+params.binsize   = getGenomeAttribute('binsize')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -19,9 +19,10 @@ include { GFFREAD              } from '../../modules/nf-core/gffread/main'
 include { CUSTOM_GETCHROMSIZES } from '../../modules/nf-core/custom/getchromsizes/main'
 include { BWA_INDEX            } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD        } from '../../modules/nf-core/bowtie2/build/main'
-
+include { BEDTOOLS_MAKEWINDOWS } from '../../modules/nf-core/bedtools/makewindows/main'
 include { GTF2BED                  } from '../../modules/local/gtf2bed'
 include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
+include { BIN_BY_CHROMOSOME  } from '../../modules/local/bin_by_chromosome'
 
 workflow PREPARE_GENOME {
 
@@ -36,6 +37,7 @@ workflow PREPARE_GENOME {
 //    gene_bed           //    file: /path/to/gene.bed
     bwa_index          //    file: /path/to/bwa/index/
     bowtie2_index      //    file: /path/to/bowtie2/index/
+    bam_binsize
 
     main:
 
@@ -180,6 +182,26 @@ workflow PREPARE_GENOME {
         }
     }
     //
+    // Binning the genome bedtools/make_windows
+    //
+    ch_binned_genome = Channel.empty()
+
+    BEDTOOLS_MAKEWINDOWS (
+        ch_genome_filtered_bed.map { bed -> [ [id: bed.simpleName], bed ] }
+    )
+    ch_versions = ch_versions.mix(BEDTOOLS_MAKEWINDOWS.out.versions)
+
+    //
+    // Splitting the binned genome by chromosome
+    //
+    BIN_BY_CHROMOSOME (
+        BEDTOOLS_MAKEWINDOWS.out.bed,
+        ch_chrom_sizes
+    )
+
+    ch_binned_genome = BIN_BY_CHROMOSOME.out.chrom_beds
+
+    //
     // Uncompress CHROMAP index or generate from scratch if required
     //
     //
@@ -196,5 +218,6 @@ workflow PREPARE_GENOME {
     bwa_index     = ch_bwa_index              //    path: bwa/index/
     bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
     blacklist     = ch_blacklist
+    binned_genome = ch_binned_genome
     versions      = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }
