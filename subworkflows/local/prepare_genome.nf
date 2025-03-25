@@ -14,15 +14,15 @@ include {
     UNTAR as UNTAR_BOWTIE2_INDEX
     } from '../../modules/nf-core/untar/main'
 
-include { UNTARFILES           } from '../../modules/nf-core/untarfiles/main'
-include { GFFREAD              } from '../../modules/nf-core/gffread/main'
-include { CUSTOM_GETCHROMSIZES } from '../../modules/nf-core/custom/getchromsizes/main'
-include { BWA_INDEX            } from '../../modules/nf-core/bwa/index/main'
-include { BOWTIE2_BUILD        } from '../../modules/nf-core/bowtie2/build/main'
-include { BEDTOOLS_MAKEWINDOWS } from '../../modules/nf-core/bedtools/makewindows/main'
-include { GTF2BED                  } from '../../modules/local/gtf2bed'
+include { UNTARFILES               } from '../../modules/nf-core/untarfiles/main'
+include { GFFREAD                  } from '../../modules/nf-core/gffread/main'
+include { CUSTOM_GETCHROMSIZES     } from '../../modules/nf-core/custom/getchromsizes/main'
+include { BWA_INDEX                } from '../../modules/nf-core/bwa/index/main'
+include { BOWTIE2_BUILD            } from '../../modules/nf-core/bowtie2/build/main'
+include { BEDTOOLS_MAKEWINDOWS     } from '../../modules/nf-core/bedtools/makewindows/main'
+include { BEDOPS_GTF2BED           } from '../../modules/nf-core/bedops/gtf2bed/main'
 include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
-include { BIN_BY_CHROMOSOME  } from '../../modules/local/bin_by_chromosome'
+include { BIN_BY_CHROMOSOME        } from '../../modules/local/bin_by_chromosome'
 
 workflow PREPARE_GENOME {
 
@@ -31,13 +31,13 @@ workflow PREPARE_GENOME {
 //    genomes            //     map: genome attributes
     fasta              //    path: path to genome fasta file
     aligner            //    string: aligner name
-//    gtf                //    file: /path/to/genome.gtf
+    gtf                //    file: /path/to/genome.gtf
 //    gff                //    file: /path/to/genome.gff
     blacklist          //    file: /path/to/blacklist.bed
-//    gene_bed           //    file: /path/to/gene.bed
+    gene_bed           //    file: /path/to/gene.bed
     bwa_index          //    file: /path/to/bwa/index/
     bowtie2_index      //    file: /path/to/bowtie2/index/
-    bam_binsize
+    binsize            //    binsize: genome binning
 
     main:
 
@@ -62,28 +62,20 @@ workflow PREPARE_GENOME {
     //     file("${params.outdir}/genome/").mkdirs()
     //     ch_fasta.copyTo("${params.outdir}/genome/")
     // }
-/*
+
     //
-    // Uncompress GTF annotation file or create from GFF3 if required
+    // Uncompress GTF annotation file
     //
-    if (gtf) {
-        if (gtf.endsWith('.gz')) {
-            ch_gtf      = GUNZIP_GTF ( [ [:], gtf ] ).gunzip.map{ it[1] }
+    ch_gtf = Channel.empty()
+    if (params.gtf) {
+        if (params.gtf.endsWith('.gz')) {
+            ch_gtf      = GUNZIP_GTF ( [ [:], params.gtf ] ).gunzip.map{ it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GTF.out.versions)
         } else {
-            ch_gtf = Channel.value(file(gtf))
+            ch_gtf = Channel.value(file(params.gtf))
         }
-    } else if (gff) {
-        if (gff.endsWith('.gz')) {
-            ch_gff      = GUNZIP_GFF ( [ [:], gff ] ).gunzip.map{ it[1] }
-            ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
-        } else {
-            ch_gff = Channel.value(file(gff))
-        }
-        ch_gtf      = GFFREAD ( [ [:], ch_gff ] ).gtf
-        ch_versions = ch_versions.mix(GFFREAD.out.versions)
     }
-*/
+
     //
     // Uncompress blacklist file if required
     //
@@ -96,7 +88,7 @@ workflow PREPARE_GENOME {
             ch_blacklist = Channel.value(file(params.blacklist))
         }
     }
-/*
+
     //
     // Uncompress gene BED annotation file or create from GTF if required
     //
@@ -104,26 +96,24 @@ workflow PREPARE_GENOME {
     // If --gtf is supplied along with --genome
     // Make gene bed from supplied --gtf instead of using iGenomes one automatically
     def make_bed = false
-    if (!gene_bed) {
+    if (!params.gene_bed) {
         make_bed = true
-    } else if (genome && gtf) {
-        if (genomes[ genome ].gtf != gtf) {
+    } else if (params.gtf) {
             make_bed = true
-        }
     }
 
     if (make_bed) {
-        ch_gene_bed = GTF2BED ( ch_gtf ).bed
-        ch_versions = ch_versions.mix(GTF2BED.out.versions)
+        ch_gtf_with_meta = ch_gtf.map { file -> [ [id: file.simpleName], file ] }
+        ch_gene_bed = BEDOPS_GTF2BED(ch_gtf_with_meta).bed
+        ch_versions = ch_versions.mix(BEDOPS_GTF2BED.out.versions)
     } else {
-        if (gene_bed.endsWith('.gz')) {
-            ch_gene_bed = GUNZIP_GENE_BED ( [ [:], gene_bed ] ).gunzip.map{ it[1] }
+        if (params.gene_bed.endsWith('.gz')) {
+            ch_gene_bed = GUNZIP_GENE_BED ( [ [:], params.gene_bed ] ).gunzip.map{ it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GENE_BED.out.versions)
         } else {
-            ch_gene_bed = Channel.value(file(gene_bed))
+            ch_gene_bed = Channel.value(file(params.gene_bed))
         }
     }
-*/
 
     //
     // Create chromosome sizes file
@@ -211,8 +201,8 @@ workflow PREPARE_GENOME {
     emit:
     fasta         = ch_fasta                  //    path: genome.fasta
     fai           = ch_fai                    //    path: genome.fai
-//    gtf           = ch_gtf                    //    path: genome.gtf
-//    gene_bed      = ch_gene_bed               //    path: gene.bed
+    gtf           = ch_gtf                    //    path: genome.gtf
+    gene_bed      = ch_gene_bed               //    path: gene.bed
     chrom_sizes   = ch_chrom_sizes            //    path: genome.sizes
     filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
     bwa_index     = ch_bwa_index              //    path: bwa/index/

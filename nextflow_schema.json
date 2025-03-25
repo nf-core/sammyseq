@@ -372,6 +372,15 @@
                     "description": "Fragment size parameter for single-end data. When set to a positive value, it enables the --extendReads option in DeepTools, extending reads to the specified length. This parameter is only used for single-end data processing and does not affect paired-end data analysis.",
                     "fa_icon": "fas fa-align-justify",
                     "hidden": true
+                },
+                "gtf": {
+                    "type": "string",
+                    "fa_icon": "fas fa-align-justify",
+                    "description": "Path to GTF annotation file."
+                },
+                "gene_bed": {
+                    "type": "string",
+                    "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified."
                 }
             }
         }
