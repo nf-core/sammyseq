@@ -22,6 +22,7 @@ include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
+include { FASTQ_ALIGN_DNA             } from '../subworkflows/nf-core/fastq_align_dna/main'
 include { FASTQ_ALIGN_BOWTIE2         } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
@@ -281,13 +282,23 @@ workflow SAMMYSEQ {
 
     def ch_aligned_bam
 
-    if (params.aligner == 'bwa') {
+    if (params.aligner == 'bwaaln') {
         FASTQ_ALIGN_BWAALN(
             TRIMMOMATIC.out.trimmed_reads,
             PREPARE_GENOME.out.bwa_index
         )
         ch_aligned_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
+    } else if (params.aligner == 'bwamem') {
+        FASTQ_ALIGN_DNA(
+            TRIMMOMATIC.out.trimmed_reads,
+            PREPARE_GENOME.out.bwa_index,
+            ch_fasta_meta,
+            params.aligner,
+            true
+        )
+        ch_aligned_bam = FASTQ_ALIGN_DNA.out.bam
+        ch_versions = ch_versions.mix(FASTQ_ALIGN_DNA.out.versions)
     } else if (params.aligner == 'bowtie2') {
         FASTQ_ALIGN_BOWTIE2(
             TRIMMOMATIC.out.trimmed_reads,
