@@ -6,7 +6,6 @@
 
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { GTF2BED                     } from '../modules/local/gtf2bed'
 include { paramsSummaryMap            } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc        } from '../subworkflows/nf-core/utils_nfcore_pipeline/main'
 include { softwareVersionsToYAML      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -111,7 +110,6 @@ workflow SAMMYSEQ {
                     params.blacklist,
                     params.binsize,
                     params.gtf,
-                    params.gff,
                     params.gene_bed)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
