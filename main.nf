@@ -32,10 +32,10 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_samm
 params.fasta         = getGenomeAttribute('fasta')
 params.bwa_index     = getGenomeAttribute('bwa')
 params.bowtie2_index = getGenomeAttribute('bowtie2')
-//params.gtf           = getGenomeAttribute('gtf')
-//params.gff           = getGenomeAttribute('gff')
-//params.gene_bed      = getGenomeAttribute('gene_bed')
+params.gtf           = getGenomeAttribute('gtf')
+params.gene_bed      = getGenomeAttribute('gene_bed')
 params.blacklist     = getGenomeAttribute('blacklist')
+params.binsize       = getGenomeAttribute('binsize')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

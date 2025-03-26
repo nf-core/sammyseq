@@ -20,20 +20,23 @@ include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
 // include { TRIMGALORE                  } from '../modules/nf-core/trimgalore/main'
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
+include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewindows/main'
+include { BIN_BY_CHROMOSOME           } from '../modules/local/bin_by_chromosome'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
+include { FASTQ_ALIGN_DNA             } from '../subworkflows/nf-core/fastq_align_dna/main'
 include { FASTQ_ALIGN_BOWTIE2         } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
-include { DEEPTOOLS_MULTIBAMSUMMARY } from '../modules/nf-core/deeptools/multibamsummary/main'
-include { DEEPTOOLS_PLOTCORRELATION } from '../modules/nf-core/deeptools/plotcorrelation/main'
-include { DEEPTOOLS_PLOTPCA } from '../modules/nf-core/deeptools/plotpca/main'
+include { DEEPTOOLS_MULTIBAMSUMMARY   } from '../modules/nf-core/deeptools/multibamsummary/main'
+include { DEEPTOOLS_PLOTCORRELATION   } from '../modules/nf-core/deeptools/plotcorrelation/main'
+include { DEEPTOOLS_PLOTPCA           } from '../modules/nf-core/deeptools/plotpca/main'
 include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_GLOBAL } from '../modules/nf-core/deeptools/plotfingerprint/main'
 include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_REGION } from '../modules/nf-core/deeptools/plotfingerprint/main'
 
-include { DEEPTOOLS_COMPUTEMATRIX } from '../modules/nf-core/deeptools/computematrix/main'
-include { DEEPTOOLS_PLOTPROFILE } from '../modules/nf-core/deeptools/plotprofile/main'
-include { DEEPTOOLS_PLOTHEATMAP } from '../modules/nf-core/deeptools/plotheatmap/main'
+include { DEEPTOOLS_COMPUTEMATRIX     } from '../modules/nf-core/deeptools/computematrix/main'
+include { DEEPTOOLS_PLOTPROFILE       } from '../modules/nf-core/deeptools/plotprofile/main'
+include { DEEPTOOLS_PLOTHEATMAP       } from '../modules/nf-core/deeptools/plotheatmap/main'
 
 // include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_FILTER     }   from '../modules/nf-core/samtools/view/main'
 // include { SAMTOOLS_SORT as SAMTOOLS_SORT_FILTERED   }   from '../modules/nf-core/samtools/sort/main'
@@ -45,13 +48,13 @@ include { DEEPTOOLS_PLOTHEATMAP } from '../modules/nf-core/deeptools/plotheatmap
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'
-include { CAT_FRACTIONS } from '../subworkflows/local/cat_fractions'
-include { CUT_SIZES_GENOME } from "../modules/local/chromosomes_size"
-include { RTWOSAMPLESMLE } from '../modules/local/rtwosamplesmle'
-include { FILTER_BAM_SAMTOOLS } from '../subworkflows/local/filter_bam_samtools'
-include { BIGWIG_PLOT_DEEPTOOLS } from '../subworkflows/local/bigwig_plot_deeptools'
-include { DEEPTOOLS_QC } from '../subworkflows/local/deeptools_qc'
+include { PREPARE_GENOME            } from '../subworkflows/local/prepare_genome'
+include { CAT_FRACTIONS             } from '../subworkflows/local/cat_fractions'
+include { CUT_SIZES_GENOME          } from "../modules/local/chromosomes_size"
+include { RTWOSAMPLESMLE            } from '../modules/local/rtwosamplesmle'
+include { FILTER_BAM_SAMTOOLS       } from '../subworkflows/local/filter_bam_samtools'
+include { BIGWIG_PLOT_DEEPTOOLS     } from '../subworkflows/local/bigwig_plot_deeptools'
+include { DEEPTOOLS_QC              } from '../subworkflows/local/deeptools_qc'
 
 
 /*
@@ -107,7 +110,10 @@ workflow SAMMYSEQ {
                     params.bowtie2_index,
                     params.blacklist,
                     params.chrom_sizes,
-                    params.fai)
+                    params.fai,
+                    params.binsize,
+                    params.gtf,
+                    params.gene_bed)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
@@ -281,15 +287,25 @@ workflow SAMMYSEQ {
         return
     }
 
-    def ch_aligned_bam
+    ch_aligned_bam = Channel.empty()
 
-    if (params.aligner == 'bwa') {
+    if (params.aligner == 'bwaaln') {
         FASTQ_ALIGN_BWAALN(
             TRIMMOMATIC.out.trimmed_reads,
             PREPARE_GENOME.out.bwa_index
         )
         ch_aligned_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
+    } else if (params.aligner == 'bwamem') {
+        FASTQ_ALIGN_DNA(
+            TRIMMOMATIC.out.trimmed_reads,
+            PREPARE_GENOME.out.bwa_index,
+            ch_fasta_meta,
+            params.aligner,
+            true
+        )
+        ch_aligned_bam = FASTQ_ALIGN_DNA.out.bam
+        ch_versions = ch_versions.mix(FASTQ_ALIGN_DNA.out.versions)
     } else if (params.aligner == 'bowtie2') {
         FASTQ_ALIGN_BOWTIE2(
             TRIMMOMATIC.out.trimmed_reads,

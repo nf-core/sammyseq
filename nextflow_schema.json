@@ -90,10 +90,10 @@
                 },
                 "aligner": {
                     "type": "string",
-                    "default": "bwa",
+                    "default": "bwamem",
                     "fa_icon": "fas fa-puzzle-piece",
                     "description": "Specify aligner to be used to map reads to reference genome.",
-                    "enum": ["bwa", "bowtie2"]
+                    "enum": ["bwamem", "bwaaln", "bowtie2"]
                 },
                 "bwa_index": {
                     "type": "string",
@@ -298,9 +298,9 @@
                     "description": "Defines how much the reads should be extended",
                     "fa_icon": "fas fa-align-justify"
                 },
-                "binSize": {
+                "bw_resolution": {
                     "type": "integer",
-                    "description": "Binsize (expressed in base pairs) for genome coverage calculation (e.g. 50)",
+                    "description": "bw_resolution (expressed in base pairs) for genome coverage calculation (default 1).",
                     "default": 1,
                     "fa_icon": "fas fa-align-justify"
                 },
@@ -354,9 +354,8 @@
                     "description": "The number of bins that are sampled from the genome, for which the overlapping number of reads is computed. (Default: 500000)",
                     "fa_icon": "fas fa-align-justify"
                 },
-                "bam_binsize": {
+                "binsize": {
                     "type": "integer",
-                    "default": 50000,
                     "description": "Deeptools multiBamSummary bam bin size (Default 50000).",
                     "fa_icon": "fas fa-align-justify"
                 },
@@ -383,6 +382,14 @@
                     "type": "string",
                     "description": "Optionally provide FASTA index (.fai) file as input",
                     "fa_icon": "fas fa-align-justify"
+                "gtf": {
+                    "type": "string",
+                    "fa_icon": "fas fa-align-justify",
+                    "description": "Path to GTF annotation file."
+                },
+                "gene_bed": {
+                    "type": "string",
+                    "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified."
                 }
             }
         }
