@@ -109,6 +109,8 @@ workflow SAMMYSEQ {
                     params.bwa_index,
                     params.bowtie2_index,
                     params.blacklist,
+                    params.chrom_sizes,
+                    params.fai,
                     params.binsize,
                     params.gtf,
                     params.gene_bed)

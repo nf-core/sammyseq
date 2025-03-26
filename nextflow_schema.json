@@ -373,6 +373,16 @@
                     "fa_icon": "fas fa-align-justify",
                     "hidden": true
                 },
+                "chrom_sizes": {
+                    "type": "string",
+                    "description": "Optionally provide chromosome sizes file as input",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "fai": {
+                    "type": "string",
+                    "description": "Optionally provide FASTA index (.fai) file as input",
+                    "fa_icon": "fas fa-align-justify"
+                },
                 "gtf": {
                     "type": "string",
                     "fa_icon": "fas fa-align-justify",
