@@ -105,7 +105,9 @@ workflow SAMMYSEQ {
                     params.aligner,
                     params.bwa_index,
                     params.bowtie2_index,
-                    params.blacklist)
+                    params.blacklist,
+                    params.chrom_sizes,
+                    params.fai)
 
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 

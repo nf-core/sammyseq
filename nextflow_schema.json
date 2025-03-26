@@ -373,6 +373,16 @@
                     "description": "Fragment size parameter for single-end data. When set to a positive value, it enables the --extendReads option in DeepTools, extending reads to the specified length. This parameter is only used for single-end data processing and does not affect paired-end data analysis.",
                     "fa_icon": "fas fa-align-justify",
                     "hidden": true
+                },
+                "chrom_sizes": {
+                    "type": "string",
+                    "description": "Optionally provide chromosome sizes file as input",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "fai": {
+                    "type": "string",
+                    "description": "Optionally provide FASTA index (.fai) file as input",
+                    "fa_icon": "fas fa-align-justify"
                 }
             }
         }
