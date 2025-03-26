@@ -90,10 +90,10 @@
                 },
                 "aligner": {
                     "type": "string",
-                    "default": "bwa",
+                    "default": "bwamem",
                     "fa_icon": "fas fa-puzzle-piece",
                     "description": "Specify aligner to be used to map reads to reference genome.",
-                    "enum": ["bwa", "bowtie2"]
+                    "enum": ["bwamem", "bwaaln", "bowtie2"]
                 },
                 "bwa_index": {
                     "type": "string",

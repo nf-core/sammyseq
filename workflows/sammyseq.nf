@@ -24,6 +24,7 @@ include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewi
 include { BIN_BY_CHROMOSOME           } from '../modules/local/bin_by_chromosome'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
+include { FASTQ_ALIGN_DNA             } from '../subworkflows/nf-core/fastq_align_dna/main'
 include { FASTQ_ALIGN_BOWTIE2         } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
@@ -284,15 +285,25 @@ workflow SAMMYSEQ {
         return
     }
 
-    def ch_aligned_bam
+    ch_aligned_bam = Channel.empty()
 
-    if (params.aligner == 'bwa') {
+    if (params.aligner == 'bwaaln') {
         FASTQ_ALIGN_BWAALN(
             TRIMMOMATIC.out.trimmed_reads,
             PREPARE_GENOME.out.bwa_index
         )
         ch_aligned_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
+    } else if (params.aligner == 'bwamem') {
+        FASTQ_ALIGN_DNA(
+            TRIMMOMATIC.out.trimmed_reads,
+            PREPARE_GENOME.out.bwa_index,
+            ch_fasta_meta,
+            params.aligner,
+            true
+        )
+        ch_aligned_bam = FASTQ_ALIGN_DNA.out.bam
+        ch_versions = ch_versions.mix(FASTQ_ALIGN_DNA.out.versions)
     } else if (params.aligner == 'bowtie2') {
         FASTQ_ALIGN_BOWTIE2(
             TRIMMOMATIC.out.trimmed_reads,

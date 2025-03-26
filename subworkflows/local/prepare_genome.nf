@@ -140,7 +140,7 @@ workflow PREPARE_GENOME {
     // Prepare BWA index
     //
     ch_bwa_index = Channel.empty()
-    if (params.aligner == 'bwa') {
+    if (params.aligner == 'bwaaln' || params.aligner == 'bwamem') {
         if (params.bwa_index) {
             if (params.bwa_index.endsWith('.tar.gz')) {
                 ch_bwa_index = UNTAR_BWA_INDEX ( [ [:], params.bwa_index ] ).untar
