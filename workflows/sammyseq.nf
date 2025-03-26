@@ -280,7 +280,7 @@ workflow SAMMYSEQ {
         return
     }
 
-   ch_aligned_bam = Channel.empty()
+    ch_aligned_bam = Channel.empty()
 
     if (params.aligner == 'bwaaln') {
         FASTQ_ALIGN_BWAALN(
