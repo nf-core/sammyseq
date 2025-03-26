@@ -241,34 +241,42 @@ workflow SAMMYSEQ {
     ///
     //  TRIMMING!
     //
-    if (params.skip_trimming) {
-        return
-    } else if (params.trimmer == 'TRIMGALORE') {
-        TRIMGALORE(merged_reads)
-        reads = TRIMGALORE.out.reads
-        ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
-    } else if (params.trimmer == 'TRIMMOMATIC') {
-        TRIMMOMATIC(merged_reads)
-        reads = TRIMMOMATIC.out.trimmed_reads
+    ch_trim= Channel.empty()
+
+    if (params.trimmer == 'trimmomatic') {
+        TRIMMOMATIC(reads = merged_reads)
+        ch_trim=TRIMMOMATIC.out.trimmed_reads
         ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions)
-    } else {
-        error "Invalid trimmer specified: ${params.trimmer}. Use 'TRIMGALORE' or 'TRIMMOMATIC'."
+                    
+    } else if (params.trimmer == 'trimgalore') {
+        ch_trimgalore_reads=merged_reads
+            .groupTuple()
+            .map {it.size() == 1 ? [it] : it}
+
+
+        TRIMGALORE(reads = ch_trimgalore_reads)
+        ch_trim=TRIMGALORE.out.reads
+        ch_versions = ch_versions.mix(TRIMGALORE.out.versions) 
     }
 
+
+
+    ch_fastqc_trim = ch_trim
+                    .map{ meta, path ->
+                    def id=meta.subMap('id')
+                    newid=id.id + "_trim"
+                    sng=meta.subMap('single_end').single_end
+                    newmeta=[id: newid, single_end: sng]
+                    [ newmeta ,path]
+                }
+        
+    
     //
     // MODULE: Run FastQC
     //
 
     //a channel is created for the trimmed files and the id is renamed to meta, so that when passed to fastqc it does not overwrite the output files with non-trimmed ones
-    ch_fastqc_trim=TRIMMOMATIC.out.trimmed_reads
-    // ch_fastqc_trim=TRIMGALORE.out.reads
-                    .map{ meta, path ->
-                        def id=meta.subMap('id')
-                        newid=id.id + "_trim"
-                        sng=meta.subMap('single_end').single_end
-                        newmeta=[id: newid, single_end: sng]
-                        [ newmeta ,path]
-                    }
+    
 
     //trimmed and untrimmed fastq channels are merged and the resulting channel is passed to FASTQC
     ch_fastqc_in = ch_fastqc_trim.mix(merged_reads)
