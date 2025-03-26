@@ -48,10 +48,15 @@ The FastQC plots displayed in the MultiQC report shows both _untrimmed_ and _tri
 
 ### Alignment on Reference
 
-The alignment is performed using [BWA](https://github.com/lh3/bwa) and the aligned reads are then sorted by chromosome coordinates with [samtools](https://www.htslib.org/doc/samtools.html).
+The alignment can be performed using [BWA](https://github.com/lh3/bwa) or [Bowtie2](https://github.com/BenLangmead/bowtie2). In particular, choosing BWA software, the alignment will be executed with BWA-MEM set as defoult algorithm; alternatively, there is the possibility of using BWA-ALN as well.
+The aligned reads are then sorted by chromosome coordinates with [samtools](https://www.htslib.org/doc/samtools.html).
 
 <details markdown="1">
+<summary>Parameters options</summary>
 
+- `--aligner bwamem` (default)
+- `--aligner bwaaln`
+- `--aligner bowtie2`
 </details>
 
 ### Mark Duplicate reads
@@ -92,7 +97,7 @@ The generated signal tracks represent read coverage and can be normalized using 
 <summary>Output files</summary>
 
 - `single_tracks/deeptools/`
-  - `<sample>.<q_score>.<normalizeUsing>.bigWig`
+  - `<sample>.<q_score>.<normalizeUsing>.bw`
 
 </details>
 
@@ -138,7 +143,7 @@ The correlation analysis computes the overall similarity between samples based o
 
 ### Fingerprint Plot
 
-The fingerprint plot helps determine how well the signal in the sample can be differentiated from the background distribution of reads in the control sample. This plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
+This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
 
 Two types of fingerprint plots are generated:
 
