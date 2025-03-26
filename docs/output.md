@@ -143,7 +143,7 @@ The correlation analysis computes the overall similarity between samples based o
 
 ### Fingerprint Plot
 
- This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
+This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
 
 Two types of fingerprint plots are generated:
 
