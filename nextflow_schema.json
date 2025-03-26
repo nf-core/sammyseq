@@ -382,6 +382,7 @@
                     "type": "string",
                     "description": "Optionally provide FASTA index (.fai) file as input",
                     "fa_icon": "fas fa-align-justify"
+                },
                 "gtf": {
                     "type": "string",
                     "fa_icon": "fas fa-align-justify",
