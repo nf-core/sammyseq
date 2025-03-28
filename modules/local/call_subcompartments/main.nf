@@ -14,6 +14,6 @@ process CALL_SUBCOMPARTMENTS {
     script:
     """
     echo "${tsv_content.join('\n')}" > compartments_input.tsv
-    template 'call_subcompartments.R' compartments_input.tsv
+    Rscript ${projectDir}/modules/local/call_subcompartments/templates/call_subcompartments.R compartments_input.tsv
     """
 }
