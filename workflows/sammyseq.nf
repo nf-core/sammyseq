@@ -50,6 +50,7 @@ include { DEEPTOOLS_PLOTHEATMAP       } from '../modules/nf-core/deeptools/ploth
 include { PREPARE_GENOME            } from '../subworkflows/local/prepare_genome'
 include { CAT_FRACTIONS             } from '../subworkflows/local/cat_fractions'
 include { RTWOSAMPLESMLE            } from '../modules/local/rtwosamplesmle'
+include { CALL_SUBCOMPARTMENTS      } from '../modules/local/call_subcompartments'
 include { FILTER_BAM_SAMTOOLS       } from '../subworkflows/local/filter_bam_samtools'
 include { BIGWIG_PLOT_DEEPTOOLS     } from '../subworkflows/local/bigwig_plot_deeptools'
 include { DEEPTOOLS_QC              } from '../subworkflows/local/deeptools_qc'
@@ -386,16 +387,20 @@ if (params.stopAt == 'ALIGNMENT') {
     ///
 
     if (params.compartmentsAnalysis) {
-
         ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
-        .map { meta, bigwig ->
-            return [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
-        }
+            .map { meta, bigwig ->
+                return [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
+            }
 
-        Channel.of(["Patient_name", "Fraction", "Status", "File"])
+        header = ["Patient_name", "Fraction", "Status", "File"]
+
+        ch_tsv_content = Channel.of(header)
             .concat(ch_bigwig_compartments)
             .map { it.join("\t") }
-            .view()
+            .collect()
+
+        CALL_SUBCOMPARTMENTS(ch_tsv_content)
+        CALL_SUBCOMPARTMENTS.out.result.view { "CALL_SUBCOMPARTMENTS Output:\n${it.text}" }
     }
 
     //
