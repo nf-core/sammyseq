@@ -381,6 +381,23 @@ if (params.stopAt == 'ALIGNMENT') {
         }
     }
 
+    ///
+    /// Compartments step
+    ///
+
+    if (params.compartmentsAnalysis) {
+
+        ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
+        .map { meta, bigwig ->
+            return [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
+        }
+
+        Channel.of(["Patient_name", "Fraction", "Status", "File"])
+            .concat(ch_bigwig_compartments)
+            .map { it.join("\t") }
+            .view()
+    }
+
     //
     // Collate and save software versions
     //
