@@ -241,27 +241,23 @@ workflow SAMMYSEQ {
     ///
     //  TRIMMING!
     //
-    ch_trim= Channel.empty()
+    ch_trimmed= Channel.empty()
 
     if (params.trimmer == 'trimmomatic') {
-        TRIMMOMATIC(reads = merged_reads)
-        ch_trim=TRIMMOMATIC.out.trimmed_reads
+        TRIMMOMATIC(merged_reads)
+        ch_trimmed=TRIMMOMATIC.out.trimmed_reads
         ch_versions = ch_versions.mix(TRIMMOMATIC.out.versions)
-                    
+
     } else if (params.trimmer == 'trimgalore') {
-        ch_trimgalore_reads=merged_reads
-            .groupTuple()
-            .map {it.size() == 1 ? [it] : it}
-
-
-        TRIMGALORE(reads = ch_trimgalore_reads)
-        ch_trim=TRIMGALORE.out.reads
-        ch_versions = ch_versions.mix(TRIMGALORE.out.versions) 
+        TRIMGALORE(merged_reads)
+        ch_trimmed=TRIMGALORE.out.reads
+        ch_versions = ch_versions.mix(TRIMGALORE.out.versions)
+//        ch_trimgalore_reads=merged_reads
+//            .groupTuple()
+//            .map {it.size() == 1 ? [it] : it}
     }
 
-
-
-    ch_fastqc_trim = ch_trim
+    ch_fastqc_trim = ch_trimmed
                     .map{ meta, path ->
                     def id=meta.subMap('id')
                     newid=id.id + "_trim"
@@ -269,14 +265,13 @@ workflow SAMMYSEQ {
                     newmeta=[id: newid, single_end: sng]
                     [ newmeta ,path]
                 }
-        
-    
+
     //
     // MODULE: Run FastQC
     //
 
     //a channel is created for the trimmed files and the id is renamed to meta, so that when passed to fastqc it does not overwrite the output files with non-trimmed ones
-    
+
 
     //trimmed and untrimmed fastq channels are merged and the resulting channel is passed to FASTQC
     ch_fastqc_in = ch_fastqc_trim.mix(merged_reads)
@@ -299,14 +294,14 @@ workflow SAMMYSEQ {
 
     if (params.aligner == 'bwaaln') {
         FASTQ_ALIGN_BWAALN(
-            TRIMMOMATIC.out.trimmed_reads,
+            ch_trimmed,
             PREPARE_GENOME.out.bwa_index
         )
         ch_aligned_bam = FASTQ_ALIGN_BWAALN.out.bam
         ch_versions = ch_versions.mix(FASTQ_ALIGN_BWAALN.out.versions)
     } else if (params.aligner == 'bwamem') {
         FASTQ_ALIGN_DNA(
-            TRIMMOMATIC.out.trimmed_reads,
+            ch_trimmed,
             PREPARE_GENOME.out.bwa_index,
             ch_fasta_meta,
             params.aligner,
@@ -316,7 +311,7 @@ workflow SAMMYSEQ {
         ch_versions = ch_versions.mix(FASTQ_ALIGN_DNA.out.versions)
     } else if (params.aligner == 'bowtie2') {
         FASTQ_ALIGN_BOWTIE2(
-            TRIMMOMATIC.out.trimmed_reads,
+            ch_trimmed,
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
             false,
