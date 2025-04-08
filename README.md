@@ -28,8 +28,6 @@
 > [!WARNING]
 > Please note that this pipeline is under active development and has not been released yet.
 
-:::
-
 Here is an outline of the analysis steps:
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
