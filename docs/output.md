@@ -29,7 +29,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 #### Trim reads
 
-[`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic) is a software used to trim adapter sequences and low quality bases from the end of reads and quality check after this step is performed again with Fastqc.
+The task of trim adapter sequences and low quality bases from the end can be performed using either [`Trim Galore!`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore) or [`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic) and quality check after this step is performed again with Fastqc.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -48,7 +48,7 @@ The FastQC plots displayed in the MultiQC report shows both _untrimmed_ and _tri
 
 ### Alignment on Reference
 
-The alignment can be performed using [BWA](https://github.com/lh3/bwa) or [Bowtie2](https://github.com/BenLangmead/bowtie2). In particular, choosing BWA software, the alignment will be executed with BWA-MEM set as defoult algorithm; alternatively, there is the possibility of using BWA-ALN as well.
+The alignment will be performed using [BWA-MEM](https://github.com/lh3/bwa) as default algorithm, alternatives BWA-ALN or [Bowtie2](https://github.com/BenLangmead/bowtie2) can be chosen with the parameter `--aligner`.
 The aligned reads are then sorted by chromosome coordinates with [samtools](https://www.htslib.org/doc/samtools.html).
 
 <details markdown="1">

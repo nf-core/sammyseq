@@ -21,20 +21,17 @@
 
 **nf-core/sammyseq** is a bioinformatics pipeline for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state as described in:
 
-> Lucini F, Petrini C, Salviato E, Pal K, Rosti V, Gorini F, Santarelli P, Quadri R, Lembo G, Graziano G, Di Patrizio Soldateschi E, Tagliaferri I, Pinatel E, Sebestyén E, Rotta L, Gentile F, Vaira V, Lanzuolo C, Ferrari F. Biochemical properties of chromatin domains define genome compartmentalization. Nucleic Acids Res. 2024 Jul 8;52(12):e54. [doi](https://doi.org/10.1093/nar/gkae454) [pubmed](https://pubmed.ncbi.nlm.nih.gov/38808669/)
+> Lucini F, Petrini C, Salviato E, Pal K, Rosti V, Gorini F, Santarelli P, Quadri R, Lembo G, Graziano G, Di Patrizio Soldateschi E, Tagliaferri I, Pinatel E, Sebestyén E, Rotta L, Gentile F, Vaira V, Lanzuolo C, Ferrari F. Biochemical properties of chromatin domains define genome compartmentalization. Nucleic Acids Research, Volume 52, Issue 12, 8 July 2024, Page e54 [doi](https://doi.org/10.1093/nar/gkae454) [pubmed](https://pubmed.ncbi.nlm.nih.gov/38808669/)
 
-> Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020). [doi](https://doi.org/10.1038/s41467-020-20048-9) [pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
+> Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020) [doi](https://doi.org/10.1038/s41467-020-20048-9) [pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
 
-:::warning
-
-Please note that this pipeline is under active development and has not been released yet.
-
-:::
+> [!WARNING]
+> Please note that this pipeline is under active development and has not been released yet.
 
 Here is an outline of the analysis steps:
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Trim reads to remove adapter sequences and low quality ends ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
+2. Trim reads to remove adapter sequences and low quality ends ([`Trim Galore!`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore) or [`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 4. Remove duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
 5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
