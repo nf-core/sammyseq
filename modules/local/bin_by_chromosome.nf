@@ -6,7 +6,8 @@ process BIN_BY_CHROMOSOME {
     path(chrom_sizes)
 
     output:
-    tuple val(meta), path("*.bed"), emit: chrom_beds
+    //tuple val(meta), path("*.bed"), emit: chrom_beds
+    tuple val(meta.id), path("*.binned.bed"), emit: chrom_beds
 
     script:
     """
