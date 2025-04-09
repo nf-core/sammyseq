@@ -9,9 +9,8 @@ process CALL_SUBCOMPARTMENTS {
     path chrom_beds
 
     output:
-    path "Data/**", emit: rdata
-    path "Output/**", emit: bed_files
-    path "AUX/**", emit: aux_rdata
+    path "*_compartment.Rdata", emit: rdata
+    path "*___*.Rdata", emit: aux_rdata
 
     script:
     """

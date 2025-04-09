@@ -447,12 +447,8 @@ removing_sammynocov_bins <- function( keeping_bins1, sammy_dist_objs, patients )
 }
 
 ### Wrapper to call subcompartments and return objects containing all the informations
-call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file, binsize, chr, genes_gr, keeping_bins1 = "all", sublevel = "sub.8", sub_colors = c( "B.2.2" = "#4575b4", "B.2.1" = "#74add1", "B.1.2" = "#abd9e9", "B.1.1" = "#e0f3f8", "A.1.1" = "#fee090", "A.1.2" = "#fdae61", "A.2.1" = "#f46d43", "A.2.2" = "#d73027" ), cores = 4, n.comp = 10, const.comp = 5, aux_dir = "./AUX/", out_dir = "./Output/" ){
+call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file, binsize, chr, genes_gr, keeping_bins1 = "all", sublevel = "sub.8", sub_colors = c( "B.2.2" = "#4575b4", "B.2.1" = "#74add1", "B.1.2" = "#abd9e9", "B.1.1" = "#e0f3f8", "A.1.1" = "#fee090", "A.1.2" = "#fdae61", "A.2.1" = "#f46d43", "A.2.2" = "#d73027" ), cores = 4, n.comp = 10, const.comp = 5 ){
 
-    ## Make aux_dir
-    system( paste( "mkdir -p", aux_dir ) )
-    system( paste( "mkdir -p", out_dir ) )
-    system( paste0( "mkdir -p ", out_dir, "/Data/" ) )
 
     ## If a list of bins to analyzed has not been passed, use all genes in bins_gr
     if( keeping_bins1[ 1 ] == "all" ){
@@ -480,7 +476,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         print( "Got file info" )
 
         ### Make the distance matrix
-        sammy_distobj_file <- paste0( aux_dir, patient, "_distance-matrix___", chr, '_', binsize, ".Rdata" )
+        sammy_distobj_file <- paste0( patient, "_distance-matrix___", chr, '_', binsize, ".Rdata" )
 
         if( !file.exists( sammy_distobj_file ) ){
 
@@ -520,7 +516,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         print( paste( "Analysing patient", patient ) )
 
         ### Load the previously created distance matrix
-        sammy_distobj_file <- paste0( aux_dir, patient, "_distance-matrix___", chr, '_', binsize, ".Rdata" )
+        sammy_distobj_file <- paste0( patient, "_distance-matrix___", chr, '_', binsize, ".Rdata" )
         load( sammy_distobj_file )
 
         ### Remove from matrix bins with no coverage in all fractions in at least one sample
@@ -532,7 +528,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         rm( sammy_dist_fullmat )
 
         ### Make the correlation matrix
-        sammy_corrmat_file <- paste0( aux_dir, patient, "_corr-matrix___", chr, '_', binsize, ".Rdata" )
+        sammy_corrmat_file <- paste0( patient, "_corr-matrix___", chr, '_', binsize, ".Rdata" )
 
         if( !file.exists( sammy_corrmat_file ) ){
 
@@ -564,7 +560,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
         print( "Blocks calculated" )
 
-        sammy_blockstrend_file <- paste0( aux_dir, patient, "_blocks-trend___", chr, '_', binsize, ".Rdata" )
+        sammy_blockstrend_file <- paste0( patient, "_blocks-trend___", chr, '_', binsize, ".Rdata" )
 
         if( !file.exists( sammy_blockstrend_file ) ){
 
@@ -966,6 +962,178 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 }
 
 
+### Import a set of tracks and arrange in a matrix (dtable, columns are the tracks and rows are the genomic bins)
+make_tracks_matrix <- function( tracks, track_names, bins_gr, keeping_bins = "all", cores = 4 ){
+
+    genome <- as.character( genome( bins_gr ) )
+
+    ## Import tracks
+    bws <- import_and_rebin__bw(
+        files = tracks,
+        bin_list = bins_gr,
+        genome = genome,
+        names = track_names,
+        cores = cores
+    )
+    print( "Tracks imported" )
+
+    ## Keep bins not having NA row in Hi-C
+    after_bins_selected <- bins_selector( bws, track_names, keeping_bins, cores )
+
+    bws <- after_bins_selected[[ "bws" ]]
+    keeping_bins <- after_bins_selected[[ "keeping_bins" ]]
+
+    ## Make the matrix (Elisa's code adapted)
+    ### Extract scores and arrange them in a data.table obj
+    score_list <- mclapply( track_names, mc.cores = cores, function( name ){
+
+        bw <- bws[[ name ]]
+        return( score( bw ) )
+
+    })
+
+    names( score_list ) <- track_names
+
+    scores_df <- do.call( "cbind", score_list )
+    bws_dtable <- data.table( scores_df )
+
+    ### Transform the keeping_bin from 1-based to 0-based (Calder works on 0-based bin list)
+    keeping_bins0 <- keeping_bins - 1
+
+    print( "Files ready for calculating the euclidean distance" )
+
+    return( list( bws_dtable = bws_dtable, keeping_bins = keeping_bins0 ) )
+
+}
+
+
+import_and_rebin__bw <- function( files, bin_list, genome, names, cores = 10 ){
+
+    bws <- mclapply( files, mc.cores = cores, function( file ){
+
+        ## Import the bigwig as RleLists
+        bwR <- import.bw( file, as = "RleList" )
+
+        ## Sort the "bin_list" seqlevels names to make them coincide with the bigwig imported
+        bin_list__names <- seqlevels( bin_list )
+        bwR <- bwR[ bin_list__names ]
+
+        ## Rebin the imported bigwig according to the previous calculated bins
+        bw <- binnedAverage( bins = bin_list, numvar = bwR, varname = "score" )
+
+        ## Add extra information to the rebinned bigwig
+        genome( bw ) <- genome
+
+        return( bw )
+
+    })
+    names( bws ) <- names
+
+    return( bws )
+
+}
+
+### Select the bin to discard from a set of tracks imported in a GRange object list
+bins_selector <- function( bws, track_names, keeping_bins, cores = 4 ){
+
+    if( keeping_bins[ 1 ] == "all" ){
+
+        keeping_bins <- seq( 1, length( bins_gr ) )
+        print( "No bin removed" )
+
+    } else if( is.numeric( keeping_bins ) ){
+
+        tmp_bws <- mclapply( track_names, mc.cores = cores, function( name ){
+
+            bw_df <- as.data.frame( bws[[ name ]] )
+            smallbw_df <- bw_df[ keeping_bins, ]
+
+            return( makeGRangesFromDataFrame( smallbw_df, keep.extra.columns = TRUE ) )
+
+        })
+
+        names( tmp_bws ) <- track_names
+
+        bws <- tmp_bws
+
+        print( "Keeping bin list updated" )
+
+    } else{
+
+        print( "Wrong keeping bins list, is not numeric" )
+
+    }
+
+    return( list( bws = bws, keeping_bins = keeping_bins ) )
+
+}
+
+
+### Function to orient according to standard the first principal component defining the compartments
+set_sign_from_genedens <- function( pc1, genes_gr, bins_gr, blocks ){
+
+    ## Get bin coordinates
+    ### Make a database to associate bins used for the analysis to compartment block
+    blocks_dblist <- lapply( names( blocks ), function( nblock ){
+
+        block_db <- cbind(
+            as.numeric( nblock ),
+            as.numeric( unlist( blocks[ nblock ] ) )
+        )
+
+        return( block_db )
+
+    })
+    blocks_db <- as.data.frame( do.call( rbind, blocks_dblist ) )
+    names( blocks_db ) <- c( "block", "nbin" )
+
+    ### Add to the database the information for each bin of pca value and if it is A or B according to the sign automatically calculated
+    blocks_db$pc1 <- as.numeric( pc1[ blocks_db$block ] )
+    blocks_db$fakecomp <- ifelse( blocks_db$pc1 > 0, 'A', 'B' )
+
+    ### Merge the bin pca info to the bin genomic coordinates info
+    bins_df <- as.data.frame( bins_gr )
+
+    blocks_df <- cbind( bins_df, blocks_db )
+    blocks_gr <- makeGRangesFromDataFrame( blocks_df, keep.extra.columns = TRUE )
+
+    ## Calculate gene density for positive and negative bins
+    ### Calculate the genes per bin
+    blocks_df$ngenes <- countOverlaps( blocks_gr, genes_gr, type = "any", ignore.strand	= TRUE )
+
+    ### Calculate the number of bins corrisponding to A and to B
+    AB_nbins <- table( blocks_df$fakecomp )
+    A_nbins <- as.numeric( AB_nbins[ 1 ] )
+    B_nbins <- as.numeric( AB_nbins[ 2 ] )
+
+    ### Count the genes in compartment A and B
+    A_genes <- sum( blocks_df[ which( blocks_df$fakecomp == 'A' ), "ngenes" ] )
+    B_genes <- sum( blocks_df[ which( blocks_df$fakecomp == 'B' ), "ngenes" ] )
+
+    ### Calculate the gene density for A and B
+    A_gendens <- A_genes / A_nbins
+    B_gendens <- B_genes / B_nbins
+
+    ## Decide to flip the sign or not
+    if( A_gendens > B_gendens ){
+
+        pc1_correct_sign <- pc1
+
+    } else if( A_gendens < B_gendens ){
+
+        pc1_correct_sign <- pc1 * -1
+
+    } else{
+
+        print( "Error! A and B compartments have exactly the same gene density!" )
+        return( "Error" )
+
+    }
+
+    return( pc1_correct_sign )
+
+}
+
 #############################################################
 #
 #   PARTE R CODED CHIAMATA SUBCOMPARTIMENTI
@@ -983,11 +1151,6 @@ option_list <- list(
 opt <- parse_args(OptionParser(option_list = option_list))
 
 # Output dirs
-out_dir <- "Output"
-aux_dir <- "AUX"
-
-dir.create(file.path(out_dir, "Data"), recursive = TRUE, showWarnings = FALSE)
-dir.create(aux_dir, recursive = TRUE, showWarnings = FALSE)
 
 sub2_colors <- c("B" = "#4575b4", "A" = "#d73027")
 
@@ -1017,11 +1180,11 @@ bins_gr <- import(bed_file, format = "BED")
 
 chroms_in_bed <- unique(seqnames(bins_gr))
 chr <- as.character(chroms_in_bed[1])
-subs_file <- file.path(out_dir, "Data", paste0(chr, "_compartment.Rdata"))
+subs_file <- paste0(chr, "_compartment.Rdata")
 
 # Run SAMMY
 sub_objs <- call_subcompartments_sammy(
-  patients = comp_df$Patient_name,
+  patients = unique(comp_df$Patient_name),
   tracks_db = comp_df,
   bins_gr = bins_gr,
   subs_file = subs_file,
@@ -1030,7 +1193,5 @@ sub_objs <- call_subcompartments_sammy(
   genes_gr = genes_gr,
   keeping_bins1 = "all",
   sublevel = "sub.8",
-  sub_colors = sub2_colors,
-  aux_dir = aux_dir,
-  out_dir = out_dir
+  sub_colors = sub2_colors
 )
