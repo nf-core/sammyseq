@@ -976,8 +976,6 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 # CLI options
 option_list <- list(
   make_option(c("-i", "--input_file"), type = "character", help = "Input TSV file"),
-  make_option(c("-o", "--output_file"), type = "character", default = "compartments_output.txt", help = "Dummy output TSV"),
-  make_option(c("-c", "--cores"), type = "integer", default = 1, help = "Number of cores"),
   make_option(c("-b", "--binsize"), type = "integer", help = "Bin size"),
   make_option(c("-g", "--gene_bed"), type = "character", help = "Gene BED file"),
   make_option(c("-m", "--chrom_beds"), type = "character", help = "Single chromosome BED")
@@ -1013,7 +1011,7 @@ clean_bed <- data.frame(
 write.table(clean_bed, file = "clean_gene_bed.bed", sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 genes_gr <- import("clean_gene_bed.bed", format = "BED")
 
-# Chromosome BED
+# Chromosome BED BINNATO
 bed_file <- opt$chrom_beds
 bins_gr <- import(bed_file, format = "BED")
 
@@ -1036,7 +1034,3 @@ sub_objs <- call_subcompartments_sammy(
   aux_dir = aux_dir,
   out_dir = out_dir
 )
-
-# Dummy output
-write.table(comp_df, file = opt$output_file, sep = "\t", quote = FALSE, row.names = FALSE)
-cat(paste("✅ Output finale scritto in:", opt$output_file, "\n"))

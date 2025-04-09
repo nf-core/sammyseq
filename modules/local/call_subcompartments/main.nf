@@ -1,6 +1,6 @@
 process CALL_SUBCOMPARTMENTS {
     container 'docker.io/ciuki97/sammy_subcompartments_env:latest'
-    publishDir "${params.outdir}/subcompartments", mode: 'copy'
+    label 'process_medium'
 
     input:
     val tsv_content
@@ -9,9 +9,9 @@ process CALL_SUBCOMPARTMENTS {
     path chrom_beds
 
     output:
-    path "Data/*_compartment.Rdata", optional: true, emit: rdata
-    path "Output/**", optional: true
-    path "AUX/**", optional: true
+    path "Data/**", emit: rdata
+    path "Output/**", emit: bed_files
+    path "AUX/**", emit: aux_rdata
 
     script:
     """
@@ -19,7 +19,6 @@ process CALL_SUBCOMPARTMENTS {
 
     call_subcompartments.R \\
         --input_file compartments_input.tsv \\
-        --cores ${task.cpus} \\
         --binsize ${binsize} \\
         --gene_bed ${gene_bed} \\
         --chrom_beds ${chrom_beds.join(",")}

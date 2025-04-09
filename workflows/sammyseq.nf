@@ -387,46 +387,39 @@ if (params.stopAt == 'ALIGNMENT') {
     ///
 
 
-if (params.compartmentsAnalysis) {
-    log.info "Compartments Analysis is enabled"
+    if (params.compartmentsAnalysis) {
 
-    // TSV content
-    ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
-        .map { meta, bigwig ->
-            return [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
-        }
+        ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
+            .map { meta, bigwig ->
+                return [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
+            }
 
-    header = ["Patient_name", "Fraction", "Status", "File"]
+        header = ["Patient_name", "Fraction", "Status", "File"]
 
-    ch_tsv_content = Channel.of(header)
-        .concat(ch_bigwig_compartments)
-        .map { it.join("\t") }
-        .collect()
+        ch_tsv_content = Channel.of(header)
+            .concat(ch_bigwig_compartments)
+            .map { it.join("\t") }
+            .collect()
 
-    // Altri canali di input
-    ch_binsize = Channel.value(params.binsize)
-    ch_gene_bed = PREPARE_GENOME.out.gene_bed
+        // input channels
+        ch_binsize = Channel.value(params.binsize)
+        ch_gene_bed = PREPARE_GENOME.out.gene_bed
+        ch_binned_genome = PREPARE_GENOME.out.binned_genome
 
-    ch_binned_genome = PREPARE_GENOME.out.binned_genome
-        .map { it ->
-            log.debug "Debug - Mapping chromosome: ${it[0]}, bed file: ${it[1]}"
-            return it
-        }
+        // debug
+        ch_tsv_content.view  { "ch_tsv_content: $it" }
+        ch_binsize.view  { "ch_binsize: $it" }
+        ch_gene_bed.view  { "ch_gene_bed: $it" }
+        ch_binned_genome.view { "ch_binned_genome: $it" }
 
-    ch_tsv_content.view  { "ch_tsv_content: $it" }
-    ch_binsize.view  { "ch_binsize: $it" }
-    ch_gene_bed.view  { "ch_gene_bed: $it" }
-    ch_binned_genome.view { "ch_binned_genome: $it" }
+        CALL_SUBCOMPARTMENTS(
+            ch_tsv_content,
+            ch_binsize,
+            ch_gene_bed,
+            ch_binned_genome.map { it[1] }
+        )
 
-    // Lancia il processo con il canale corretto
-    CALL_SUBCOMPARTMENTS(
-        ch_tsv_content,
-        ch_binsize,
-        ch_gene_bed,
-        ch_binned_genome.map { it[1] }
-    )
-
-}
+    }
 
     //
     // Collate and save software versions
