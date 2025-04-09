@@ -403,19 +403,19 @@ if (params.stopAt == 'ALIGNMENT') {
 
         // input channels
         ch_binsize = Channel.value(params.binsize)
-        ch_gene_bed = PREPARE_GENOME.out.gene_bed
+        // ch_gene_bed = PREPARE_GENOME.out.gene_bed
         ch_binned_genome = PREPARE_GENOME.out.binned_genome
 
-        // debug
-        ch_tsv_content.view  { "ch_tsv_content: $it" }
-        ch_binsize.view  { "ch_binsize: $it" }
-        ch_gene_bed.view  { "ch_gene_bed: $it" }
-        ch_binned_genome.view { "ch_binned_genome: $it" }
+        // // debug
+        // ch_tsv_content.view  { "ch_tsv_content: $it" }
+        // ch_binsize.view  { "ch_binsize: $it" }
+        // // ch_gene_bed.view  { "ch_gene_bed: $it" }
+        // ch_binned_genome.view { "ch_binned_genome: $it" }
 
         CALL_SUBCOMPARTMENTS(
             ch_tsv_content,
             ch_binsize,
-            ch_gene_bed,
+            PREPARE_GENOME.out.gtf,
             ch_binned_genome.map { it[1] }
         )
 

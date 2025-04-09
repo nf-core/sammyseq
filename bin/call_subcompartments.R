@@ -1145,7 +1145,7 @@ set_sign_from_genedens <- function( pc1, genes_gr, bins_gr, blocks ){
 option_list <- list(
   make_option(c("-i", "--input_file"), type = "character", help = "Input TSV file"),
   make_option(c("-b", "--binsize"), type = "integer", help = "Bin size"),
-  make_option(c("-g", "--gene_bed"), type = "character", help = "Gene BED file"),
+  make_option(c("-g", "--gene_gtf"), type = "character", help = "Gene GTF file"),
   make_option(c("-m", "--chrom_beds"), type = "character", help = "Single chromosome BED")
 )
 opt <- parse_args(OptionParser(option_list = option_list))
@@ -1157,22 +1157,8 @@ sub2_colors <- c("B" = "#4575b4", "A" = "#d73027")
 # Input TSV
 comp_df <- fread(opt$input_file, data.table = FALSE)
 
-# Gene BED
-raw_bed <- fread(opt$gene_bed, header = FALSE, sep = "\t", quote = "")
-
-
-extract_gene_id <- function(attr) sub('.*gene_id "?([^";]+)".*', '\\1', attr)
-gene_ids <- sapply(raw_bed$V9, extract_gene_id)
-clean_bed <- data.frame(
-  chrom  = raw_bed$V1,
-  start  = raw_bed$V2,
-  end    = raw_bed$V3,
-  name   = gene_ids,
-  score  = 0,
-  strand = raw_bed$V6
-)
-write.table(clean_bed, file = "clean_gene_bed.bed", sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
-genes_gr <- import("clean_gene_bed.bed", format = "BED")
+# Gene GTF
+genes_gr <- import(opt$gene_gtf, format = "GTF")
 
 # Chromosome BED BINNATO
 bed_file <- opt$chrom_beds

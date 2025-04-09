@@ -5,7 +5,7 @@ process CALL_SUBCOMPARTMENTS {
     input:
     val tsv_content
     val binsize
-    path gene_bed
+    path gene_gtf
     path chrom_beds
 
     output:
@@ -19,7 +19,7 @@ process CALL_SUBCOMPARTMENTS {
     call_subcompartments.R \\
         --input_file compartments_input.tsv \\
         --binsize ${binsize} \\
-        --gene_bed ${gene_bed} \\
+        --gene_gtf ${gene_gtf} \\
         --chrom_beds ${chrom_beds.join(",")}
     """
 }
