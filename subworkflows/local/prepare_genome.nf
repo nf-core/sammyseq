@@ -189,16 +189,13 @@ workflow PREPARE_GENOME {
     //
     // Splitting the binned genome by chromosome
     //
+
     BIN_BY_CHROMOSOME (
         BEDTOOLS_MAKEWINDOWS.out.bed,
         ch_chrom_sizes
     )
 
     ch_binned_genome = BIN_BY_CHROMOSOME.out
-        .map { it ->
-            log.debug "Debug - Mapping chromosome: ${it[0]}, bed file: ${it[1]}"
-            return it
-        }
 
     emit:
     fasta         = ch_fasta                  //    path: genome.fasta

@@ -1,6 +1,8 @@
 process CALL_SUBCOMPARTMENTS {
     container 'docker.io/ciuki97/sammy_subcompartments_env:latest'
     label 'process_medium'
+    errorStrategy 'terminate'
+    maxRetries 0
 
     input:
     val tsv_content
@@ -20,6 +22,6 @@ process CALL_SUBCOMPARTMENTS {
         --input_file compartments_input.tsv \\
         --binsize ${binsize} \\
         --gene_gtf ${gene_gtf} \\
-        --chrom_beds ${chrom_beds.join(",")}
+        --chrom_bed ${chrom_beds}
     """
 }
