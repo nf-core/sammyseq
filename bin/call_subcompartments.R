@@ -44,8 +44,6 @@ opt <- parse_args(OptionParser(option_list = option_list))
 # Output dirs
 
 sub2_colors <- c("B" = "#4575b4", "A" = "#d73027")
-sub4_colors <- c( "B.2" = "#4575B4", "B.1" = "#E0F3F8", "A.1" = "#FEE090", "A.2" = "#F46D43" )
-sub8_colors <- c( "B.2.2" = "#4575B4", "B.2.1" = "#74ADD1", "B.1.2" = "#ABD9E9", "B.1.1" = "#E0F3F8", "A.1.1" = "#FEE090", "A.1.2" = "#FDAE61", "A.2.1" = "#F46D43", "A.2.2" = "#D73027" )
 
 # Input TSV
 comp_df <- fread(opt$input_file, data.table = FALSE)
@@ -71,6 +69,11 @@ sub_objs <- call_subcompartments_sammy(
   chr = chr,
   genes_gr = genes_gr,
   keeping_bins1 = "all",
-  sublevel = "sub.8",
+  sublevel = "sub.2",
   sub_colors = sub2_colors
 )
+
+cat("Structure of sub_objs:\n")
+print(str(sub_objs, max.level = 3))
+
+generate_files(sub_objs, chr)

@@ -402,10 +402,10 @@ if (params.stopAt == 'ALIGNMENT') {
             .collect()
 
         ch_binsize = Channel.value(params.binsize)
-        ch_binned_genome = PREPARE_GENOME.out.binned_genome
-                .map { it[1] }
-                .flatten()
-                .set { ch_chromosomes }
+        PREPARE_GENOME.out.binned_genome
+            .map { it[1] }
+            .flatten()
+            .set { ch_chromosomes }
 
         CALL_SUBCOMPARTMENTS(
             ch_tsv_content,

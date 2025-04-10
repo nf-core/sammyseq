@@ -12,7 +12,8 @@ process CALL_SUBCOMPARTMENTS {
 
     output:
     path "*_compartment.Rdata", emit: rdata
-    path "*___*.Rdata", emit: aux_rdata
+    path "*_compartments.bed", emit: bed_files
+    path "*_comp_eigenvector.bedgraph", emit: bedgraph_files
 
     script:
     """
@@ -25,3 +26,5 @@ process CALL_SUBCOMPARTMENTS {
         --chrom_bed ${chrom_beds}
     """
 }
+
+

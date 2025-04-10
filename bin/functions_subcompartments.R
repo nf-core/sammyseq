@@ -1104,3 +1104,77 @@ set_sign_from_genedens <- function( pc1, genes_gr, bins_gr, blocks ){
     return( pc1_correct_sign )
 
 }
+
+######################
+# BED AND BEDGRAPHS
+######################
+
+# Function to convert hex colors to RGB
+rgb_str <- function(hex) {
+  rgb_col <- paste(as.vector(col2rgb(hex)), collapse = ",")
+  return(rgb_col)
+}
+
+# Function to generate TSV and BED files
+generate_files <- function(sub_objs, chr) {
+  for (ctrl in names(sub_objs)) {
+    df_tp <- as.data.frame(sub_objs[[ctrl]][["gr"]])
+    df_tp_chronly <- df_tp[df_tp$seqnames == chr,]
+
+    # Generate the compartments TSV file
+    write.table(df_tp_chronly,
+                paste0(ctrl, "_", chr, "_compartments_merged.tsv"),
+                sep = "\t",
+                row.names = FALSE)
+
+    # Generate the eigenvectors TSV file
+    prvbin <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Bin"]])
+    prvblock <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Block"]])
+
+    df_eigenvect <- data.frame()
+    for (i in seq_len(nrow(prvbin))) {
+      partdf <- prvblock[prvblock$block == as.integer(prvbin$block[i]), c("block", "pc1")]
+      df_eigenvect <- rbind(df_eigenvect, partdf)
+    }
+
+    df_tp_chronly_eigenvect <- cbind(df_tp_chronly, df_eigenvect)
+    write.table(df_tp_chronly_eigenvect,
+                paste0(ctrl, "_", chr, "_compartments_eigenvector.tsv"),
+                sep = "\t",
+                row.names = FALSE)
+
+    # Generate the BED file
+    df_tp_chronly$strand <- gsub("\\*", "\\.", df_tp_chronly$strand)
+    df_tp_chronly$zero <- 0
+    bed_data <- df_tp_chronly[, c('seqnames', 'start', 'end', 'subcomps_vect', 'zero', 'strand', 'start', 'end', 'subcolor_vect')]
+
+    # Modify colors for A and B compartments
+    bed_data$subcolor_vect <- ifelse(substr(bed_data$subcomps_vect, 1, 1) == "A", "69,117,180", "207,207,207")
+
+    bed_file <- paste0(ctrl, "_", chr, "_compartments.bed")
+    header_bedfile <- paste0('track name="', ctrl, '" description="', ctrl, ' (Emission ordered)" visibility=1 itemRgb="On"')
+
+    writeLines(header_bedfile, bed_file)
+    write.table(bed_data,
+                bed_file,
+                append = TRUE,
+                quote = FALSE,
+                sep = "\t",
+                row.names = FALSE,
+                col.names = FALSE)
+
+    # Generate the bedGraph file for eigenvectors
+    bedgraph_data <- df_tp_chronly_eigenvect[, c('seqnames', 'start', 'end', 'pc1')]
+    bedgraph_file <- paste0(ctrl, "_", chr, "_comp_eigenvector.bedgraph")
+    header_bedgraph <- paste0('track type=bedGraph name="', ctrl, '_eigenvector" description="', ctrl, ' eigenvector" visibility=full color=200,100,0 altColor=0,100,200 priority=20')
+
+    writeLines(header_bedgraph, bedgraph_file)
+    write.table(bedgraph_data,
+                bedgraph_file,
+                append = TRUE,
+                quote = FALSE,
+                sep = "\t",
+                row.names = FALSE,
+                col.names = FALSE)
+  }
+}
