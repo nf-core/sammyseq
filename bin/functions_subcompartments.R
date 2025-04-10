@@ -1109,6 +1109,7 @@ set_sign_from_genedens <- function( pc1, genes_gr, bins_gr, blocks ){
 # BED AND BEDGRAPHS
 ######################
 
+
 # Function to convert hex colors to RGB
 rgb_str <- function(hex) {
   rgb_col <- paste(as.vector(col2rgb(hex)), collapse = ",")

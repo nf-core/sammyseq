@@ -41,6 +41,9 @@ option_list <- list(
 )
 opt <- parse_args(OptionParser(option_list = option_list))
 
+# Set option to allow arbitrary chromosome identifiers
+options(ucscChromosomeNames=FALSE)
+
 # Output dirs
 
 sub2_colors <- c("B" = "#4575b4", "A" = "#d73027")
@@ -72,8 +75,5 @@ sub_objs <- call_subcompartments_sammy(
   sublevel = "sub.2",
   sub_colors = sub2_colors
 )
-
-cat("Structure of sub_objs:\n")
-print(str(sub_objs, max.level = 3))
 
 generate_files(sub_objs, chr)
