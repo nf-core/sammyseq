@@ -37,7 +37,8 @@ option_list <- list(
   make_option(c("-i", "--input_file"), type = "character", help = "Input TSV file"),
   make_option(c("-b", "--binsize"), type = "integer", help = "Bin size"),
   make_option(c("-g", "--gene_gtf"), type = "character", help = "Gene GTF file"),
-  make_option(c("-m", "--chrom_beds"), type = "character", help = "Single chromosome BED")
+  make_option(c("-m", "--chrom_beds"), type = "character", help = "Single chromosome BED"),
+  make_option(c("-p", "--patient"), type = "character", help = "Patient to process")
 )
 opt <- parse_args(OptionParser(option_list = option_list))
 
@@ -60,12 +61,18 @@ bins_gr <- import(bed_file, format = "BED")
 
 chroms_in_bed <- unique(seqnames(bins_gr))
 chr <- as.character(chroms_in_bed[1])
-subs_file <- paste0(chr, "_compartment.Rdata")
+
+# replica unica
+patient <- opt$patient
+comp_df_replica <- comp_df[comp_df$Patient_name == patient, ]
+print(comp_df_replica)
+
+subs_file <- paste0(patient, "_compartment___", chr, '_', opt$binsize, ".Rdata")
 
 # Run SAMMY
 sub_objs <- call_subcompartments_sammy(
-  patients = unique(comp_df$Patient_name),
-  tracks_db = comp_df,
+  patients = patient,
+  tracks_db = comp_df_replica,
   bins_gr = bins_gr,
   subs_file = subs_file,
   binsize = opt$binsize,

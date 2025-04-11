@@ -382,13 +382,8 @@ if (params.stopAt == 'ALIGNMENT') {
         }
     }
 
-    ///
-    /// Compartments step
-    ///
-
-
+// Compartment Analysis
     if (params.compartmentsAnalysis) {
-
         ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
             .map { meta, bigwig ->
                 return [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
@@ -402,16 +397,26 @@ if (params.stopAt == 'ALIGNMENT') {
             .collect()
 
         ch_binsize = Channel.value(params.binsize)
-        PREPARE_GENOME.out.binned_genome
+
+        ch_patients = ch_bigwig_compartments
+            .map { it[0] }
+            .unique()
+
+        ch_chromosomes_patients = PREPARE_GENOME.out.binned_genome
             .map { it[1] }
             .flatten()
-            .set { ch_chromosomes }
+            .combine(ch_patients)
+
+
+    ch_chromosomes_patients.map { it[0] }.view()
+    ch_chromosomes_patients.map { it[1] }.view()
 
         CALL_SUBCOMPARTMENTS(
             ch_tsv_content,
             ch_binsize,
             PREPARE_GENOME.out.gtf,
-            ch_chromosomes
+            ch_chromosomes_patients.map { it[0] },  // bed del cromosoma binnato
+            ch_chromosomes_patients.map { it[1] }   // replica unica
         )
     }
 
