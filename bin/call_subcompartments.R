@@ -37,35 +37,28 @@ option_list <- list(
   make_option(c("-i", "--input_file"), type = "character", help = "Input TSV file"),
   make_option(c("-b", "--binsize"), type = "integer", help = "Bin size"),
   make_option(c("-g", "--gene_gtf"), type = "character", help = "Gene GTF file"),
-  make_option(c("-m", "--chrom_beds"), type = "character", help = "Single chromosome BED"),
-  make_option(c("-p", "--patient"), type = "character", help = "Patient to process")
+  make_option(c("-m", "--chrom_bed"), type = "character", help = "Single chromosome BED file"),
+  make_option(c("-p", "--patient"), type = "character", help = "Replica to process"),
+  make_option(c("-c", "--chromosome"), type = "character", help = "Chromosome to process")
 )
 opt <- parse_args(OptionParser(option_list = option_list))
 
-# Set option to allow arbitrary chromosome identifiers
 options(ucscChromosomeNames=FALSE)
 
-# Output dirs
+## Setting variables
 
-sub2_colors <- c("B" = "#4575b4", "A" = "#d73027")
 
-# Input TSV
+patient <- opt$patient
 comp_df <- fread(opt$input_file, data.table = FALSE)
+comp_df_replica <- comp_df[comp_df$Patient_name == patient, ]
 
-# Gene GTF
+bed_file <- opt$chrom_bed
+bins_gr <- import(bed_file, format = "BED")
 genes_gr <- import(opt$gene_gtf, format = "GTF")
 
-# Chromosome BED BINNATO
-bed_file <- opt$chrom_beds
-bins_gr <- import(bed_file, format = "BED")
+chr <- opt$chromosome
 
-chroms_in_bed <- unique(seqnames(bins_gr))
-chr <- as.character(chroms_in_bed[1])
-
-# replica unica
-patient <- opt$patient
-comp_df_replica <- comp_df[comp_df$Patient_name == patient, ]
-print(comp_df_replica)
+sub2_colors <- c("B" = "#4575b4", "A" = "#d73027")
 
 subs_file <- paste0(patient, "_compartment___", chr, '_', opt$binsize, ".Rdata")
 

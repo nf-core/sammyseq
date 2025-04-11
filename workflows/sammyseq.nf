@@ -20,7 +20,6 @@ include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
 include { TRIMGALORE                  } from '../modules/nf-core/trimgalore/main'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
 include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewindows/main'
-include { BIN_BY_CHROMOSOME           } from '../modules/local/bin_by_chromosome'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
 include { FASTQ_ALIGN_DNA             } from '../subworkflows/nf-core/fastq_align_dna/main'
@@ -382,11 +381,14 @@ if (params.stopAt == 'ALIGNMENT') {
         }
     }
 
-// Compartment Analysis
+    ///
+    /// Compartments calling
+    ///
+
     if (params.compartmentsAnalysis) {
         ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
             .map { meta, bigwig ->
-                return [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
+                [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
             }
 
         header = ["Patient_name", "Fraction", "Status", "File"]
@@ -402,22 +404,26 @@ if (params.stopAt == 'ALIGNMENT') {
             .map { it[0] }
             .unique()
 
-        ch_chromosomes_patients = PREPARE_GENOME.out.binned_genome
-            .map { it[1] }
-            .flatten()
+        ch_binned_genome = PREPARE_GENOME.out.binned_genome
+            .flatMap { meta, bed ->
+                bed.readLines().groupBy { line -> line.split('\t')[0] }
+                    .collect { chrom, lines ->
+                        tuple([id: meta.id, chromosome: chrom], lines)
+                    }
+            }
+
+        ch_chromosomes_patients = ch_binned_genome
             .combine(ch_patients)
-
-
-    ch_chromosomes_patients.map { it[0] }.view()
-    ch_chromosomes_patients.map { it[1] }.view()
+            .map { meta, bedLines, patient ->
+                tuple(meta, bedLines, patient)
+            }
 
         CALL_SUBCOMPARTMENTS(
             ch_tsv_content,
             ch_binsize,
             PREPARE_GENOME.out.gtf,
-            ch_chromosomes_patients.map { it[0] },  // bed del cromosoma binnato
-            ch_chromosomes_patients.map { it[1] }   // replica unica
-        )
+            ch_chromosomes_patients
+            )
     }
 
     //

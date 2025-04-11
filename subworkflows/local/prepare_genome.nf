@@ -23,7 +23,6 @@ include { BWA_INDEX                } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD            } from '../../modules/nf-core/bowtie2/build/main'
 include { BEDTOOLS_MAKEWINDOWS     } from '../../modules/nf-core/bedtools/makewindows/main'
 include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
-include { BIN_BY_CHROMOSOME        } from '../../modules/local/bin_by_chromosome'
 
 workflow PREPARE_GENOME {
 
@@ -175,27 +174,20 @@ workflow PREPARE_GENOME {
             ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         }
     }
+
     //
     // Binning the genome bedtools/make_windows
     //
-    ch_binned_genome = Channel.empty()
 
+    ch_binned_genome = Channel.empty()
 
     BEDTOOLS_MAKEWINDOWS (
         ch_genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MAKEWINDOWS.out.versions)
 
-    //
-    // Splitting the binned genome by chromosome
-    //
+    ch_binned_genome = BEDTOOLS_MAKEWINDOWS.out.bed
 
-    BIN_BY_CHROMOSOME (
-        BEDTOOLS_MAKEWINDOWS.out.bed,
-        ch_chrom_sizes
-    )
-
-    ch_binned_genome = BIN_BY_CHROMOSOME.out
 
     emit:
     fasta         = ch_fasta                  //    path: genome.fasta
