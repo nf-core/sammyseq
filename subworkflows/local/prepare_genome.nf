@@ -40,6 +40,7 @@ workflow PREPARE_GENOME {
     chrom_sizes        //    file: /path/to/genome.sizes
     fai                //    file: /path/to/genome.fai
     binsize            //    binsize: genome binning
+    keep_regions_bed   //    file: /path/to/keep_regions.bed
 
     main:
 
@@ -179,10 +180,31 @@ workflow PREPARE_GENOME {
     // Binning the genome bedtools/make_windows
     //
 
-    ch_binned_genome = Channel.empty()
+    ch_genome_filtered_bed_for_windows = Channel.empty()
+
+    if (params.keep_regions_bed) {
+        ch_keep_chroms = Channel.fromPath(params.keep_regions_bed)
+            .splitCsv(sep: '\t')
+            .map { it[0].toString().trim() }
+            .collect()
+
+        ch_genome_filtered_bed_for_windows = ch_genome_filtered_bed
+            .combine(ch_keep_chroms)
+            .map { bed, keep_chroms ->
+                def filtered_bed = file("${bed.baseName}_filtered.bed")
+                def bedContent = bed.text
+                filtered_bed.text = bedContent.readLines().findAll { line ->
+                    def chrom = line.split('\t')[0].trim()
+                    keep_chroms.contains(chrom)
+                }.join('\n')
+                return filtered_bed
+            }
+    } else {
+        ch_genome_filtered_bed_for_windows = ch_genome_filtered_bed
+    }
 
     BEDTOOLS_MAKEWINDOWS (
-        ch_genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
+        ch_genome_filtered_bed_for_windows.map { bed -> tuple([id: bed.simpleName], bed) }
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MAKEWINDOWS.out.versions)
 

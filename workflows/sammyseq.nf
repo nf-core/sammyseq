@@ -106,7 +106,9 @@ workflow SAMMYSEQ {
                     params.fai,
                     params.binsize,
                     params.gtf,
-                    params.gene_bed)
+                    params.gene_bed,
+                    params.keep_regions_bed
+                    )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     if (params.stopAt == 'PREPARE_GENOME') {
@@ -404,14 +406,6 @@ if (params.stopAt == 'ALIGNMENT') {
             .map { it[0] }
             .unique()
 
-        ch_keep_chroms = params.keep_regions_bed
-            ? Channel.fromPath(params.keep_regions_bed)
-                .splitCsv(sep: '\t')
-                .map { it[0] }
-                .unique()
-                .collect()
-            : Channel.value([])
-
         ch_binned_genome = PREPARE_GENOME.out.binned_genome
             .flatMap { meta, bed ->
                 bed.readLines().groupBy { line -> line.split('\t')[0] }
@@ -420,23 +414,13 @@ if (params.stopAt == 'ALIGNMENT') {
                     }
             }
 
-        ch_chromosomes_filtered = ch_binned_genome
-            .combine(ch_keep_chroms)
-            .filter { it ->
-                def (meta, lines, keep_chroms) = it
-                keep_chroms.isEmpty() || keep_chroms.contains(meta.chromosome)
-            }
-            .map { it ->
-                def (meta, lines, keep_chroms) = it
-                tuple(meta, lines)
-            }
 
-        ch_chromosomes_patients = ch_chromosomes_filtered
+        ch_chromosomes_patients = ch_binned_genome
             .combine(ch_patients)
-            .map { it ->
-                def (meta, bedLines, patient) = it
+            .map { meta, bedLines, patient ->
                 tuple(meta, bedLines, patient)
             }
+
 
         CALL_SUBCOMPARTMENTS(
             ch_tsv_content,
@@ -445,6 +429,7 @@ if (params.stopAt == 'ALIGNMENT') {
             ch_chromosomes_patients
         )
     }
+
 
     //
     // Collate and save software versions
