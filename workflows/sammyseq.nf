@@ -404,6 +404,14 @@ if (params.stopAt == 'ALIGNMENT') {
             .map { it[0] }
             .unique()
 
+        ch_keep_chroms = params.keep_regions_bed
+        ? Channel.fromPath(params.keep_regions_bed)
+            .splitCsv(sep: '\t')
+            .map { it[0] }
+            .unique()
+            .collect()
+        : Channel.value([])
+
         ch_binned_genome = PREPARE_GENOME.out.binned_genome
             .flatMap { meta, bed ->
                 bed.readLines().groupBy { line -> line.split('\t')[0] }
@@ -411,6 +419,11 @@ if (params.stopAt == 'ALIGNMENT') {
                         tuple([id: meta.id, chromosome: chrom], lines)
                     }
             }
+            .combine(ch_keep_chroms)
+            .filter { meta, lines, keep_chroms ->
+                keep_chroms.isEmpty() || keep_chroms.contains(meta.chromosome)
+            }
+            .map { meta, lines, keep_chroms -> tuple(meta, lines) }
 
         ch_chromosomes_patients = ch_binned_genome
             .combine(ch_patients)
@@ -423,7 +436,7 @@ if (params.stopAt == 'ALIGNMENT') {
             ch_binsize,
             PREPARE_GENOME.out.gtf,
             ch_chromosomes_patients
-            )
+        )
     }
 
     //
