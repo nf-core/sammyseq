@@ -405,12 +405,12 @@ if (params.stopAt == 'ALIGNMENT') {
             .unique()
 
         ch_keep_chroms = params.keep_regions_bed
-        ? Channel.fromPath(params.keep_regions_bed)
-            .splitCsv(sep: '\t')
-            .map { it[0] }
-            .unique()
-            .collect()
-        : Channel.value([])
+            ? Channel.fromPath(params.keep_regions_bed)
+                .splitCsv(sep: '\t')
+                .map { it[0] }
+                .unique()
+                .collect()
+            : Channel.value([])
 
         ch_binned_genome = PREPARE_GENOME.out.binned_genome
             .flatMap { meta, bed ->
@@ -419,15 +419,22 @@ if (params.stopAt == 'ALIGNMENT') {
                         tuple([id: meta.id, chromosome: chrom], lines)
                     }
             }
+
+        ch_chromosomes_filtered = ch_binned_genome
             .combine(ch_keep_chroms)
-            .filter { meta, lines, keep_chroms ->
+            .filter { it ->
+                def (meta, lines, keep_chroms) = it
                 keep_chroms.isEmpty() || keep_chroms.contains(meta.chromosome)
             }
-            .map { meta, lines, keep_chroms -> tuple(meta, lines) }
+            .map { it ->
+                def (meta, lines, keep_chroms) = it
+                tuple(meta, lines)
+            }
 
-        ch_chromosomes_patients = ch_binned_genome
+        ch_chromosomes_patients = ch_chromosomes_filtered
             .combine(ch_patients)
-            .map { meta, bedLines, patient ->
+            .map { it ->
+                def (meta, bedLines, patient) = it
                 tuple(meta, bedLines, patient)
             }
 
