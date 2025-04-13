@@ -183,20 +183,22 @@ workflow PREPARE_GENOME {
     ch_genome_filtered_bed_for_windows = Channel.empty()
 
     if (params.keep_regions_bed) {
-        ch_keep_chroms = Channel.fromPath(params.keep_regions_bed)
-            .splitCsv(sep: '\t')
-            .map { it[0].toString().trim() }
+        ch_keep_chroms = Channel
+            .fromPath(params.keep_regions_bed)
+            .flatMap { file -> file.readLines() }
+            .map { it.trim().split('\t')[0] }
             .collect()
+            .map { it.toSet() }
 
-        ch_genome_filtered_bed_for_windows = ch_genome_filtered_bed
-            .combine(ch_keep_chroms)
-            .map { bed, keep_chroms ->
+        ch_genome_filtered_bed_for_windows = ch_keep_chroms
+            .combine(ch_genome_filtered_bed)
+            .map { keep_chroms, bed ->
                 def filtered_bed = file("${bed.baseName}_filtered.bed")
-                def bedContent = bed.text
-                filtered_bed.text = bedContent.readLines().findAll { line ->
+                def filtered_lines = bed.readLines().findAll { line ->
                     def chrom = line.split('\t')[0].trim()
                     keep_chroms.contains(chrom)
-                }.join('\n')
+                }
+                filtered_bed.text = filtered_lines.join('\n') + '\n'
                 return filtered_bed
             }
     } else {
