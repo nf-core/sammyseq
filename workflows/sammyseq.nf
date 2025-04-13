@@ -386,41 +386,82 @@ if (params.stopAt == 'ALIGNMENT') {
     ///
     /// Compartments calling
     ///
+//    if (params.compartmentsAnalysis) {
+//
+//        ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
+//            .map { meta, bigwig -> [meta.experimentalID, meta.fraction, meta.sample_group, bigwig] }
+//
+//        ch_tsv_content = Channel.of(["Patient_name", "Fraction", "Status", "File"])
+//            .concat(ch_bigwig_compartments)
+//            .map { it.join("\t") }
+//            .collect()
+//
+//        ch_binsize = Channel.value(params.binsize)
+//
+//        ch_patients = ch_bigwig_compartments.map { it[0] }.unique()
+//
+//        ch_binned_genome_lines = PREPARE_GENOME.out.binned_genome
+//            .flatMap { meta, bed_files ->
+//                bed_files.collect { bed ->
+//                    def lines = bed.text.readLines()
+//                    def chrom = lines.collect { it.split('\t')[0] }.unique().first()
+//                    tuple([id: meta.id, chromosome: chrom], lines)
+//                }
+//            }
+//
+//
+//        ch_chromosomes_patients = ch_binned_genome_lines
+//            .combine(ch_patients)
+//            .map { meta, bedLines, patient ->
+//                tuple(meta, bedLines, patient)
+//            }
+//
+//        CALL_SUBCOMPARTMENTS(
+//            ch_tsv_content,
+//            ch_binsize,
+//            PREPARE_GENOME.out.gtf,
+//            ch_chromosomes_patients
+//        )
+//    }
+//
 
     if (params.compartmentsAnalysis) {
+
         ch_bigwig_compartments = DEEPTOOLS_BAMCOVERAGE.out[0]
-            .map { meta, bigwig ->
-                [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
-            }
+            .map { meta, bigwig -> [meta.experimentalID, meta.fraction, meta.sample_group, bigwig] }
 
-        header = ["Patient_name", "Fraction", "Status", "File"]
-
-        ch_tsv_content = Channel.of(header)
+        ch_tsv_content = Channel.of(["Patient_name", "Fraction", "Status", "File"])
             .concat(ch_bigwig_compartments)
             .map { it.join("\t") }
             .collect()
 
         ch_binsize = Channel.value(params.binsize)
+        ch_patients = ch_bigwig_compartments.map { it[0] }.unique()
 
-        ch_patients = ch_bigwig_compartments
-            .map { it[0] }
-            .unique()
+        def keepChrList = []
+        if (params.keep_regions_bed) {
+            keepChrList = file(params.keep_regions_bed).text
+                .split('\n')
+                .collect { it.split('\t')[0] }
+                .unique()
+        }
 
-        ch_binned_genome = PREPARE_GENOME.out.binned_genome
-            .flatMap { meta, bed ->
-                bed.readLines().groupBy { line -> line.split('\t')[0] }
-                    .collect { chrom, lines ->
-                        tuple([id: meta.id, chromosome: chrom], lines)
-                    }
+        ch_binned_genome_lines = PREPARE_GENOME.out.binned_genome
+            .flatMap { meta, bedFile ->
+                def lines = bedFile.text.split('\n').findAll { it }
+                def filtered = keepChrList ? lines.findAll { keepChrList.contains(it.split('\t')[0]) } : lines
+                def grouped = filtered.groupBy { it.split('\t')[0] }
+
+                grouped.collect { chrom, chromLines ->
+                    tuple([id: meta.id, chromosome: chrom], chromLines)
+                }
             }
 
-
-        ch_chromosomes_patients = ch_binned_genome
+        ch_chromosomes_patients = ch_binned_genome_lines
             .combine(ch_patients)
             .map { meta, bedLines, patient ->
                 tuple(meta, bedLines, patient)
             }
-
 
         CALL_SUBCOMPARTMENTS(
             ch_tsv_content,
@@ -428,8 +469,7 @@ if (params.stopAt == 'ALIGNMENT') {
             PREPARE_GENOME.out.gtf,
             ch_chromosomes_patients
         )
-    }
-
+}
 
     //
     // Collate and save software versions

@@ -180,38 +180,43 @@ workflow PREPARE_GENOME {
     // Binning the genome bedtools/make_windows
     //
 
-    ch_genome_filtered_bed_for_windows = Channel.empty()
+//  // 1. Crea finestre sul genoma
+//  BEDTOOLS_MAKEWINDOWS(
+//      ch_genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
+//  )
+//
+//  // 2. Estrai cromosomi da keep_regions_bed come lista in memoria
+//  ch_keep_chr = Channel
+//      .fromPath(params.keep_regions_bed)
+//      .map { bedfile ->
+//          bedfile.text.readLines()
+//              .collect { it.split('\t')[0] }
+//              .unique()
+//      }
+//
+//  // 3. Filtra finestre per i cromosomi richiesti, crea file temporanei
+//  ch_binned_genome = BEDTOOLS_MAKEWINDOWS.out.bed
+//      .combine(ch_keep_chr)
+//      .map { meta, bedfile, keepList ->
+//          def lines = bedfile.text.readLines()
+//          def filtered = lines.findAll { line -> keepList.contains(line.split('\t')[0]) }
+//          def grouped = filtered.groupBy { it.split('\t')[0] }
+//
+//          def tmpDir = java.nio.file.Files.createTempDirectory("binned_chr_${meta.id}").toFile()
+//          def files = grouped.collect { chrom, chromLines ->
+//              def f = new File(tmpDir, "${chrom}.binned.bed")
+//              f.text = chromLines.join('\n') + '\n'
+//              return f
+//          }
+//
+//          tuple(meta, files)
+//      }
 
-    if (params.keep_regions_bed) {
-        ch_keep_chroms = Channel
-            .fromPath(params.keep_regions_bed)
-            .flatMap { file -> file.readLines() }
-            .map { it.trim().split('\t')[0] }
-            .collect()
-            .map { it.toSet() }
-
-        ch_genome_filtered_bed_for_windows = ch_keep_chroms
-            .combine(ch_genome_filtered_bed)
-            .map { keep_chroms, bed ->
-                def filtered_bed = file("${bed.baseName}_filtered.bed")
-                def filtered_lines = bed.readLines().findAll { line ->
-                    def chrom = line.split('\t')[0].trim()
-                    keep_chroms.contains(chrom)
-                }
-                filtered_bed.text = filtered_lines.join('\n') + '\n'
-                return filtered_bed
-            }
-    } else {
-        ch_genome_filtered_bed_for_windows = ch_genome_filtered_bed
-    }
-
-    BEDTOOLS_MAKEWINDOWS (
-        ch_genome_filtered_bed_for_windows.map { bed -> tuple([id: bed.simpleName], bed) }
+    BEDTOOLS_MAKEWINDOWS(
+        ch_genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
     )
-    ch_versions = ch_versions.mix(BEDTOOLS_MAKEWINDOWS.out.versions)
 
     ch_binned_genome = BEDTOOLS_MAKEWINDOWS.out.bed
-
 
     emit:
     fasta         = ch_fasta                  //    path: genome.fasta

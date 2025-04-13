@@ -15,21 +15,22 @@ process CALL_SUBCOMPARTMENTS {
     //path "*___*.Rdata", emit: aux_rdata
     path "*_compartments.bed", emit: bed_files
     path "*_comp_eigenvector.bedgraph", emit: bedgraph_files
-    //path "*.bed", emit: binned_bed
 
     script:
-    def chrom_bed = "${meta.chromosome}_binned.bed"
-    """
-    echo '${tsv_content.join("\n")}' > compartments_input.tsv
+    def chrom_bed_name = "${meta.chromosome}_binned.bed"
 
-    # Create the binned BED file
-    echo '${bedLines.join("\n")}' > ${chrom_bed}
+    def echo_tsv = tsv_content.collect { it.replace('$', '\\$') }.join('\\n')
+    def echo_bed = bedLines.collect { it.replace('$', '\\$') }.join('\\n')
+
+    """
+    echo -e "${echo_tsv}" > compartments_input.tsv
+    echo -e "${echo_bed}" > ${chrom_bed_name}
 
     call_subcompartments.R \\
         --input_file compartments_input.tsv \\
         --binsize ${binsize} \\
         --gene_gtf ${gene_gtf} \\
-        --chrom_bed ${chrom_bed} \\
+        --chrom_bed ${chrom_bed_name} \\
         --patient ${patient} \\
         --chromosome ${meta.chromosome}
     """
