@@ -1,8 +1,8 @@
-process CALL_SUBCOMPARTMENTS {
+process CALL_COMPARTMENTS {
     container 'docker.io/ciuki97/sammy_subcompartments_env:latest'
     label 'process_medium'
-    errorStrategy 'terminate'
-    maxRetries 0
+    //errorStrategy 'terminate'
+    //maxRetries 0
 
     input:
     val tsv_content
