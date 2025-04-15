@@ -5,7 +5,7 @@ process MERGE_COMPARTMENTS {
     tuple val(sample_id), path(bed_files), path(bedgraph_files)
 
     output:
-    path("${sample_id}_merged_compartments.bed"), emit: merged_bedsartments_beds
+    path("${sample_id}_merged_compartments.bed"), emit: merged_beds
     path("${sample_id}_merged_compartments_eigen.bedgraph"), emit: merged_bedgraphs
 
     script:
