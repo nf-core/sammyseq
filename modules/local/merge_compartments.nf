@@ -1,4 +1,5 @@
 process MERGE_COMPARTMENTS {
+    tag "$sample_id"
 
     input:
     tuple val(sample_id), path(bed_files), path(bedgraph_files)
