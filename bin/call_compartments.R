@@ -30,7 +30,7 @@ suppressMessages({
 ## https://community.seqera.io/t/source-another-r-script-in-the-bin-directory/1059
 path <- Sys.getenv("PATH") |> strsplit(":")
 bin_path <- tail(path[[1]], n=1)
-source(file.path(bin_path, "functions_subcompartments.R"))
+source(file.path(bin_path, "functions_compartments.R"))
 
 # CLI options
 option_list <- list(

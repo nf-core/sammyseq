@@ -176,42 +176,6 @@ workflow PREPARE_GENOME {
         }
     }
 
-    //
-    // Binning the genome bedtools/make_windows
-    //
-
-//  // 1. Crea finestre sul genoma
-//  BEDTOOLS_MAKEWINDOWS(
-//      ch_genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
-//  )
-//
-//  // 2. Estrai cromosomi da keep_regions_bed come lista in memoria
-//  ch_keep_chr = Channel
-//      .fromPath(params.keep_regions_bed)
-//      .map { bedfile ->
-//          bedfile.text.readLines()
-//              .collect { it.split('\t')[0] }
-//              .unique()
-//      }
-//
-//  // 3. Filtra finestre per i cromosomi richiesti, crea file temporanei
-//  ch_binned_genome = BEDTOOLS_MAKEWINDOWS.out.bed
-//      .combine(ch_keep_chr)
-//      .map { meta, bedfile, keepList ->
-//          def lines = bedfile.text.readLines()
-//          def filtered = lines.findAll { line -> keepList.contains(line.split('\t')[0]) }
-//          def grouped = filtered.groupBy { it.split('\t')[0] }
-//
-//          def tmpDir = java.nio.file.Files.createTempDirectory("binned_chr_${meta.id}").toFile()
-//          def files = grouped.collect { chrom, chromLines ->
-//              def f = new File(tmpDir, "${chrom}.binned.bed")
-//              f.text = chromLines.join('\n') + '\n'
-//              return f
-//          }
-//
-//          tuple(meta, files)
-//      }
-
     BEDTOOLS_MAKEWINDOWS(
         ch_genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
     )

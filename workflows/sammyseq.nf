@@ -53,7 +53,7 @@ include { CALL_COMPARTMENTS         } from '../modules/local/call_compartments'
 include { FILTER_BAM_SAMTOOLS       } from '../subworkflows/local/filter_bam_samtools'
 include { BIGWIG_PLOT_DEEPTOOLS     } from '../subworkflows/local/bigwig_plot_deeptools'
 include { DEEPTOOLS_QC              } from '../subworkflows/local/deeptools_qc'
-
+include { MERGE_COMPARTMENTS        } from '../modules/local/merge_compartments'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -432,6 +432,22 @@ if (params.stopAt == 'ALIGNMENT') {
             PREPARE_GENOME.out.gtf,
             ch_chromSampleTuples
         )
+
+        ch_compartments_beds = CALL_COMPARTMENTS.out.bed_files
+            .map { file -> tuple(file.getBaseName().tokenize('_')[0..1].join('_'), file) }
+            .groupTuple()
+
+        ch_compartments_eigen_bedgraphs = CALL_COMPARTMENTS.out.bedgraph_files
+            .map { file -> tuple(file.getBaseName().tokenize('_')[0..1].join('_'), file) }
+            .groupTuple()
+
+        ch_merged_compartments = ch_compartments_beds
+            .join(ch_compartments_eigen_bedgraphs)
+            .map { sample_id, bed_files, bedgraph_files ->
+                tuple(sample_id, bed_files, bedgraph_files)
+            }
+
+        MERGE_COMPARTMENTS(ch_merged_compartments)
     }
 
     //

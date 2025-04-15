@@ -26,7 +26,7 @@ process CALL_COMPARTMENTS {
     echo -e "${echo_tsv}" > compartments_input.tsv
     echo -e "${echo_bed}" > ${chrom_bed_name}
 
-    call_subcompartments.R \\
+    call_compartments.R \\
         --input_file compartments_input.tsv \\
         --binsize ${binsize} \\
         --gene_gtf ${gene_gtf} \\
@@ -34,4 +34,6 @@ process CALL_COMPARTMENTS {
         --patient ${patient} \\
         --chromosome ${meta.chromosome}
     """
+
+
 }
