@@ -399,10 +399,6 @@
                     "type": "string",
                     "fa_icon": "fas fa-align-justify",
                     "description": "Path to GTF annotation file."
-                },
-                "gene_bed": {
-                    "type": "string",
-                    "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified."
                 }
             }
         }

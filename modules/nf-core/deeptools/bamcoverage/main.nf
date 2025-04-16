@@ -1,6 +1,6 @@
 process DEEPTOOLS_BAMCOVERAGE {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -14,7 +14,7 @@ process DEEPTOOLS_BAMCOVERAGE {
     path(blacklist)
 
     output:
-    tuple val(meta), path("*.bw")       , emit: bigwig, optional: true
+    tuple val(meta), path("*.bigWig")   , emit: bigWig, optional: true
     tuple val(meta), path("*.bedgraph") , emit: bedgraph, optional: true
     path "versions.yml"                 , emit: versions
 
@@ -24,8 +24,8 @@ process DEEPTOOLS_BAMCOVERAGE {
     script:
     def args      = task.ext.args ?: ''
     def prefix    = task.ext.prefix ?: "${meta.id}"
-    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bw"
-    def blacklist_params = blacklist ? "--blackListFileName ${blacklist}" : ""
+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bigWig"
+    def blacklist = blacklist ? "--blackListFileName ${blacklist}" : ""
 
     // cram_input is currently not working with deeptools
     // therefore it's required to convert cram to bam first
@@ -70,7 +70,7 @@ process DEEPTOOLS_BAMCOVERAGE {
 
     stub:
     def prefix    = task.ext.prefix ?: "${meta.id}"
-    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bw"
+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bigWig"
     """
     touch ${prefix}.${extension}
 

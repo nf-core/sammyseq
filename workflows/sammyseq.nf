@@ -36,9 +36,6 @@ include { DEEPTOOLS_COMPUTEMATRIX     } from '../modules/nf-core/deeptools/compu
 include { DEEPTOOLS_PLOTPROFILE       } from '../modules/nf-core/deeptools/plotprofile/main'
 include { DEEPTOOLS_PLOTHEATMAP       } from '../modules/nf-core/deeptools/plotheatmap/main'
 
-// include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_FILTER     }   from '../modules/nf-core/samtools/view/main'
-// include { SAMTOOLS_SORT as SAMTOOLS_SORT_FILTERED   }   from '../modules/nf-core/samtools/sort/main'
-// include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_FILTERED }   from '../modules/nf-core/samtools/index/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,16 +94,16 @@ workflow SAMMYSEQ {
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
 
-    PREPARE_GENOME (params.fasta,
+    PREPARE_GENOME (
+                    params.fasta,
                     params.aligner,
+                    params.gtf,
+                    params.blacklist,
                     params.bwa_index,
                     params.bowtie2_index,
-                    params.blacklist,
-                    params.chrom_sizes,
                     params.fai,
+                    params.chrom_sizes,
                     params.binsize,
-                    params.gtf,
-                    params.gene_bed,
                     params.keep_regions_bed
                     )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
@@ -245,7 +242,7 @@ if (params.stopAt == 'ALIGNMENT') {
         )
     ch_versions = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
 
-    ch_mle_in = BAM_MARKDUPLICATES_PICARD.out.bam
+//    ch_mle_in = BAM_MARKDUPLICATES_PICARD.out.bam
 
     if (params.stopAt == 'BAM_MARKDUPLICATES_PICARD') {
         return
@@ -275,9 +272,7 @@ if (params.stopAt == 'ALIGNMENT') {
         }
 
     ch_fai_path = PREPARE_GENOME.out.fai.map { it[1] }
-    //ch_fai_path.view()
     ch_fasta_path = ch_fasta_meta.map { it[1] }
-    //ch_fasta_path.view()
 
     DEEPTOOLS_BAMCOVERAGE (
         ch_bam_bai_filtered,
@@ -497,8 +492,8 @@ if (params.stopAt == 'ALIGNMENT') {
     //ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
     //ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.idxstats.collect{it[1]}.ifEmpty([]))
 
-    ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.stats.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.stats.collect{it[1]}.ifEmpty([]))
+    //ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.idxstats.collect{it[1]}.ifEmpty([]))
 
     ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.correlation_matrix.collect{it[1]}.ifEmpty([]))
