@@ -31,13 +31,22 @@
 Here is an outline of the analysis steps:
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+
 2. Trim reads to remove adapter sequences and low quality ends ([`Trim Galore!`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore) or [`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
+
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
+
 4. Remove duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
-5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
+
+5. BAM filtering and generate alignment statistics ([`samtools`](http://www.htslib.org/))
+
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
-7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`])
-8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
+
+7. (Optionally) Perform A/B compartment analysis using (['CALDER2'](https://github.com/CSOgroup/CALDER2)) to generate eigenvector and compartment BED tracks
+
+8. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`](https://github.com/hms-dbmi/spp))
+
+9. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <p align="center">
     <img title="sammyseq scheme" src="docs/images/nf-core-sammyseq_tubemap.png" width=70%>
@@ -53,13 +62,13 @@ First, prepare a samplesheet with your input data that looks as follows:
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2,experimentalID,fraction
-CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2
-CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3
-CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
+sample,fastq_1,fastq_2,experimentalID,fraction,sample_group
+CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2,CTRL
+CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3,CTRL
+CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end), `experimentalID` represents the biological specimen of interest and `sample` the library produced for each fraction, it usually is a unique combination of `experimentalID` and `fraction`.
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), `experimentalID` represents the biological specimen of interest and `sample` the library produced for each fraction, it usually is a unique combination of `experimentalID` and `fraction`. The `sample_group` field is used to group multiple replicates that belong to the same biological condition.
 
 Now, you can run the pipeline using:
 
@@ -81,6 +90,17 @@ nextflow run nf-core/sammyseq \
    --outdir <OUTDIR> \
    --comparisonFile comparisons.csv
 ```
+
+or
+
+```bash
+nextflow run nf-core/sammyseq \
+   -profile <docker/singularity/.../institute> \
+   --fasta reference_genome.fa \
+   --input samplesheet.csv \
+   --outdir <OUTDIR> \
+   --compartmentsAnalysis
+   ```
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).

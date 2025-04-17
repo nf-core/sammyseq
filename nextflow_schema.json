@@ -399,6 +399,10 @@
                     "type": "string",
                     "fa_icon": "fas fa-align-justify",
                     "description": "Path to GTF annotation file."
+                },
+                "tss_bed": {
+                    "type": "string",
+                    "description": "Path to bed file."
                 }
             }
         }

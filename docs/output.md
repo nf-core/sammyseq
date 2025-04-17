@@ -17,6 +17,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Samtools reads filtering](#samtools-reads-filtering)
 - [Signal track generation](#signal-track-generation)
 - [DeepTools based QC](#deeptools-based-qc)
+- [Compartment Analysis](#compartment-analysis)
 - [Comparisons](#comparisons)
 - [MultiQC](#multiqc)
 - [Pipeline information](#pipeline-information)
@@ -61,7 +62,7 @@ The aligned reads are then sorted by chromosome coordinates with [samtools](http
 
 ### Mark Duplicate reads
 
-Read pairs that are likely to have originated from duplicates of the same original DNA fragments through some artificial processes are identified. These are considered to be non-independent observations, so all but a single read pair within each set of duplicates are marked, not removed from the bam file.
+Read duplicate marking is carried out on aligned BAM using the [Picard](https://github.com/broadinstitute/picard) MarkDuplicates command. Read pairs that are likely to have originated from duplicates of the same original DNA fragments through some artificial processes are identified. These are considered to be non-independent observations, so all but a single read pair within each set of duplicates are marked, not removed from the BAM file.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -73,9 +74,9 @@ Read pairs that are likely to have originated from duplicates of the same origin
 
 </details>
 
-### Samtools reads filtering
+### Samtools bam filtering
 
-The BAM files generated are further processed with SAMtools for filtering (based on samtools flags and quality score) and indexing, as well as to generate read mapping statistics.
+BAM files generated after alignment and duplicate marking are further processed with [samtools](https://www.htslib.org/doc/samtools.html) to apply filtering based on mapping quality (default q_score > 1) and SAM flags (default 1540). This step also includes indexing the filtered BAM files and generating various alignment statistics, such as read counts per chromosome, overall alignment rate, and flag summaries.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -105,45 +106,21 @@ The generated signal tracks represent read coverage and can be normalized using 
 
 DeepTools is used to perform quality control analysis at the aligned fraction level. The pipeline uses several DeepTools commands to generate comprehensive QC metrics and visualizations.
 
-### MultiBAMSummary
+#### Correlation Heatmap
 
-The process starts with multiBamSummary, which computes the read coverage over the entire genome (or a specified region) for multiple BAM files. This creates a matrix of read counts that serves as input for the subsequent analyses. By default, the bin size is set to 50000, but you can adjust this using the --bam_binsize parameter.
-
-<details markdown="1"> <summary>Output files</summary>
-
-    deeptools/quality_control/multibamsummary/
-        ${meta.id}.npz: Binary file containing the read coverage matrix
-        outRawCounts.txt: Text file with raw read counts
-
-</details>
-
-### PCA (Principal Component Analysis)
-
-PCA is used to analyze and visualize variability in high-dimensional datasets. In the context of sequencing data analysis, PCA helps to determine if samples show greater variability between experimental conditions than between replicates of the same treatment.
+The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotCorrelation command is used to compute the overall similarity between samples based on genome-wide read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') by setting the --qc_corr_method parameter (default is 'pearson').
 
 <details markdown="1"> <summary>Output files</summary>
 
-    deeptools/quality_control/plotpca/
-        ${meta.id}.pdf: PCA plot
-        ${meta.id}.tab: Table with PCA coordinates
-
-</details>
-
-### Correlation Heatmap
-
-The correlation analysis computes the overall similarity between samples based on read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') if the parameter qc_corr_method is provided (default is pearson)
-
-<details markdown="1"> <summary>Output files</summary>
-
-    deeptools/quality_control/plotcorrelation/
+    reports/deeptools/plotcorrelation/
         ${meta.id}.pdf: Correlation heatmap
         ${meta.id}.tab: Table with correlation coefficients
 
 </details>
 
-### Fingerprint Plot
+#### Fingerprint Plot
 
-This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
+The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotFingerprint command is useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
 
 Two types of fingerprint plots are generated:
 
@@ -151,7 +128,7 @@ Two types of fingerprint plots are generated:
 
 <details markdown="1"> <summary>Output files</summary>
 
-    deeptools/quality_control/plotfingerprint/global/
+    reports/deeptools/plotfingerprint/global/
         ${meta.id}_global.pdf: Global fingerprint plot
         ${meta.id}_global.raw.txt: Raw data for the global fingerprint plot
 
@@ -161,11 +138,50 @@ Two types of fingerprint plots are generated:
 
 <details markdown="1"> <summary>Output files</summary>
 
-    deeptools/quality_control/plotfingerprint/${params.region}/
+    reports/deeptools/plotfingerprint/${params.region}/
         ${meta.id}_region_${params.region}.pdf: Region-specific fingerprint plot
         ${meta.id}_region_${params.region}.raw.txt: Raw data for the region-specific fingerprint plot
 
 </details>
+
+#### PCA (Principal Component Analysis)
+
+The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotPCA command is used to determine whether samples vary more between experimental conditions than between replicates. The output PDF includes both the PCA plot and the corresponding scree plot, which displays the proportion of variance explained by each principal component.
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/plotpca/
+        ${meta.id}.pdf: PCA plot (including scree plot)
+        ${meta.id}.tab: Table with PCA coordinates
+
+</details>
+
+#### Plot Profile
+
+If the --tss_bed parameter is provided, the [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotProfile command is used to generate TSS-centered signal profile plots, which help visualize the average distribution of sequencing signal (e.g. coverage or enrichment) around transcription start sites (TSS). All fractions belonging to the same sample are grouped and their signal tracks aggregated to produce a single profile per sample.
+
+<details markdown="1"> <summary>Output files</summary>
+
+    reports/deeptools/plotprofile/{$params.tss_bed}/
+        ${meta.id}.${params.tss_bed}.plotProfile.pdf: Line plot showing the average signal across TSS for all fractions of a given sample.
+        ${meta.id}.${params.tss_bed}.plotProfile.tab: Tabular file with the raw values used in the plot.
+
+</details>
+
+### Compartments Analysis
+
+The pipeline includes an optional module for calling A/B chromatin compartments based on SAMMY-seq signal tracks, enabled via the --compartmentsAnalysis parameter. The analysis begins with genomic binning performed using bedtools makewindows, which divides the genome into 50 kb windows by default (adjustable via --binsize). To limit the analysis to specific chromosomes, a BED file can be provided with the --keep_regions_bed parameter. The --gtf parameter is also required, as gene annotations are used in downstream steps. Each fraction is identified using the experimentalID column in the samplesheet, and samples are grouped using the sample_group column, allowing samples of the same group to be analyzed together. The analysis is performed using the CALDER2 algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
+
+<details markdown="1"><summary>Output files</summary>
+
+    compartments/
+
+        <sample>_compartments.bed: BED file with genomic bins annotated as A or B compartments.
+
+        <sample>_compartments.bedGraph: BedGraph file with PC1 eigenvector values for each bin.
+
+</details>
+
 
 ### Comparisons
 

@@ -38,10 +38,6 @@ input:
         type: file
         description: Index of the reference file (optional, but recommended)
         pattern: "*.{fai}"
-  - - blacklist:
-        type: file
-        description: Coordinates of regions to exclude from the output
-        pattern: "*.{bed}"
 output:
   - bigwig:
       - meta:
@@ -76,3 +72,4 @@ maintainers:
   - "@FriederikeHanssen"
   - "@SusiJo"
   - "@JoseEspinosa"
+  

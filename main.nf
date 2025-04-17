@@ -35,6 +35,7 @@ params.chrom_sizes   = getGenomeAttribute('chrom_sizes')
 params.bwa_index     = getGenomeAttribute('bwa')
 params.bowtie2_index = getGenomeAttribute('bowtie2')
 params.gtf           = getGenomeAttribute('gtf')
+params.tss_bed       = getGenomeAttribute('tss_bed')
 params.blacklist     = getGenomeAttribute('blacklist')
 params.binsize       = getGenomeAttribute('binsize')
 

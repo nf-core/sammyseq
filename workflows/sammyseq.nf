@@ -98,6 +98,7 @@ workflow SAMMYSEQ {
                     params.fasta,
                     params.aligner,
                     params.gtf,
+                    params.tss_bed,
                     params.blacklist,
                     params.bwa_index,
                     params.bowtie2_index,
@@ -242,8 +243,6 @@ if (params.stopAt == 'ALIGNMENT') {
         )
     ch_versions = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
 
-//    ch_mle_in = BAM_MARKDUPLICATES_PICARD.out.bam
-
     if (params.stopAt == 'BAM_MARKDUPLICATES_PICARD') {
         return
     }
@@ -260,8 +259,6 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_bam_bai_combined,
         ch_fasta_meta
     )
-
-//ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
 
     ch_bam_bai_filtered = FILTER_BAM_SAMTOOLS.out.bam
         .join(FILTER_BAM_SAMTOOLS.out.bai, by: [0], remainder: true)
@@ -302,6 +299,25 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_dt_fpmetrics_region = DEEPTOOLS_QC.out.fingerprint_metrics_region
     }
     ch_versions = ch_versions.mix(DEEPTOOLS_QC.out.versions)
+
+    if (params.tss_bed) {
+        ch_bw_by_sample = DEEPTOOLS_BAMCOVERAGE.out.bigWig
+            .map { meta, bw -> tuple(meta.experimentalID, [meta, bw]) }
+            .groupTuple()
+            .map { id, values ->
+                def sorted = values.sort { it[1].getBaseName() }
+                def sorted_bw = sorted.collect { it[1] }
+                def sorted_labels = sorted.collect { it[0].id }
+                tuple([id: id, labels: sorted_labels], sorted_bw)
+    }
+
+    BIGWIG_PLOT_DEEPTOOLS(
+        ch_bw_by_sample,
+        PREPARE_GENOME.out.tss_bed
+    )
+
+        ch_versions = ch_versions.mix(BIGWIG_PLOT_DEEPTOOLS.out.versions)
+    }
 
     if (params.comparisonFile) {
         // Add the suffix "_T1" to each sample ID in the comparison file
@@ -384,6 +400,10 @@ if (params.stopAt == 'ALIGNMENT') {
 
     if (params.compartmentsAnalysis) {
 
+        if (!params.gtf) {
+            exit 1, "ERROR: The --gtf parameter must be provided when --compartmentsAnalysis is enabled."
+        }
+
         ch_compartmentTracks = DEEPTOOLS_BAMCOVERAGE.out[0]
             .map { meta, bigwig -> [meta.experimentalID, meta.fraction, meta.sample_group, bigwig] }
 
@@ -397,7 +417,7 @@ if (params.stopAt == 'ALIGNMENT') {
 
         def validChroms = []
         if (params.keep_regions_bed) {
-             validChroms = file(params.keep_regions_bed)
+            validChroms = file(params.keep_regions_bed)
                 .readLines()
                 .findAll { it }
                 .collect { it.tokenize()[0].trim() }
@@ -502,6 +522,9 @@ if (params.stopAt == 'ALIGNMENT') {
     ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.pca_data.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_matrix_global.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_metrics_global.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BIGWIG_PLOT_DEEPTOOLS.out.plotprofile_pdf.collect { it[1] }.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(BIGWIG_PLOT_DEEPTOOLS.out.plotprofile_table.collect { it[1] }.ifEmpty([]))
+
 
     MULTIQC (
         ch_multiqc_files.collect(),

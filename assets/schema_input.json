@@ -46,6 +46,6 @@
                 "meta": ["sample_group"]
             }
         },
-        "required": ["sample", "fastq_1", "experimentalID", "fraction"]
+        "required": ["sample", "fastq_1", "experimentalID", "fraction","sample_group"]
     }
 }

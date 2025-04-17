@@ -6,7 +6,7 @@ include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GTF
     GUNZIP as GUNZIP_GFF
-    GUNZIP as GUNZIP_GENE_BED
+    GUNZIP as GUNZIP_TSS_BED
     GUNZIP as GUNZIP_CHROM_SIZES
     GUNZIP as GUNZIP_FAI
     GUNZIP as GUNZIP_BLACKLIST } from '../../modules/nf-core/gunzip/main'
@@ -33,6 +33,7 @@ workflow PREPARE_GENOME {
     fasta              //    path: path to genome fasta file
     aligner            //    string: aligner name
     gtf                //    file: /path/to/genome.gtf
+    tss_bed            //    file: /path/to/tss.bed
     blacklist          //    file: /path/to/blacklist.bed
     bwa_index          //    file: /path/to/bwa/index/
     bowtie2_index      //    file: /path/to/bowtie2/index/
@@ -66,6 +67,19 @@ workflow PREPARE_GENOME {
             ch_versions = ch_versions.mix(GUNZIP_GTF.out.versions)
         } else {
             ch_gtf = Channel.value(file(params.gtf))
+        }
+    }
+
+    //
+    //  Uncompress bed file
+    //
+    ch_tss_bed = Channel.empty()
+    if (params.tss_bed) {
+        if (params.tss_bed.endsWith('.gz')) {
+            ch_tss_bed = GUNZIP_TSS_BED ( [ [:], params.tss_bed ] ).gunzip.map{ it[1] }
+            ch_versions = ch_versions.mix(GUNZIP_TSS_BED.out.versions)
+        } else {
+            ch_tss_bed = Channel.value(file(params.tss_bed))
         }
     }
 
@@ -187,6 +201,7 @@ workflow PREPARE_GENOME {
     fasta         = ch_fasta                  //    path: genome.fasta
     fai           = ch_fai                    //    path: genome.fai
     gtf           = ch_gtf                    //    path: genome.gtf
+    tss_bed       = ch_tss_bed                //    path: tss.bed
     chrom_sizes   = ch_chrom_sizes            //    path: genome.sizes
     filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
     bwa_index     = ch_bwa_index              //    path: bwa/index/
