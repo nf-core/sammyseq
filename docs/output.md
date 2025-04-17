@@ -134,7 +134,7 @@ Global Fingerprint Plot: Covers the entire genome
 
 </details>
 
-Region-specific Fingerprint Plot: Focuses on a user-specified genomic region (if `--region parameter` is provided (e.g., 'chr1', 'chr2:1000000-2000000'))
+Region-specific Fingerprint Plot: Focuses on a user-specified genomic region (if `--region` parameter is provided (e.g., 'chr1', 'chr2:1000000-2000000'))
 
 <details markdown="1"> <summary>Output files</summary>
 
