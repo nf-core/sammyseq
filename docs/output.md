@@ -108,7 +108,7 @@ DeepTools is used to perform quality control analysis at the aligned fraction le
 
 #### Correlation Heatmap
 
-The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotCorrelation command is used to compute the overall similarity between samples based on genome-wide read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') by setting the --qc_corr_method parameter (default is 'pearson').
+The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotCorrelation command is used to compute the overall similarity between samples based on genome-wide read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') by setting the `--qc_corr_method` parameter (default is 'pearson').
 
 <details markdown="1"> <summary>Output files</summary>
 
@@ -124,7 +124,7 @@ The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tool
 
 Two types of fingerprint plots are generated:
 
-    Global Fingerprint Plot: Covers the entire genome
+Global Fingerprint Plot: Covers the entire genome
 
 <details markdown="1"> <summary>Output files</summary>
 
@@ -134,7 +134,7 @@ Two types of fingerprint plots are generated:
 
 </details>
 
-    Region-specific Fingerprint Plot: Focuses on a user-specified genomic region (if --region parameter is provided (e.g., 'chr1', 'chr2:1000000-2000000'))
+Region-specific Fingerprint Plot: Focuses on a user-specified genomic region (if `--region parameter` is provided (e.g., 'chr1', 'chr2:1000000-2000000'))
 
 <details markdown="1"> <summary>Output files</summary>
 
@@ -158,7 +158,7 @@ The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tool
 
 #### Plot Profile
 
-If the --tss_bed parameter is provided, the [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotProfile command is used to generate TSS-centered signal profile plots, which help visualize the average distribution of sequencing signal (e.g. coverage or enrichment) around transcription start sites (TSS). All fractions belonging to the same sample are grouped and their signal tracks aggregated to produce a single profile per sample.
+If the `--tss_bed parameter` is provided, the [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotProfile command will generate TSS-centered signal profile plots, which help visualize the average distribution of sequencing signal (e.g. coverage or enrichment) around transcription start sites (TSS). All fractions belonging to the same sample are grouped and their signal tracks aggregated to produce a single profile per sample.
 
 <details markdown="1"> <summary>Output files</summary>
 
@@ -170,7 +170,7 @@ If the --tss_bed parameter is provided, the [deepTools](https://deeptools.readth
 
 ### Compartments Analysis
 
-The pipeline includes an optional module for calling A/B chromatin compartments based on SAMMY-seq signal tracks, enabled via the --compartmentsAnalysis parameter. The analysis begins with genomic binning performed using bedtools makewindows, which divides the genome into 50 kb windows by default (adjustable via --binsize). To limit the analysis to specific chromosomes, a BED file can be provided with the --keep_regions_bed parameter. The --gtf parameter is also required, as gene annotations are used in downstream steps. Each fraction is identified using the experimentalID column in the samplesheet, and samples are grouped using the sample_group column, allowing samples of the same group to be analyzed together. The analysis is performed using the CALDER2 algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
+The pipeline includes an optional module for calling A/B chromatin compartments based on SAMMY-seq signal tracks, enabled via the `--compartmentsAnalysis` parameter. The analysis begins with genomic binning performed using bedtools makewindows, which divides the genome into 50 kb windows by default (adjustable via `--binsize`). To limit the analysis to specific chromosomes, a BED file can be provided with the `--keep_regions_bed` parameter. The `--gtf parameter` is also required, as gene annotations are used in downstream steps. Each fraction is identified using the experimentalID column in the samplesheet, and samples are grouped using the sample_group column, allowing samples of the same group to be analyzed together. The analysis is performed using the CALDER2 algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
 
 <details markdown="1"><summary>Output files</summary>
 
