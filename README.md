@@ -99,6 +99,7 @@ nextflow run nf-core/sammyseq \
    --fasta reference_genome.fa \
    --input samplesheet.csv \
    --outdir <OUTDIR> \
+   --gtf reference_annotation.gtf \
    --compartmentsAnalysis
    ```
 
