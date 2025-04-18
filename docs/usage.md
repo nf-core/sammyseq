@@ -93,14 +93,13 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 | `fastq_2`        | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
 | `experimentalID` | Experimental sample identifier. This represents the biological specimen of interest and will be the same for all fractions exctracted.                                                 |
 | `fraction`       | Fraction derived from SAMMY protocol, e.g. depending on the protocol it can be S2, S2L, S2S, S3, S4.                                                                                   |
-| `sample_group`   | Identifier for grouping multiple experimental samples (experimentalIDs) into the same biological condition.                                                                           |
+| `sample_group`   | Identifier used to group samples that belong to the same biological condition condition.                                                                           |
 
 An [example samplesheet](../tests/samplesheet_test.csv) has been provided with the pipeline.
 
 ### Compartments Analysis
 
-When enabling compartment analysis `--compartmentsAnalysis` the sample_group field included in the samplesheet is used to group multiple fractions or replicates that belong to the same biological condition or sample. Compartments will be called on the combined signal of each replicate sharing the same sample_group label.
-
+When enabling compartment analysis `--compartmentsAnalysis`, the `experimentalID` field in the samplesheet is used to identify replicates belonging to the same sample, on which compartments will be called. Consensus profiles will then be generated across replicates belonging to the same biological condition, as defined by the `sample_group` field in the samplesheet.
 
 ### Pairwise comparisons
 

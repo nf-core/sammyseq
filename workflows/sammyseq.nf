@@ -51,6 +51,7 @@ include { FILTER_BAM_SAMTOOLS       } from '../subworkflows/local/filter_bam_sam
 include { BIGWIG_PLOT_DEEPTOOLS     } from '../subworkflows/local/bigwig_plot_deeptools'
 include { DEEPTOOLS_QC              } from '../subworkflows/local/deeptools_qc'
 include { MERGE_COMPARTMENTS        } from '../modules/local/merge_compartments'
+include { GENERATE_CONSENSUS        } from '../modules/local/generate_consensus'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -463,6 +464,24 @@ if (params.stopAt == 'ALIGNMENT') {
             }
 
         MERGE_COMPARTMENTS(ch_merged_compartments)
+
+        ch_sample_groups = ch_samplesheet
+            .map { meta, _ -> tuple(meta.experimentalID, meta.sample_group) }
+            .distinct()
+
+        ch_consensus_input = MERGE_COMPARTMENTS.out.merged_beds
+            .map { file ->
+                def sample_id = file.getBaseName().tokenize('_')[0..1].join('_')
+                tuple(sample_id, file)
+            }
+            .join(ch_sample_groups, by: 0)
+            .map { sample_id, file, group -> tuple(group, file) }
+            .groupTuple()
+            //if n. replicates are minor than three don't run the process
+            .filter { group, files -> files.size() >= 3 }
+
+        GENERATE_CONSENSUS(ch_consensus_input)
+
     }
 
     //

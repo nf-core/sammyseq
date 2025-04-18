@@ -10,7 +10,10 @@ process MERGE_COMPARTMENTS {
 
     script:
     """
-    sort -k1,1V -k2,2n ${bed_files.join(' ')} > ${sample_id}_merged_compartments.bed
-    sort -k1,1V -k2,2n ${bedgraph_files.join(' ')} > ${sample_id}_merged_compartments_eigen.bedgraph
+    head -n 1 ${bed_files[0]} > ${sample_id}_merged_compartments.bed
+    cat ${bed_files.join(' ')} | grep -v '^track' | sort -k1,1V -k2,2n >> ${sample_id}_merged_compartments.bed
+
+    head -n 1 ${bedgraph_files[0]} > ${sample_id}_merged_compartments_eigen.bedgraph
+    cat ${bedgraph_files.join(' ')} | grep -v '^track' | sort -k1,1V -k2,2n >> ${sample_id}_merged_compartments_eigen.bedgraph
     """
 }

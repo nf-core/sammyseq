@@ -42,7 +42,7 @@ Here is an outline of the analysis steps:
 
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
 
-7. (Optionally) Perform A/B compartment analysis using ([`CALDER2`](https://github.com/CSOgroup/CALDER2)) to generate eigenvector and compartment BED tracks
+7. (Optionally) Perform A/B compartment analysis using ([`CALDER2`](https://github.com/CSOgroup/CALDER2)) to generate eigenvector and compartments BED tracks
 
 8. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`](https://github.com/hms-dbmi/spp))
 
@@ -68,7 +68,7 @@ CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3,CTRL
 CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end), `experimentalID` represents the biological specimen of interest and `sample` the library produced for each fraction, it usually is a unique combination of `experimentalID` and `fraction`. The `sample_group` field is used to group multiple replicates that belong to the same biological condition.
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), `experimentalID` represents the biological specimen of interest and `sample` the library produced for each fraction, it usually is a unique combination of `experimentalID` and `fraction`. The `sample_group` field is used to group samples that belong to the same biological condition.
 
 Now, you can run the pipeline using:
 

@@ -170,7 +170,9 @@ If the `--tss_bed` parameter is provided, the [deepTools](https://deeptools.read
 
 ### Compartments Analysis
 
-The pipeline includes an optional module for calling A/B chromatin compartments based on SAMMY-seq signal tracks, enabled via the `--compartmentsAnalysis` parameter. The analysis begins with genomic binning performed using bedtools makewindows, which divides the genome into 50 kb windows by default (adjustable via `--binsize`). To limit the analysis to specific chromosomes, a BED file can be provided with the `--keep_regions_bed` parameter. The `--gtf` parameter is also required, as gene annotations are used in downstream steps. Each fraction is identified using the experimentalID column in the samplesheet, and samples are grouped using the sample_group column, allowing samples of the same group to be analyzed together. The analysis is performed using the [CALDER2](https://github.com/CSOgroup/CALDER2) algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
+The pipeline includes an optional module for calling A/B chromatin compartments based on SAMMY-seq signal tracks, enabled via the `--compartmentsAnalysis` parameter. The analysis begins with genomic binning performed using bedtools makewindows, which divides the genome into 50 kb windows by default (adjustable via `--binsize`). To limit the analysis to specific chromosomes, a BED file can be provided with the `--keep_regions_bed` parameter. The `--gtf` parameter is also required, as gene annotations are used in downstream steps. Each fraction is identified using the experimentalID column in the samplesheet allowing fractions of the same sample to be analyzed together. The analysis is performed using the  [CALDER2](https://github.com/CSOgroup/CALDER2) algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
+
+Consensus profiles are then computed by merging compartment calls from all replicates within the same sample group. For each genomic bin—defined according to the resolution set by the `--binsize` parameter, the consensus label is assigned based on the majority vote among replicates. A bin is labeled as A or B if at least two out of three replicates agree; otherwise, it is marked as NA. The input for this step is the set of merged compartment BED files, and the consensus output is sorted and formatted for IGV visualization.
 
 <details markdown="1"><summary>Output files</summary>
 
@@ -179,6 +181,10 @@ The pipeline includes an optional module for calling A/B chromatin compartments 
         <sample>_compartments.bed: BED file with genomic bins annotated as A or B compartments.
 
         <sample>_compartments.bedGraph: BedGraph file with PC1 eigenvector values for each bin.
+
+    compartments/consensus/
+
+        <sample_group>_compartments_consensus.bed: consensus BED file.
 
 </details>
 
