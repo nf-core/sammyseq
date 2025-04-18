@@ -14,10 +14,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Trim reads](#trim-reads)
 - [Alignment on Reference](#alignment-on-reference)
 - [Mark Duplicate reads](#mark-duplicate-reads)
-- [Samtools reads filtering](#samtools-reads-filtering)
+- [Samtools bam filtering](#samtools-bam-filtering)
 - [Signal track generation](#signal-track-generation)
 - [DeepTools based QC](#deeptools-based-qc)
-- [Compartment Analysis](#compartment-analysis)
+- [Compartments Analysis](#compartments-analysis)
 - [Comparisons](#comparisons)
 - [MultiQC](#multiqc)
 - [Pipeline information](#pipeline-information)
@@ -170,7 +170,8 @@ If the `--tss_bed` parameter is provided, the [deepTools](https://deeptools.read
 
 ### Compartments Analysis
 
-The pipeline includes an optional module for calling A/B chromatin compartments based on SAMMY-seq signal tracks, enabled via the `--compartmentsAnalysis` parameter. The analysis begins with genomic binning performed using bedtools makewindows, which divides the genome into 50 kb windows by default (adjustable via `--binsize`). To limit the analysis to specific chromosomes, a BED file can be provided with the `--keep_regions_bed` parameter. The `--gtf` parameter is also required, as gene annotations are used in downstream steps. Each fraction is identified using the experimentalID column in the samplesheet allowing fractions of the same sample to be analyzed together. The analysis is performed using the  [CALDER2](https://github.com/CSOgroup/CALDER2) algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
+When `--compartmentsAnalysis` is enabled, a module is triggered to infer A/B chromatin compartments from SAMMY-seq signal tracks. The analysis is based on fixed size genomic binning, performed per chromosome using bedtools makewindows, which divides the genome into windows of a defined size (default 50000) set by the `--binsize` parameter. To restrict the analysis to specific chromosomes, a BED file with only the chromosomes to include can be provided via the `--keep_regions_bed` parameter. The `--gtf` parameter is also required, as gene annotations are used in downstream steps.
+Each fraction is identified using the `experimentalID` column in the samplesheet allowing fractions of the same sample to be analyzed together. The Compartments calling is based on [CALDER2](https://github.com/CSOgroup/CALDER2) algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
 
 Consensus profiles are then computed by merging compartment calls from all replicates within the same sample group. For each genomic bin—defined according to the resolution set by the `--binsize` parameter, the consensus label is assigned based on the majority vote among replicates. A bin is labeled as A or B if at least two out of three replicates agree; otherwise, it is marked as NA. The input for this step is the set of merged compartment BED files, and the consensus output is sorted and formatted for IGV visualization.
 
