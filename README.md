@@ -42,7 +42,7 @@ Here is an outline of the analysis steps:
 
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
 
-7. (Optionally) Perform A/B compartment analysis using ([`CALDER2`](https://github.com/CSOgroup/CALDER2)) to generate eigenvector and compartments BED tracks
+7. (Optionally) Perform A/B compartment analysis to generate eigenvectors and compartments BED tracks ([`CALDER2`](https://github.com/CSOgroup/CALDER2))
 
 8. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`](https://github.com/hms-dbmi/spp))
 
