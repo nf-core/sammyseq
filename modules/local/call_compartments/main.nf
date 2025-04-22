@@ -13,8 +13,8 @@ process CALL_COMPARTMENTS {
     output:
     //path "*_compartment___*_*.Rdata", emit: rdata
     //path "*___*.Rdata", emit: aux_rdata
-    path "*_compartments.bed", emit: bed_files
-    path "*_comp_eigenvector.bedgraph", emit: bedgraph_files
+    tuple val(patient), path("*_compartments.bed"), emit: bed_files
+    tuple val(patient), path("*_comp_eigenvector.bedgraph"), emit: bedgraph_files
 
     script:
     def chrom_bed_name = "${meta.chromosome}_binned.bed"

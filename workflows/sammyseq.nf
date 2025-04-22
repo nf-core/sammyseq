@@ -450,11 +450,9 @@ if (params.stopAt == 'ALIGNMENT') {
         )
 
         ch_compartments_beds = CALL_COMPARTMENTS.out.bed_files
-            .map { file -> tuple(file.getBaseName().tokenize('_')[0..1].join('_'), file) }
             .groupTuple()
 
         ch_compartments_eigen_bedgraphs = CALL_COMPARTMENTS.out.bedgraph_files
-            .map { file -> tuple(file.getBaseName().tokenize('_')[0..1].join('_'), file) }
             .groupTuple()
 
         ch_merged_compartments = ch_compartments_beds
@@ -470,10 +468,6 @@ if (params.stopAt == 'ALIGNMENT') {
             .distinct()
 
         ch_consensus_input = MERGE_COMPARTMENTS.out.merged_beds
-            .map { file ->
-                def sample_id = file.getBaseName().tokenize('_')[0..1].join('_')
-                tuple(sample_id, file)
-            }
             .join(ch_sample_groups, by: 0)
             .map { sample_id, file, group -> tuple(group, file) }
             .groupTuple()
@@ -481,6 +475,19 @@ if (params.stopAt == 'ALIGNMENT') {
             .filter { group, files -> files.size() >= 3 }
 
         GENERATE_CONSENSUS(ch_consensus_input)
+
+//       ch_consensus_input = MERGE_COMPARTMENTS.out.merged_beds
+//           .map { file ->
+//               def sample_id = file.getBaseName().tokenize('_')[0..1].join('_')
+//               tuple(sample_id, file)
+//           }
+//           .join(ch_sample_groups, by: 0)
+//           .map { sample_id, file, group -> tuple(group, file) }
+//           .groupTuple()
+//
+//            .filter { group, files -> files.size() >= 3 }
+
+//        GENERATE_CONSENSUS(ch_consensus_input)
 
     }
 
