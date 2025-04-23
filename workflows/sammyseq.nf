@@ -405,7 +405,7 @@ if (params.stopAt == 'ALIGNMENT') {
             exit 1, "ERROR: The --gtf parameter must be provided when --compartmentsAnalysis is enabled."
         }
 
-        ch_compartmentTracks = DEEPTOOLS_BAMCOVERAGE.out[0]
+        ch_compartmentTracks = DEEPTOOLS_BAMCOVERAGE.out.bigWig
             .map { meta, bigwig -> [meta.experimentalID, meta.fraction, meta.sample_group, bigwig] }
 
         ch_compartmentsTSV = Channel.of(["Patient_name", "Fraction", "Status", "File"])
@@ -471,7 +471,8 @@ if (params.stopAt == 'ALIGNMENT') {
             .join(ch_sample_groups, by: 0)
             .map { sample_id, file, group -> tuple(group, file) }
             .groupTuple()
-            .filter { group, files -> files.size() >= 3 }         //if n. replicates are minor than three don't run the process
+            //if n. replicates are minor than three don't run the process
+            .filter { group, files -> files.size() >= 3 }
 
         GENERATE_CONSENSUS(ch_consensus_input)
 
