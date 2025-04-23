@@ -471,23 +471,9 @@ if (params.stopAt == 'ALIGNMENT') {
             .join(ch_sample_groups, by: 0)
             .map { sample_id, file, group -> tuple(group, file) }
             .groupTuple()
-            //if n. replicates are minor than three don't run the process
-            .filter { group, files -> files.size() >= 3 }
+            .filter { group, files -> files.size() >= 3 }         //if n. replicates are minor than three don't run the process
 
         GENERATE_CONSENSUS(ch_consensus_input)
-
-//       ch_consensus_input = MERGE_COMPARTMENTS.out.merged_beds
-//           .map { file ->
-//               def sample_id = file.getBaseName().tokenize('_')[0..1].join('_')
-//               tuple(sample_id, file)
-//           }
-//           .join(ch_sample_groups, by: 0)
-//           .map { sample_id, file, group -> tuple(group, file) }
-//           .groupTuple()
-//
-//            .filter { group, files -> files.size() >= 3 }
-
-//        GENERATE_CONSENSUS(ch_consensus_input)
 
     }
 
