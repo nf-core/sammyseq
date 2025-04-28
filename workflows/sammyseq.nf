@@ -472,7 +472,7 @@ if (params.stopAt == 'ALIGNMENT') {
             .map { sample_id, file, group -> tuple(group, file) }
             .groupTuple()
             //if n. replicates are minor than three don't run the process
-            .filter { group, files -> files.size() >= 3 }
+            .filter { group, files -> files.size() >= 2 }
 
         GENERATE_CONSENSUS(ch_consensus_input)
 
