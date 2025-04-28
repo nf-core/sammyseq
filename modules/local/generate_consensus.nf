@@ -18,7 +18,7 @@ process GENERATE_CONSENSUS {
     {
         bin = \$1 "\\t" \$2 "\\t" \$3                                       ## bin columns (chrom, start, end)
         igv_fields[bin] = \$5 "\\t" \$6 "\\t" \$7 "\\t" \$8                 ## igv columns constant
-        if (\$4 == "A") a[bin]++                                            ## 4 column is the compartment column in the merged bed
+        if (\$4 == "A") a[bin]++                                            ## 4 column is the compartment column in the combined bed
         else if (\$4 == "B") b[bin]++
     }
     END {

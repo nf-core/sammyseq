@@ -50,7 +50,7 @@ include { CALL_COMPARTMENTS         } from '../modules/local/call_compartments'
 include { FILTER_BAM_SAMTOOLS       } from '../subworkflows/local/filter_bam_samtools'
 include { BIGWIG_PLOT_DEEPTOOLS     } from '../subworkflows/local/bigwig_plot_deeptools'
 include { DEEPTOOLS_QC              } from '../subworkflows/local/deeptools_qc'
-include { MERGE_COMPARTMENTS        } from '../modules/local/merge_compartments'
+include { COMBINE_COMPARTMENTS        } from '../modules/local/combine_compartments'
 include { GENERATE_CONSENSUS        } from '../modules/local/generate_consensus'
 
 /*
@@ -455,19 +455,19 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_compartments_eigen_bedgraphs = CALL_COMPARTMENTS.out.bedgraph_files
             .groupTuple()
 
-        ch_merged_compartments = ch_compartments_beds
+        ch_combined_compartments = ch_compartments_beds
             .join(ch_compartments_eigen_bedgraphs)
             .map { sample_id, bed_files, bedgraph_files ->
                 tuple(sample_id, bed_files, bedgraph_files)
             }
 
-        MERGE_COMPARTMENTS(ch_merged_compartments)
+        COMBINE_COMPARTMENTS(ch_combined_compartments)
 
         ch_sample_groups = ch_samplesheet
             .map { meta, _ -> tuple(meta.experimentalID, meta.sample_group) }
             .distinct()
 
-        ch_consensus_input = MERGE_COMPARTMENTS.out.merged_beds
+        ch_consensus_input = COMBINE_COMPARTMENTS.out.combined_beds
             .join(ch_sample_groups, by: 0)
             .map { sample_id, file, group -> tuple(group, file) }
             .groupTuple()

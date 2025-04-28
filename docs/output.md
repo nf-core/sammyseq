@@ -171,17 +171,17 @@ If the `--tss_bed` parameter is provided, the [deepTools](https://deeptools.read
 ### Compartments Analysis
 
 When `--compartmentsAnalysis` is enabled, a module is triggered to infer A/B chromatin compartments from SAMMY-seq signal tracks. The analysis is based on fixed size genomic binning, performed per chromosome using bedtools makewindows, which divides the genome into windows of a defined size (default 50000) set by the `--binsize` parameter. To restrict the analysis to specific chromosomes, a BED file with only the chromosomes to include can be provided via the `--keep_regions_bed` parameter. The `--gtf` parameter is also required, as gene annotations are used in downstream steps.
-Each fraction is identified using the `experimentalID` column in the samplesheet allowing fractions of the same sample to be analyzed together. The Compartments calling is based on [CALDER2](https://github.com/CSOgroup/CALDER2) algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are merged into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
+Each fraction is identified using the `experimentalID` column in the samplesheet allowing fractions of the same sample to be analyzed together. The Compartments calling is based on [CALDER2](https://github.com/CSOgroup/CALDER2) algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are combined into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
 
-Consensus profiles are then computed by merging compartment calls from all replicates within the same sample group. For each genomic bin—defined according to the resolution set by the `--binsize` parameter, the consensus label is assigned based on the majority vote among replicates. A bin is labeled as A or B if at least two out of three replicates agree; otherwise, it is marked as NA. The input for this step is the set of merged compartment BED files, and the consensus output is sorted and formatted for IGV visualization.
+Consensus profiles are then computed by merging compartment calls from all replicates within the same sample group. For each genomic bin—defined according to the resolution set by the `--binsize` parameter, the consensus label is assigned based on the majority vote among replicates. A bin is labeled as A or B if at least two out of three replicates agree; otherwise, it is marked as NA. The input for this step is the set of combined compartment BED files, and the consensus output is sorted and formatted for IGV visualization.
 
 <details markdown="1"><summary>Output files</summary>
 
     compartments/
 
-        <sample>_compartments.bed: BED file with genomic bins annotated as A or B compartments.
+        <sample>_combined_compartments.bed: BED file with genomic bins annotated as A or B compartments, combined from all analyzed chromosomes.
 
-        <sample>_compartments.bedGraph: BedGraph file with PC1 eigenvector values for each bin.
+        <sample>_combined_compartments.bedGraph: BedGraph file with PC1 eigenvector values for each bin.
 
     compartments/consensus/
 
