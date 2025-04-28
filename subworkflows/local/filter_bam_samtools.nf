@@ -10,6 +10,7 @@ workflow FILTER_BAM_SAMTOOLS {
     take:
     bam_bai // channel: [ val(meta), [ bam ], [ bai ] ]
     fasta   // path   : fasta
+    ch_keep_regions_bed
 
     main:
 
@@ -22,7 +23,8 @@ workflow FILTER_BAM_SAMTOOLS {
         bam_bai,
         fasta,
         [],
-        bam_bai.map { it[2].getName().tokenize('.')[-1] }
+        bam_bai.map { it[2].getName().tokenize('.')[-1] },
+        ch_keep_regions_bed
     )
 
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())

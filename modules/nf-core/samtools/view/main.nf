@@ -12,6 +12,7 @@ process SAMTOOLS_VIEW {
     tuple val(meta2), path(fasta)
     path qname
     val index_format
+    path(keep_regions_bed)
 
     output:
     tuple val(meta), path("${prefix}.bam"),                                    emit: bam,              optional: true
@@ -32,6 +33,7 @@ process SAMTOOLS_VIEW {
     def args2 = task.ext.args2 ?: ''
     prefix = task.ext.prefix ?: "${meta.id}"
     def reference = fasta ? "--reference ${fasta}" : ""
+    def keep_regions_bed = keep_regions_bed ? "-L ${keep_regions_bed}" : ""
     file_type = args.contains("--output-fmt sam") ? "sam" :
                 args.contains("--output-fmt bam") ? "bam" :
                 args.contains("--output-fmt cram") ? "cram" :
@@ -55,6 +57,7 @@ process SAMTOOLS_VIEW {
         --threads ${task.cpus-1} \\
         ${reference} \\
         ${readnames} \\
+        $keep_regions_bed \\
         $args \\
         -o ${output_file} \\
         $input \\
