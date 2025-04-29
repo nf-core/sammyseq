@@ -419,13 +419,13 @@ if (params.stopAt == 'ALIGNMENT') {
 
         def validChroms = []
         if (params.keep_regions_bed) {
-            def bedFile = PREPARE_GENOME.out.keep_regions_bed.toList().first()
-            validChroms = bedFile
-                .readLines()
-                .findAll { it }
-                .collect { it.tokenize()[0].trim() }
-                .unique()
+            def bedFile = PREPARE_GENOME.out.keep_regions_bed
+            validChroms = bedFile.readLines()
+                                .findAll { it }
+                                .collect { it.tokenize()[0].trim() }
+                                .unique()
         }
+
 
         ch_genomeBins = PREPARE_GENOME.out.binned_genome
             .flatMap { meta, bedFile ->
