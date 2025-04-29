@@ -93,7 +93,7 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 | `fastq_2`        | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
 | `experimentalID` | Experimental sample identifier. This represents the biological specimen of interest and will be the same for all fractions exctracted.                                                 |
 | `fraction`       | Fraction derived from SAMMY protocol, e.g. depending on the protocol it can be S2, S2L, S2S, S3, S4.                                                                                   |
-| `sample_group`   | Identifier used to group samples that belong to the same biological condition condition.                                                                           |
+| `sample_group`   | Identifier used to group samples that belong to the same biological condition condition.                                                                                               |
 
 An [example samplesheet](../tests/samplesheet_test.csv) has been provided with the pipeline.
 

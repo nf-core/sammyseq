@@ -189,7 +189,6 @@ Consensus profiles are then computed by merging compartment calls from all repli
 
 </details>
 
-
 ### Comparisons
 
 When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile smoothed by the Gaussian kernel is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat. Biotech. doi:10.1038/nbt.1508

@@ -101,7 +101,7 @@ nextflow run nf-core/sammyseq \
    --outdir <OUTDIR> \
    --gtf reference_annotation.gtf \
    --compartmentsAnalysis
-   ```
+```
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
