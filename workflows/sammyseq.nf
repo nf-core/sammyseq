@@ -259,7 +259,7 @@ if (params.stopAt == 'ALIGNMENT') {
     FILTER_BAM_SAMTOOLS(
         ch_bam_bai_combined,
         ch_fasta_meta,
-        params.keep_regions_bed ? PREPARE_GENOME.out.keep_regions_bed : []
+        PREPARE_GENOME.out.keep_regions_bed.collect { it }.ifEmpty([])
     )
 
     ch_bam_bai_filtered = FILTER_BAM_SAMTOOLS.out.bam
@@ -424,7 +424,6 @@ if (params.stopAt == 'ALIGNMENT') {
                 .map { it.text.split('\n').collect { it.tokenize()[0] }.unique() }
                 .first()
         }
-
 
         ch_genomeBins = PREPARE_GENOME.out.binned_genome
             .flatMap { meta, bedFile ->

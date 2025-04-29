@@ -16,6 +16,7 @@ workflow FILTER_BAM_SAMTOOLS {
 
     ch_versions = Channel.empty()
 
+
     //
     // Filter BAM using Samtools view
     //
@@ -24,10 +25,10 @@ workflow FILTER_BAM_SAMTOOLS {
         fasta,
         [],
         bam_bai.map { it[2].getName().tokenize('.')[-1] },
-        ch_keep_regions_bed.first()
+        ch_keep_regions_bed
     )
 
-    ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
+    ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.ifEmpty([]))
 
     //
     // Index BAM file and run samtools stats, flagstat and idxstats
