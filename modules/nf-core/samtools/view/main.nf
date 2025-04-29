@@ -12,7 +12,7 @@ process SAMTOOLS_VIEW {
     tuple val(meta2), path(fasta)
     path qname
     val index_format
-    path(keep_regions_bed)
+    path keep_regions_bed
 
     output:
     tuple val(meta), path("${prefix}.bam"),                                    emit: bam,              optional: true

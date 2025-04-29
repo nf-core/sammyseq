@@ -204,6 +204,8 @@ workflow PREPARE_GENOME {
         } else {
             ch_keep_regions_bed = Channel.fromPath(params.keep_regions_bed, checkIfExists: true)
         }
+            } else {
+        ch_keep_regions_bed = Channel.empty()
     }
 
     ///
