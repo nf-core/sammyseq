@@ -108,7 +108,7 @@ CTRL004_S2,CTRL004_S3
 CTRL004_S2,CTRL004_S4
 ```
 
-It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file. When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech doi\\:10.1038/nbt.1508
+It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file. When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
 
 ### Combine fractions
 
