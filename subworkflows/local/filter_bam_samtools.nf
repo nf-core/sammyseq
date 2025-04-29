@@ -24,7 +24,7 @@ workflow FILTER_BAM_SAMTOOLS {
         fasta,
         [],
         bam_bai.map { it[2].getName().tokenize('.')[-1] },
-        ch_keep_region_bed
+        ch_keep_region_bed.first()
     )
 
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
