@@ -421,7 +421,7 @@ if (params.stopAt == 'ALIGNMENT') {
 
         if (params.keep_regions_bed) {
             validChroms = PREPARE_GENOME.out.keep_regions_bed
-                .map { it.text.split('\n').findAll{ it }.collect{ it.tokenize()[0].trim() }.unique() }
+                .map { it.text.split('\n').collect { it.tokenize()[0] }.unique() }
                 .first()
         }
 
