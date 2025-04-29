@@ -256,12 +256,10 @@ if (params.stopAt == 'ALIGNMENT') {
 
         }
 
-    ch_keep_regions_bed = Channel.value(params.keep_regions_bed)
-
     FILTER_BAM_SAMTOOLS(
         ch_bam_bai_combined,
         ch_fasta_meta,
-        ch_keep_regions_bed
+        PREPARE_GENOME.out.keep_regions_bed
     )
 
     ch_bam_bai_filtered = FILTER_BAM_SAMTOOLS.out.bam
@@ -421,7 +419,8 @@ if (params.stopAt == 'ALIGNMENT') {
 
         def validChroms = []
         if (params.keep_regions_bed) {
-            validChroms = file(params.keep_regions_bed)
+            def bedFile = PREPARE_GENOME.out.keep_regions_bed.toList().first()
+            validChroms = bedFile
                 .readLines()
                 .findAll { it }
                 .collect { it.tokenize()[0].trim() }

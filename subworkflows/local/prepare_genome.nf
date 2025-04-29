@@ -9,6 +9,7 @@ include {
     GUNZIP as GUNZIP_TSS_BED
     GUNZIP as GUNZIP_CHROM_SIZES
     GUNZIP as GUNZIP_FAI
+    GUNZIP as GUNZIP_KEEP_REGIONS_BED
     GUNZIP as GUNZIP_BLACKLIST } from '../../modules/nf-core/gunzip/main'
 
 include {
@@ -188,6 +189,23 @@ workflow PREPARE_GENOME {
         }
     }
 
+    //
+    // Load keep_regions_bed as a channel
+    //
+
+    ch_keep_regions_bed = Channel.empty()
+
+    if (params.keep_regions_bed) {
+        if (params.keep_regions_bed.endsWith('.gz')) {
+            ch_keep_regions_bed = GUNZIP_KEEP_REGIONS_BED(
+                [ [:], params.keep_regions_bed ]
+            ).gunzip.map { it[1] }
+            ch_versions = ch_versions.mix(GUNZIP_KEEP_REGIONS_BED.out.versions)
+        } else {
+            ch_keep_regions_bed = Channel.fromPath(params.keep_regions_bed, checkIfExists: true)
+        }
+    }
+
     ///
     // Create bins for genome
     //
@@ -198,15 +216,16 @@ workflow PREPARE_GENOME {
     ch_binned_genome = BEDTOOLS_MAKEWINDOWS.out.bed
 
     emit:
-    fasta         = ch_fasta                  //    path: genome.fasta
-    fai           = ch_fai                    //    path: genome.fai
-    gtf           = ch_gtf                    //    path: genome.gtf
-    tss_bed       = ch_tss_bed                //    path: tss.bed
-    chrom_sizes   = ch_chrom_sizes            //    path: genome.sizes
-    filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
-    bwa_index     = ch_bwa_index              //    path: bwa/index/
-    bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
-    blacklist     = ch_blacklist
-    binned_genome = ch_binned_genome
-    versions      = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
+    fasta            = ch_fasta                  //    path: genome.fasta
+    fai              = ch_fai                    //    path: genome.fai
+    gtf              = ch_gtf                    //    path: genome.gtf
+    tss_bed          = ch_tss_bed                //    path: tss.bed
+    chrom_sizes      = ch_chrom_sizes            //    path: genome.sizes
+    filtered_bed     = ch_genome_filtered_bed    //    path: *.include_regions.bed
+    bwa_index        = ch_bwa_index              //    path: bwa/index/
+    bowtie2_index    = ch_bowtie2_index          //    path: bowtie2/index/
+    blacklist        = ch_blacklist
+    binned_genome    = ch_binned_genome
+    keep_regions_bed = ch_keep_regions_bed
+    versions         = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }
