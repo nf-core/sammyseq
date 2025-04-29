@@ -17,8 +17,8 @@ include {
 
 include { UNTARFILES               } from '../../modules/nf-core/untarfiles/main'
 include { GFFREAD                  } from '../../modules/nf-core/gffread/main'
-include { CUSTOM_GETCHROMSIZES as CUSTOM_GETCHROMSIZES_CHROM_SIZES } from '../../modules/nf-core/custom/getchromsizes/main'
-include { CUSTOM_GETCHROMSIZES as CUSTOM_GETCHROMSIZES_FAI         } from '../../modules/nf-core/custom/getchromsizes/main'
+include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_CHROM_SIZES } from '../../modules/nf-core/samtools/faidx/main'
+include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_FAI         } from '../../modules/nf-core/samtools/faidx/main'
 include { BWA_INDEX                } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD            } from '../../modules/nf-core/bowtie2/build/main'
 include { BEDTOOLS_MAKEWINDOWS     } from '../../modules/nf-core/bedtools/makewindows/main'
@@ -92,38 +92,46 @@ workflow PREPARE_GENOME {
         }
     }
 
-    // Create chromosome sizes file
-
-    ch_chrom_sizes = Channel.empty()
-    if (params.chrom_sizes) {
-        if (params.chrom_sizes.endsWith('.gz')) {
-            ch_chrom_sizes = GUNZIP_CHROM_SIZES ( [ [:], params.chrom_sizes ] ).gunzip.map{ it[1] }
-            ch_versions = ch_versions.mix(GUNZIP_CHROM_SIZES.out.versions)
-        } else {
-            ch_chrom_sizes = Channel.value(file(params.chrom_sizes))
-        }
-    } else {
-        // Execute CUSTOM_GETCHROMSIZES only if params.chrom_sizes is not provided
-        CUSTOM_GETCHROMSIZES_CHROM_SIZES( ch_fasta.map { [ [:], it ] } )
-        ch_chrom_sizes = CUSTOM_GETCHROMSIZES_CHROM_SIZES.out.sizes.map { it[1] }
-        ch_versions = ch_versions.mix(CUSTOM_GETCHROMSIZES_CHROM_SIZES.out.versions)
-    }
-
+    //
     // Create FASTA index
-
+    //
     ch_fai = Channel.empty()
     if (params.fai) {
         if (params.fai.endsWith('.gz')) {
-            ch_fai = GUNZIP_FAI ( [ [:], params.fai ] ).gunzip.map{ it[1] }
+            ch_fai = GUNZIP_FAI([ [:], params.fai ]).gunzip.map{ it[1] }
             ch_versions = ch_versions.mix(GUNZIP_FAI.out.versions)
         } else {
             ch_fai = Channel.value(file(params.fai))
         }
     } else {
-        // Esegui SAMTOOLS_FAIDX solo se params.fai non è fornito
-        CUSTOM_GETCHROMSIZES_FAI ( ch_fasta.map { [ [:], it ] } )
-        ch_fai = CUSTOM_GETCHROMSIZES_FAI.out.fai.map{ it[1] }
-        ch_versions = ch_versions.mix(CUSTOM_GETCHROMSIZES_FAI.out.versions)
+        SAMTOOLS_FAIDX_FAI(
+            ch_fasta.map { tuple([:], it) },
+            [[:], []],
+            false
+        )
+        ch_fai = SAMTOOLS_FAIDX_FAI.out.fai.map { it[1] }
+        ch_versions = ch_versions.mix(SAMTOOLS_FAIDX_FAI.out.versions)
+    }
+
+    //
+    // Create chromosome sizes file
+    //
+    ch_chrom_sizes = Channel.empty()
+    if (params.chrom_sizes) {
+        if (params.chrom_sizes.endsWith('.gz')) {
+            ch_chrom_sizes = GUNZIP_CHROM_SIZES([ [:], params.chrom_sizes ]).gunzip.map{ it[1] }
+            ch_versions = ch_versions.mix(GUNZIP_CHROM_SIZES.out.versions)
+        } else {
+            ch_chrom_sizes = Channel.value(file(params.chrom_sizes))
+        }
+    } else {
+        SAMTOOLS_FAIDX_CHROM_SIZES(
+            ch_fasta.map { tuple([:], it) },
+            [[:], []],
+            true
+        )
+        ch_chrom_sizes = SAMTOOLS_FAIDX_CHROM_SIZES.out.sizes.map { it[1] }
+        ch_versions = ch_versions.mix(SAMTOOLS_FAIDX_CHROM_SIZES.out.versions)
     }
 
 
