@@ -418,14 +418,12 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_uniqueSamples = ch_compartmentTracks.map { it[0] }.unique()
 
         def validChroms = []
-        if (params.keep_regions_bed) {
-            def bedFile = PREPARE_GENOME.out.keep_regions_bed
-            validChroms = bedFile.readLines()
-                                .findAll { it }
-                                .collect { it.tokenize()[0].trim() }
-                                .unique()
-        }
 
+        if (params.keep_regions_bed) {
+            validChroms = PREPARE_GENOME.out.keep_regions_bed
+                .map { it.text.split('\n').findAll{ it }.collect{ it.tokenize()[0].trim() }.unique() }
+                .first()
+        }
 
         ch_genomeBins = PREPARE_GENOME.out.binned_genome
             .flatMap { meta, bedFile ->
