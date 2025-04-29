@@ -55,11 +55,6 @@
                         "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["modules"]
                     },
-                    "custom/getchromsizes": {
-                        "branch": "master",
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
-                        "installed_by": ["modules"]
-                    },
                     "deeptools/bamcoverage": {
                         "branch": "master",
                         "git_sha": "f045f9e2d406a8ea87fff4fa1bb5c1071a38f458",
