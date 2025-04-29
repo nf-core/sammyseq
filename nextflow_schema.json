@@ -95,6 +95,13 @@
                     "description": "Specify aligner to be used to map reads to reference genome.",
                     "enum": ["bwamem", "bwaaln", "bowtie2"]
                 },
+                "trimmer": {
+                    "type": "string",
+                    "default": "trimgalore",
+                    "fa_icon": "fas fa-cut",
+                    "enum": ["trimgalore", "trimmomatic"],
+                    "description": "Specify the program to use for read trimming"
+                },
                 "bwa_index": {
                     "type": "string",
                     "description": "Path to directory or tar.gz archive for pre-built BWA index.",
@@ -408,11 +415,5 @@
         {
             "$ref": "#/$defs/generic_options"
         }
-    ],
-    "properties": {
-        "trimmer": {
-            "type": "string",
-            "default": "trimmomatic"
-        }
-    }
+    ]
 }

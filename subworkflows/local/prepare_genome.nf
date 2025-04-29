@@ -22,7 +22,6 @@ include { CUSTOM_GETCHROMSIZES as CUSTOM_GETCHROMSIZES_FAI         } from '../..
 include { BWA_INDEX                } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD            } from '../../modules/nf-core/bowtie2/build/main'
 include { BEDTOOLS_MAKEWINDOWS     } from '../../modules/nf-core/bedtools/makewindows/main'
-include { BEDOPS_GTF2BED           } from '../../modules/nf-core/bedops/gtf2bed/main'
 include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
 include { BIN_BY_CHROMOSOME        } from '../../modules/local/bin_by_chromosome'
 
@@ -90,32 +89,6 @@ workflow PREPARE_GENOME {
             ch_versions  = ch_versions.mix(GUNZIP_BLACKLIST.out.versions)
         } else {
             ch_blacklist = Channel.value(file(params.blacklist))
-        }
-    }
-
-    //
-    // Uncompress gene BED annotation file or create from GTF if required
-    //
-
-    // If --gtf is supplied along with --genome
-    // Make gene bed from supplied --gtf instead of using iGenomes one automatically
-    def make_bed = false
-    if (!params.gene_bed) {
-        make_bed = true
-    } else if (params.gtf) {
-            make_bed = true
-    }
-
-    if (make_bed) {
-        ch_gtf_with_meta = ch_gtf.map { file -> [ [id: file.simpleName], file ] }
-        ch_gene_bed = BEDOPS_GTF2BED(ch_gtf_with_meta).bed
-        ch_versions = ch_versions.mix(BEDOPS_GTF2BED.out.versions)
-    } else {
-        if (params.gene_bed.endsWith('.gz')) {
-            ch_gene_bed = GUNZIP_GENE_BED ( [ [:], params.gene_bed ] ).gunzip.map{ it[1] }
-            ch_versions = ch_versions.mix(GUNZIP_GENE_BED.out.versions)
-        } else {
-            ch_gene_bed = Channel.value(file(params.gene_bed))
         }
     }
 
@@ -226,7 +199,7 @@ workflow PREPARE_GENOME {
     fasta         = ch_fasta                  //    path: genome.fasta
     fai           = ch_fai                    //    path: genome.fai
     gtf           = ch_gtf                    //    path: genome.gtf
-    gene_bed      = ch_gene_bed               //    path: gene.bed
+    // gene_bed      = ch_gene_bed               //    path: gene.bed
     chrom_sizes   = ch_chrom_sizes            //    path: genome.sizes
     filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
     bwa_index     = ch_bwa_index              //    path: bwa/index/
