@@ -256,12 +256,12 @@ if (params.stopAt == 'ALIGNMENT') {
 
         }
 
-    ch_keep_regipns_bed = Channel.value(params.keep_regions_bed)
+    ch_keep_regions_bed = Channel.value(params.keep_regions_bed)
 
     FILTER_BAM_SAMTOOLS(
         ch_bam_bai_combined,
         ch_fasta_meta,
-        ch_keep_regipns_bed
+        ch_keep_regions_bed
     )
 
     ch_bam_bai_filtered = FILTER_BAM_SAMTOOLS.out.bam
