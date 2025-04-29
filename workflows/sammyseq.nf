@@ -18,7 +18,6 @@ include { UTILS_NFCORE_PIPELINE       } from '../subworkflows/nf-core/utils_nfco
 include { CAT_FASTQ                   } from '../modules/nf-core/cat/fastq'
 include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
 include { TRIMGALORE                  } from '../modules/nf-core/trimgalore/main'
-include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
 include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewindows/main'
 include { BIN_BY_CHROMOSOME           } from '../modules/local/bin_by_chromosome'
@@ -50,7 +49,6 @@ include { DEEPTOOLS_PLOTHEATMAP       } from '../modules/nf-core/deeptools/ploth
 
 include { PREPARE_GENOME            } from '../subworkflows/local/prepare_genome'
 include { CAT_FRACTIONS             } from '../subworkflows/local/cat_fractions'
-include { CUT_SIZES_GENOME          } from "../modules/local/chromosomes_size"
 include { RTWOSAMPLESMLE            } from '../modules/local/rtwosamplesmle'
 include { FILTER_BAM_SAMTOOLS       } from '../subworkflows/local/filter_bam_samtools'
 include { BIGWIG_PLOT_DEEPTOOLS     } from '../subworkflows/local/bigwig_plot_deeptools'
@@ -237,25 +235,11 @@ if (params.stopAt == 'ALIGNMENT') {
     //  DUPLICATE READS REMOVAL
     //
 
-    // Index Fasta File for Markduplicates
-    SAMTOOLS_FAIDX (
-            ch_fasta_meta,
-            [[], []]
-        )
-    ch_fai_for_cut = SAMTOOLS_FAIDX.out.fai.collect()
-    ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
-
-    if (params.stopAt == 'SAMTOOLS_FAIDX') {
-        return
-    }
-
-    CUT_SIZES_GENOME(ch_fai_for_cut)
-
     // MARK DUPLICATES IN BAM FILE
     BAM_MARKDUPLICATES_PICARD (
         ch_aligned_bam,
         ch_fasta_meta,
-        SAMTOOLS_FAIDX.out.fai.collect()
+        PREPARE_GENOME.out.fai.collect { [ [id: 'fasta'], it ] }
         )
     ch_versions = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
 
@@ -288,7 +272,7 @@ if (params.stopAt == 'ALIGNMENT') {
 
         }
 
-    ch_fai_path = SAMTOOLS_FAIDX.out.fai.map { it[1] }
+    ch_fai_path = PREPARE_GENOME.out.fai.map { it[1] }
     //ch_fai_path.view()
     ch_fasta_path = ch_fasta_meta.map { it[1] }
     //ch_fasta_path.view()
@@ -389,8 +373,7 @@ if (params.stopAt == 'ALIGNMENT') {
         //4.run rscript
 
         RTWOSAMPLESMLE (comparisons_merge_ch,
-                        CUT_SIZES_GENOME.out.ch_sizes_genome
-                        // PREPARE_GENOME.out.chrom_sizes
+                        PREPARE_GENOME.out.chrom_sizes
                         )
 
         if (params.stopAt == 'RTWOSAMPLESMLE') {
