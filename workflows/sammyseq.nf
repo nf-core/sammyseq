@@ -397,7 +397,7 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     ///
-    /// Compartments calling
+    /// Compartments Analysis
     ///
 
     if (params.compartmentsAnalysis) {
@@ -417,24 +417,37 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_binsize = Channel.value(params.binsize)
         ch_uniqueSamples = ch_compartmentTracks.map { it[0] }.unique()
 
-        def validChroms = []
-
-        if (params.keep_regions_bed) {
-            validChroms = PREPARE_GENOME.out.keep_regions_bed
-                .map { it.text.split('\n').collect { it.tokenize()[0] }.unique() }
-                .first()
-        }
-
-        ch_genomeBins = PREPARE_GENOME.out.binned_genome
-            .flatMap { meta, bedFile ->
-                def lines = bedFile.text.split('\n').findAll { it }
-                def filtered = validChroms ? lines.findAll { validChroms.contains(it.split('\t')[0]) } : lines
-                def grouped = filtered.groupBy { it.split('\t')[0] }
-
-                grouped.collect { chrom, chromLines ->
-                    tuple([id: meta.id, chromosome: chrom], chromLines)
+        // If --keep_regions_bed is provided, pair each genome bin with the keep_regions_bed file (which contains the chromosomes to keep)
+        ch_keepRegions = params.keep_regions_bed
+            ? PREPARE_GENOME.out.binned_genome
+                .combine(PREPARE_GENOME.out.keep_regions_bed)
+                .map { meta, bedFile, keepFile ->
+                    tuple(meta, bedFile, keepFile)
                 }
-            }
+        // If --keep_regions_bed is not provided, pass genome bins with all chromosomes present in the fasta
+            : PREPARE_GENOME.out.binned_genome
+                .map { meta, bedFile ->
+                    tuple(meta, bedFile, null)
+                }
+
+        ch_genomeBins = ch_keepRegions
+            .flatMap { meta, bedFile, keepFile ->
+                def validChroms = []
+                if (keepFile) {
+                    validChroms = keepFile.getText().split('\n')
+                        .findAll { it }
+                        .collect { it.tokenize()[0].trim() }
+                        .unique()
+                }
+
+        def lines = bedFile.getText().split('\n').findAll { it }
+        def filtered = validChroms ? lines.findAll { validChroms.contains(it.split('\t')[0]) } : lines
+        def grouped = filtered.groupBy { it.split('\t')[0] }
+
+        grouped.collect { chrom, chromLines ->
+            tuple([id: meta.id, chromosome: chrom], chromLines)
+        }
+    }
 
         ch_chromSampleTuples = ch_genomeBins
             .combine(ch_uniqueSamples)
@@ -471,7 +484,7 @@ if (params.stopAt == 'ALIGNMENT') {
             .join(ch_sample_groups, by: 0)
             .map { sample_id, file, group -> tuple(group, file) }
             .groupTuple()
-            //if n. replicates are minor than three don't run the process
+        // If n. replicates (sample_group) are minor than two don't run the process
             .filter { group, files -> files.size() >= 2 }
 
         GENERATE_CONSENSUS(ch_consensus_input)
