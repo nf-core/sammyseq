@@ -8,7 +8,10 @@ multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 fastqc/*_fastqc.{html,zip}
 pipeline_info/*.{html,json,txt,yml}
+multiqc/multiqc_data/deeptools_pca_plot.txt
+multiqc/multiqc_data/deeptools_plot_PCA.txt
+reports/deeptools/multibamsummary/all_target_bams.bamSummary.npz
 reports/deeptools/plotcorrelation/all_target_bams.plotCorrelation.pdf
-reports/deeptools/plotfingerprint/global/CTRL004_global.plotFingerprint.pdf
-reports/deeptools/plotfingerprint/global/CTRL004_global.plotFingerprint.raw.txt
+reports/deeptools/plotfingerprint/global/CTRL004_global.plotFingerprint.*
+reports/deeptools/plotpca/all_target_bams.plotPCA.*
 reports/markduplicates/CTRL004_*.md.MarkDuplicates.metrics.txt

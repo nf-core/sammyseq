@@ -211,11 +211,9 @@
                 "chr22.binned.bed:md5,1f50a634c5057be8b5cf576dabd8140b",
                 "chr22.fa.fai:md5,6d0b824b29dd8593c2b7575ddc345ece",
                 "chr22.fa.sizes:md5,3b8cd381d92f11c1a6cd64a01a5c4b66",
-                "versions.yml:md5,334ff10c4cb7c45934e8839168763216",
+                "versions.yml:md5,d684926c05ce543309abb0993c1204ee",
                 "deeptools_correlation_plot.txt:md5,6c05e7a6bc6b84f813c1687927ce4ab1",
                 "deeptools_fingerprint_plot.txt:md5,69d4e6bdab5fa365357dca87a5065223",
-                "deeptools_pca_plot.txt:md5,d4dcd12f07295a7b23cc42c75c6f0225",
-                "deeptools_plot_PCA.txt:md5,10d859426fffaad9811d1c2c4ae9062a",
                 "deeptools_plot_fingerprint_counts.txt:md5,1855a7beffd277849f22194044c8216f",
                 "deeptools_plot_fingerprint_metrics.txt:md5,cf29429a93bf6ef2b25a2a0a65c71f3c",
                 "fastqc-status-check-heatmap.txt:md5,17d93c671e5548b5d52922c70d2a3a56",
@@ -246,11 +244,7 @@
                 "samtools-idxstats-mapped-reads-plot_Raw_Counts.txt:md5,a9e393a702389c8a42a518d791ae58b9",
                 "samtools-stats-dp.txt:md5,3a6e4d8ef5709e21ba20252d994d75e0",
                 "samtools_alignment_plot.txt:md5,353a0f2972f2408242f42f8e44f99877",
-                "all_target_bams.bamSummary.npz:md5,2dd15cee87d789f9ae800b8766212a52",
                 "all_target_bams.plotCorrelation.mat.tab:md5,4b45caec40d932383b6e182f700cba41",
-                "CTRL004_global.plotFingerprint.qcmetrics.txt:md5,267ad78be5b633d18182ff77ce1ae91a",
-                "all_target_bams.plotPCA.pdf:md5,7756c925c764fd8b1b561aac9ab4604c",
-                "all_target_bams.plotPCA.tab:md5,1fca9ddb3f206527f727705b740679f4",
                 "CTRL004_S2.flagstat:md5,fad1bb26917ecee7ef6d28812b61b928",
                 "CTRL004_S2.idxstats:md5,e5c53300abc273b1a20805a1d7e7d235",
                 "CTRL004_S2.stats:md5,ee0a15ae364d7c4bfbe9d805ed551edb",
@@ -278,6 +272,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-05T12:32:08.492664"
+        "timestamp": "2025-06-05T13:09:16.444431"
     }
 }
