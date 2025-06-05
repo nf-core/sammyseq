@@ -8,3 +8,7 @@ multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 fastqc/*_fastqc.{html,zip}
 pipeline_info/*.{html,json,txt,yml}
+reports/deeptools/plotcorrelation/all_target_bams.plotCorrelation.pdf
+reports/deeptools/plotfingerprint/global/CTRL004_global.plotFingerprint.pdf
+reports/deeptools/plotfingerprint/global/CTRL004_global.plotFingerprint.raw.txt
+reports/markduplicates/CTRL004_*.md.MarkDuplicates.metrics.txt

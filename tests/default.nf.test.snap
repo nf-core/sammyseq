@@ -248,15 +248,9 @@
                 "samtools_alignment_plot.txt:md5,353a0f2972f2408242f42f8e44f99877",
                 "all_target_bams.bamSummary.npz:md5,2dd15cee87d789f9ae800b8766212a52",
                 "all_target_bams.plotCorrelation.mat.tab:md5,4b45caec40d932383b6e182f700cba41",
-                "all_target_bams.plotCorrelation.pdf:md5,b5a32a02b97c67e4d166e602504850ab",
-                "CTRL004_global.plotFingerprint.pdf:md5,d7fc3d1eb1df9035e4ccb03bd2b4b532",
                 "CTRL004_global.plotFingerprint.qcmetrics.txt:md5,267ad78be5b633d18182ff77ce1ae91a",
-                "CTRL004_global.plotFingerprint.raw.txt:md5,81345b6b076a7ec4dcdad5d9d954c187",
-                "all_target_bams.plotPCA.pdf:md5,55f0d690433db487ce719406ddaa566f",
+                "all_target_bams.plotPCA.pdf:md5,38eecdded7f0497d7fba2f465e598c5b",
                 "all_target_bams.plotPCA.tab:md5,1fca9ddb3f206527f727705b740679f4",
-                "CTRL004_S2.md.MarkDuplicates.metrics.txt:md5,5941a94cf24df6e0952cd4654ce97204",
-                "CTRL004_S3.md.MarkDuplicates.metrics.txt:md5,c80956b14881fdb6a1e3b7d6e955899e",
-                "CTRL004_S4.md.MarkDuplicates.metrics.txt:md5,8e0cdf86a4c013cfb9523c179038eb63",
                 "CTRL004_S2.flagstat:md5,fad1bb26917ecee7ef6d28812b61b928",
                 "CTRL004_S2.idxstats:md5,e5c53300abc273b1a20805a1d7e7d235",
                 "CTRL004_S2.stats:md5,ee0a15ae364d7c4bfbe9d805ed551edb",
@@ -284,6 +278,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-05T10:22:40.474841"
+        "timestamp": "2025-06-05T11:46:43.499893"
     }
 }
