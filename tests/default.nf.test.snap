@@ -211,7 +211,6 @@
                 "chr22.binned.bed:md5,1f50a634c5057be8b5cf576dabd8140b",
                 "chr22.fa.fai:md5,6d0b824b29dd8593c2b7575ddc345ece",
                 "chr22.fa.sizes:md5,3b8cd381d92f11c1a6cd64a01a5c4b66",
-                "versions.yml:md5,d684926c05ce543309abb0993c1204ee",
                 "deeptools_correlation_plot.txt:md5,6c05e7a6bc6b84f813c1687927ce4ab1",
                 "deeptools_fingerprint_plot.txt:md5,69d4e6bdab5fa365357dca87a5065223",
                 "deeptools_plot_fingerprint_counts.txt:md5,1855a7beffd277849f22194044c8216f",
@@ -272,6 +271,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-05T13:09:16.444431"
+        "timestamp": "2025-06-05T16:05:35.807389"
     }
 }

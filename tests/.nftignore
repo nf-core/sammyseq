@@ -15,3 +15,4 @@ reports/deeptools/plotcorrelation/all_target_bams.plotCorrelation.pdf
 reports/deeptools/plotfingerprint/global/CTRL004_global.plotFingerprint.*
 reports/deeptools/plotpca/all_target_bams.plotPCA.*
 reports/markduplicates/CTRL004_*.md.MarkDuplicates.metrics.txt
+genome/versions.yml
