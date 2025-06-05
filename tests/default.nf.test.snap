@@ -249,7 +249,7 @@
                 "all_target_bams.bamSummary.npz:md5,2dd15cee87d789f9ae800b8766212a52",
                 "all_target_bams.plotCorrelation.mat.tab:md5,4b45caec40d932383b6e182f700cba41",
                 "CTRL004_global.plotFingerprint.qcmetrics.txt:md5,267ad78be5b633d18182ff77ce1ae91a",
-                "all_target_bams.plotPCA.pdf:md5,38eecdded7f0497d7fba2f465e598c5b",
+                "all_target_bams.plotPCA.pdf:md5,7756c925c764fd8b1b561aac9ab4604c",
                 "all_target_bams.plotPCA.tab:md5,1fca9ddb3f206527f727705b740679f4",
                 "CTRL004_S2.flagstat:md5,fad1bb26917ecee7ef6d28812b61b928",
                 "CTRL004_S2.idxstats:md5,e5c53300abc273b1a20805a1d7e7d235",
@@ -278,6 +278,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-05T11:46:43.499893"
+        "timestamp": "2025-06-05T12:32:08.492664"
     }
 }

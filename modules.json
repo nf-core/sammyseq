@@ -37,12 +37,12 @@
                     },
                     "bwa/sampe": {
                         "branch": "master",
-                        "git_sha": "5c2a07fa0bf3720097ad1d0ac795b02b4104d326",
+                        "git_sha": "8204ea029e2dd0321c33a1cfe3f8fcfb7d583a17",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "bwa/samse": {
                         "branch": "master",
-                        "git_sha": "5c2a07fa0bf3720097ad1d0ac795b02b4104d326",
+                        "git_sha": "8204ea029e2dd0321c33a1cfe3f8fcfb7d583a17",
                         "installed_by": ["fastq_align_bwaaln"]
                     },
                     "bwamem2/mem": {
