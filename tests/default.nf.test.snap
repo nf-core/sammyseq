@@ -243,7 +243,6 @@
                 "samtools-idxstats-mapped-reads-plot_Raw_Counts.txt:md5,a9e393a702389c8a42a518d791ae58b9",
                 "samtools-stats-dp.txt:md5,3a6e4d8ef5709e21ba20252d994d75e0",
                 "samtools_alignment_plot.txt:md5,353a0f2972f2408242f42f8e44f99877",
-                "all_target_bams.plotCorrelation.mat.tab:md5,4b45caec40d932383b6e182f700cba41",
                 "CTRL004_S2.flagstat:md5,fad1bb26917ecee7ef6d28812b61b928",
                 "CTRL004_S2.idxstats:md5,e5c53300abc273b1a20805a1d7e7d235",
                 "CTRL004_S2.stats:md5,ee0a15ae364d7c4bfbe9d805ed551edb",
@@ -271,6 +270,6 @@
             "nf-test": "0.9.0",
             "nextflow": "25.04.3"
         },
-        "timestamp": "2025-06-05T16:05:35.807389"
+        "timestamp": "2025-06-06T15:41:54.472005"
     }
 }
