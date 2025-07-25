@@ -11,6 +11,8 @@ pipeline_info/*.{html,json,txt,yml}
 multiqc/multiqc_plots/*
 multiqc/multiqc_data/deeptools_pca_plot.txt
 multiqc/multiqc_data/deeptools_plot_PCA.txt
+multiqc/multiqc_data/BETA-multiqc.parquet
+multiqc/multiqc_data/llms-full.txt
 reports/deeptools/multibamsummary/*
 reports/deeptools/plotcorrelation/*
 reports/deeptools/plotfingerprint/*
