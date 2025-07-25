@@ -46,13 +46,12 @@ Changes in 'deeptools/bamcoverage/main.nf':
  
      stub:
      def prefix    = task.ext.prefix ?: "${meta.id}"
--    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bigWig"
-+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bw"
+-    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bigWig"
++    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bw"
      """
-     touch ${prefix}
+     touch ${prefix}.${extension}
  
 
 'modules/nf-core/deeptools/bamcoverage/tests/main.nf.test.snap' is unchanged
-'modules/nf-core/deeptools/bamcoverage/tests/tags.yml' is unchanged
 'modules/nf-core/deeptools/bamcoverage/tests/main.nf.test' is unchanged
 ************************************************************

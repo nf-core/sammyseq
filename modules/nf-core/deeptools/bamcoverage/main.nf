@@ -25,7 +25,7 @@ process DEEPTOOLS_BAMCOVERAGE {
     def args      = task.ext.args ?: ''
     def prefix    = task.ext.prefix ?: "${meta.id}"
     def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bw"
-    def blacklist_params = blacklist ? "--blackListFileName ${blacklist}" : ""
+    def blacklist = blacklist ? "--blackListFileName ${blacklist}" : ""
 
     // cram_input is currently not working with deeptools
     // therefore it's required to convert cram to bam first
@@ -41,7 +41,7 @@ process DEEPTOOLS_BAMCOVERAGE {
         bamCoverage \\
             --bam $input_out \\
             $args \\
-            $blacklist_params \\
+            $blacklist \\
             --numberOfProcessors ${task.cpus} \\
             --outFileName ${prefix}.${extension}
 
@@ -57,7 +57,7 @@ process DEEPTOOLS_BAMCOVERAGE {
         bamCoverage \\
             --bam $input_out \\
             $args \\
-            $blacklist_params \\
+            $blacklist \\
             --numberOfProcessors ${task.cpus} \\
             --outFileName ${prefix}.${extension}
 
@@ -70,7 +70,7 @@ process DEEPTOOLS_BAMCOVERAGE {
 
     stub:
     def prefix    = task.ext.prefix ?: "${meta.id}"
-    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bw"
+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bw"
     """
     touch ${prefix}.${extension}
 

@@ -19,15 +19,15 @@ process DEEPTOOLS_MULTIBAMSUMMARY {
     task.ext.when == null || task.ext.when
 
     script:
-    def args             = task.ext.args ?: ''
-    def prefix           = task.ext.prefix ?: "all_bam"
-    def label            = labels ? "--labels ${labels.join(' ')}" : ''
-    def blacklist_params = blacklist ? "--blackListFileName ${blacklist}" : ""
+    def args      = task.ext.args ?: ''
+    def prefix    = task.ext.prefix ?: "all_bam"
+    def label     = labels ? "--labels ${labels.join(' ')}" : ''
+    def blacklist = blacklist ? "--blackListFileName ${blacklist}" : ""
     """
     multiBamSummary bins \\
         $args \\
         $label \\
-        $blacklist_params \\
+        $blacklist \\
         --bamfiles ${bams.join(' ')} \\
         --numberOfProcessors $task.cpus \\
         --outFileName ${prefix}.bamSummary.npz
