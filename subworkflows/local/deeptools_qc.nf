@@ -96,7 +96,7 @@ workflow DEEPTOOLS_QC {
 
         DEEPTOOLS_PLOTFINGERPRINT_GLOBAL(ch_grouped_bam_bai)
         ch_versions = ch_versions.mix(DEEPTOOLS_PLOTFINGERPRINT_GLOBAL.out.versions)
-        
+
         ch_fingerprint_matrix_global = DEEPTOOLS_PLOTFINGERPRINT_GLOBAL.out.matrix
         ch_fingerprint_metrics_global = DEEPTOOLS_PLOTFINGERPRINT_GLOBAL.out.metrics
 
