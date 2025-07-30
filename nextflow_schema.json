@@ -328,11 +328,6 @@
                     "description": "A list of space-delimited chromosome names containing those chromosomes that should be excluded for computing the normalization",
                     "fa_icon": "fas fa-align-justify"
                 },
-                "ignoreDuplicates": {
-                    "type": "boolean",
-                    "description": "If set, reads that have the same orientation and start position will be considered only once. If reads are paired, the mate\\u2019s position also has to coincide to ignore a read",
-                    "fa_icon": "fas fa-align-justify"
-                },
                 "keep_regions_bed": {
                     "type": "string",
                     "description": "-L options filter the alignments that will be included in the output to only those alignments that match certain criteria.",
@@ -368,7 +363,7 @@
                 },
                 "corr_method": {
                     "type": "string",
-                    "default": "pearson",
+                    "default": "spearman",
                     "enum": ["pearson", "spearman"],
                     "description": "Deeptools Correlation Plot statistical calculation method",
                     "fa_icon": "fas fa-bars"
@@ -395,9 +390,15 @@
                     "fa_icon": "fas fa-align-justify",
                     "description": "Path to GTF annotation file."
                 },
+                "plotfingerprint": {
+                    "type": "boolean",
+                    "description": "Enable deepTools plotFingerprint analysis for quality control assessment",
+                    "fa_icon": "fas fa-align-justify"
+                },
                 "gene_bed": {
                     "type": "string",
-                    "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified."
+                    "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified.",
+                    "fa_icon": "fas fa-align-justify"
                 }
             }
         }

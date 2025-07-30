@@ -28,6 +28,7 @@ include { FASTQ_ALIGN_BOWTIE2         } from '../subworkflows/nf-core/fastq_alig
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
 include { DEEPTOOLS_MULTIBAMSUMMARY   } from '../modules/nf-core/deeptools/multibamsummary/main'
+include { DEEPTOOLS_MULTIBIGWIGSUMMARY} from '../modules/nf-core/deeptools/multibigwigsummary/main'
 include { DEEPTOOLS_PLOTCORRELATION   } from '../modules/nf-core/deeptools/plotcorrelation/main'
 include { DEEPTOOLS_PLOTPCA           } from '../modules/nf-core/deeptools/plotpca/main'
 include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_GLOBAL } from '../modules/nf-core/deeptools/plotfingerprint/main'
@@ -291,18 +292,21 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     DEEPTOOLS_QC (
-        FILTER_BAM_SAMTOOLS.out.bam,
-        FILTER_BAM_SAMTOOLS.out.bai,
-        params.corr_method,
-        params.blacklist ? PREPARE_GENOME.out.blacklist : []
+    FILTER_BAM_SAMTOOLS.out.bam,
+    FILTER_BAM_SAMTOOLS.out.bai,
+    DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+    params.corr_method,
+    params.blacklist ? PREPARE_GENOME.out.blacklist : []
     )
     ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
     ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
-    ch_dt_fpmatrix_global = DEEPTOOLS_QC.out.fingerprint_matrix_global
-    ch_dt_fpmetrics_global = DEEPTOOLS_QC.out.fingerprint_metrics_global
-    if (params.region) {
-        ch_dt_fpmatrix_region = DEEPTOOLS_QC.out.fingerprint_matrix_region
-        ch_dt_fpmetrics_region = DEEPTOOLS_QC.out.fingerprint_metrics_region
+    if (params.plotfingerprint) {
+        ch_dt_fpmatrix_global = DEEPTOOLS_QC.out.fingerprint_matrix_global
+        ch_dt_fpmetrics_global = DEEPTOOLS_QC.out.fingerprint_metrics_global
+        if (params.region) {
+            ch_dt_fpmatrix_region = DEEPTOOLS_QC.out.fingerprint_matrix_region
+            ch_dt_fpmetrics_region = DEEPTOOLS_QC.out.fingerprint_metrics_region
+        }
     }
     ch_versions = ch_versions.mix(DEEPTOOLS_QC.out.versions)
 
@@ -434,11 +438,12 @@ if (params.stopAt == 'ALIGNMENT') {
 
     ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.correlation_matrix.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.pca_data.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.correlation_matrix.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.pca_data.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_matrix_global.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_metrics_global.collect{it[1]}.ifEmpty([]))
-
+    
+    if (params.plotfingerprint) {
+        ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_matrix_global.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_metrics_global.collect{it[1]}.ifEmpty([]))
+    }
+    
     MULTIQC (
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
