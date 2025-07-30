@@ -35,7 +35,7 @@ Here is an outline of the analysis steps:
 2. Trim reads to remove adapter sequences and low quality ends ([`Trim Galore!`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore) or [`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 4. Mark duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
-5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
+5. Filter reads and generate alignment statistics ([`samtools`](http://www.htslib.org/))
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
 7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`])
 8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
@@ -104,7 +104,7 @@ The nf-core pipeline (nf-core/sammyseq) is being implemented by [Lucio Di Filipp
 
 <!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
 
-Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu), [Júlia Mir-Pedrol](https://github.com/mirpedrol) and [Marcel Ribeiro-Dantas](https://github.com/mribeirodantas).
+Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu), [Marinicla Pascale](https://github.com/Marinicla), [Júlia Mir-Pedrol](https://github.com/mirpedrol) and [Marcel Ribeiro-Dantas](https://github.com/mribeirodantas).
 
 ## Acknowledgements
 
