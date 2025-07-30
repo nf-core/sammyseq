@@ -41,7 +41,7 @@ Here is an outline of the analysis steps:
 8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <p align="center">
-    <img title="sammyseq scheme" src="docs/images/nf-core-sammyseq_tubemap.png" width=70%>
+    <img title="sammyseq scheme" src="docs/images/nf-core-sammyseq_tubemap.png" width=100%>
 </p>
 
 ## Usage
