@@ -1,0 +1,31 @@
+Changes in component 'nf-core/deeptools/multibigwigsummary'
+'modules/nf-core/deeptools/multibigwigsummary/meta.yml' is unchanged
+Changes in 'deeptools/multibigwigsummary/main.nf':
+--- modules/nf-core/deeptools/multibigwigsummary/main.nf
++++ modules/nf-core/deeptools/multibigwigsummary/main.nf
+@@ -9,6 +9,7 @@
+ 
+     input:
+     tuple val(meta), path(bigwigs), val(labels)
++    path(blacklist)
+ 
+     output:
+     tuple val(meta), path("*.npz") , emit: matrix
+@@ -21,10 +22,12 @@
+     def args   = task.ext.args ?: ''
+     def prefix = task.ext.prefix ?: "all_bigwig"
+     def label  = labels ? "--labels ${labels.join(' ')}" : ''
++    def blacklist_params = blacklist ? "--blackListFileName ${blacklist}" : ""
+     """
+     multiBigwigSummary bins \\
+         $args \\
+         $label \\
++        $blacklist_params \\
+         --bwfiles ${bigwigs.join(' ')} \\
+         --numberOfProcessors $task.cpus \\
+         --outFileName ${prefix}.bigwigSummary.npz
+
+'modules/nf-core/deeptools/multibigwigsummary/environment.yml' is unchanged
+'modules/nf-core/deeptools/multibigwigsummary/tests/main.nf.test' is unchanged
+'modules/nf-core/deeptools/multibigwigsummary/tests/main.nf.test.snap' is unchanged
+************************************************************
