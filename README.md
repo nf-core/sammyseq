@@ -20,48 +20,67 @@
 
 ## Introduction
 
-**nf-core/sammyseq** is a bioinformatics pipeline that ...
+**nf-core/sammyseq** is a bioinformatics pipeline for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state as described in:
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
+> Lucini F, Petrini C, Salviato E, Pal K, Rosti V, Gorini F, Santarelli P, Quadri R, Lembo G, Graziano G, Di Patrizio Soldateschi E, Tagliaferri I, Pinatel E, Sebestyén E, Rotta L, Gentile F, Vaira V, Lanzuolo C, Ferrari F. Biochemical properties of chromatin domains define genome compartmentalization. Nucleic Acids Research, Volume 52, Issue 12, 8 July 2024, Page e54 [doi](https://doi.org/10.1093/nar/gkae454) [pubmed](https://pubmed.ncbi.nlm.nih.gov/38808669/)
 
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+> Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020) [doi](https://doi.org/10.1038/s41467-020-20048-9) [pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
+
+> [!WARNING]
+> Please note that this pipeline is under active development and has not been released yet.
+
+Here is an outline of the analysis steps:
+
+1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+2. Trim reads to remove adapter sequences and low quality ends ([`Trim Galore!`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore) or [`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
+3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
+4. Mark duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
+5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
+6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
+7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`])
+8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
+
+<p align="center">
+    <img title="sammyseq scheme" src="docs/images/nf-core-sammyseq_tubemap.png" width=70%>
+</p>
 
 ## Usage
 
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
 First, prepare a samplesheet with your input data that looks as follows:
 
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,fastq_1,fastq_2,experimentalID,fraction
+CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2
+CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3
+CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
+Each row represents a fastq file (single-end) or a pair of fastq files (paired end), `experimentalID` represents the biological specimen of interest and `sample` the library produced for each fraction, it usually is a unique combination of `experimentalID` and `fraction`.
 
 Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
 nextflow run nf-core/sammyseq \
    -profile <docker/singularity/.../institute> \
+   --fasta reference_genome.fa \
    --input samplesheet.csv \
    --outdir <OUTDIR>
+```
+
+or
+
+```bash
+nextflow run nf-core/sammyseq \
+   -profile <docker/singularity/.../institute> \
+   --fasta reference_genome.fa \
+   --input samplesheet.csv \
+   --outdir <OUTDIR> \
+   --comparisonFile comparisons.csv
 ```
 
 > [!WARNING]
@@ -71,17 +90,25 @@ For more details and further functionality, please refer to the [usage documenta
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/sammyseq/results) tab on the nf-core website pipeline page.
+<!-- TODO uncomment after first release: To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/sammyseq/results) tab on the nf-core website pipeline page. -->
+
 For more details about the output files and reports, please refer to the
 [output documentation](https://nf-co.re/sammyseq/output).
 
 ## Credits
 
-nf-core/sammyseq was originally written by Margherita Mutarelli, Lucio Di Filippo.
+The SAMMY-seq data analysis procedure was originally developed by the laboratory of Francesco Ferrari (IFOM-ETS, Milan; IGM-CNR, Pavia) in collaboration with the laboratory of Chiara Lanzuolo (INGM, Milan; ITB-CNR, Segrate).
+The orginal pipeline backbone was mainly the result of work by Cristiano Petrini (IFOM) and Endre Sebestyén (IFOM), with significant contributions by Ilario Tagliaferri (IFOM), Giovanni Lembo (IFOM) and Emanuele Di Patrizio Soldateschi (INGM). The project also benefited from the collaboration and input by Eva Maria Pinatel (ITB-CNR). The product of this effort resulted in a first pipeline implemented in bash and adapted to work on Sun Grid Engine (SGE) scheduler.
 
-We thank the following people for their extensive assistance in the development of this pipeline:
+The nf-core pipeline (nf-core/sammyseq) is being implemented by [Lucio Di Filippo](https://github.com/lucidif) (ISASI-CNR, Pozzuoli; IBBTEC, Santander), [Ugo Maria Iannacchero](https://github.com/ugoiannacchero) (ITB-CNR) and [Margherita Mutarelli](https://github.com/daisymut) (ISASI-CNR).
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+<!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
+
+Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu), [Júlia Mir-Pedrol](https://github.com/mirpedrol) and [Marcel Ribeiro-Dantas](https://github.com/mribeirodantas).
+
+## Acknowledgements
+
+The development of this pipeline was made possible thanks to the projects Progetti@CNR Myo-CoV-2 B93C20046330005, AFM Téléthon EDMD-GenomeSCAN B53C22009260007 and PIR01_00011 I.Bi.S.Co. Infrastruttura per Big data e Scientific COmputing (PON 2014-2020).
 
 ## Contributions and Support
 

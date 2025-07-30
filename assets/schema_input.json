@@ -26,8 +26,26 @@
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "experimentalID": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "experimentalID must be provided and cannot contain spaces",
+                "meta": ["experimentalID"]
+            },
+            "fraction": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "fraction must be provided and cannot contain spaces",
+                "meta": ["fraction"]
+            },
+            "sample_group": {
+                "type": "string",
+                "pattern": "^\\S+$",
+                "errorMessage": "sample_group must be provided and cannot contain spaces",
+                "meta": ["sample_group"]
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample", "fastq_1", "experimentalID", "fraction"]
     }
 }
