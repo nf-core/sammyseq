@@ -105,17 +105,9 @@ The generated signal tracks represent read coverage and can be normalized using 
 
 DeepTools is used to perform quality control analysis at the aligned fraction level. The pipeline uses several DeepTools commands to generate comprehensive QC metrics and visualizations.
 
-### MultiBAMSummary
+### MultiBigwigSummary
 
-The process starts with multiBamSummary, which computes the read coverage over the entire genome (or a specified region) for multiple BAM files. This creates a matrix of read counts that serves as input for the subsequent analyses. By default, the bin size is set to 50000, but you can adjust this using the --bam_binsize parameter.
-
-<details markdown="1"> <summary>Output files</summary>
-
-    deeptools/quality_control/multibamsummary/
-        ${meta.id}.npz: Binary file containing the read coverage matrix
-        outRawCounts.txt: Text file with raw read counts
-
-</details>
+The process starts with multiBigwigSummary, which computes the read coverage for multiple BigWig files. This creates a matrix of read counts that serves as input for correlation and PCA analyses.
 
 ### PCA (Principal Component Analysis)
 
@@ -131,7 +123,7 @@ PCA is used to analyze and visualize variability in high-dimensional datasets. I
 
 ### Correlation Heatmap
 
-The correlation analysis computes the overall similarity between samples based on read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') if the parameter qc_corr_method is provided (default is pearson)
+The correlation analysis computes the overall similarity between samples based on read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') if the parameter qc_corr_method is provided (default is spearman)
 
 <details markdown="1"> <summary>Output files</summary>
 
@@ -141,13 +133,17 @@ The correlation analysis computes the overall similarity between samples based o
 
 </details>
 
-### Fingerprint Plot
+### Fingerprint Plot (Optional)
 
-This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
+This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions. This analysis uses BAM files and can be disabled using --plotfingerprint false.
 
-Two types of fingerprint plots are generated:
+#### MultiBAMSummary
 
-    Global Fingerprint Plot: Covers the entire genome
+When fingerprint analysis is enabled, multiBamSummary computes read coverage from BAM files to generate the data matrix required for fingerprint plotting.
+
+#### Global Fingerprint Plot
+
+Covers the entire genome to assess overall signal enrichment patterns.
 
 <details markdown="1"> <summary>Output files</summary>
 
@@ -157,7 +153,9 @@ Two types of fingerprint plots are generated:
 
 </details>
 
-    Region-specific Fingerprint Plot: Focuses on a user-specified genomic region (if --region parameter is provided (e.g., 'chr1', 'chr2:1000000-2000000'))
+#### Region-specific Fingerprint Plot
+
+Focuses on a user-specified genomic region (if --region parameter is provided, e.g., 'chr1', 'chr2:1000000-2000000').
 
 <details markdown="1"> <summary>Output files</summary>
 

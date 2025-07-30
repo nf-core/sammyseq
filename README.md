@@ -5,12 +5,12 @@
   </picture>
 </h1>
 
-[![GitHub Actions CI Status](https://github.com/nf-core/sammyseq/actions/workflows/ci.yml/badge.svg)](https://github.com/nf-core/sammyseq/actions/workflows/ci.yml)
+[![GitHub Actions CI Status](https://github.com/nf-core/sammyseq/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/sammyseq/actions/workflows/nf-test.yml)
 [![GitHub Actions Linting Status](https://github.com/nf-core/sammyseq/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/sammyseq/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/sammyseq/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
-[![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.04.2-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
-[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.1-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.1)
+[![Nextflow](https://img.shields.io/badge/version-%E2%89%A524.10.5-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
+[![nf-core template version](https://img.shields.io/badge/nf--core_template-3.3.2-green?style=flat&logo=nfcore&logoColor=white&color=%2324B064&link=https%3A%2F%2Fnf-co.re)](https://github.com/nf-core/tools/releases/tag/3.3.2)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
@@ -35,7 +35,7 @@ Here is an outline of the analysis steps:
 2. Trim reads to remove adapter sequences and low quality ends ([`Trim Galore!`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore) or [`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 4. Mark duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
-5. Generate alignment statistics ([`samtools`](http://www.htslib.org/))
+5. Filter reads and generate alignment statistics ([`samtools`](http://www.htslib.org/))
 6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
 7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`])
 8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
@@ -104,7 +104,7 @@ The nf-core pipeline (nf-core/sammyseq) is being implemented by [Lucio Di Filipp
 
 <!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
 
-Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu), [Júlia Mir-Pedrol](https://github.com/mirpedrol) and [Marcel Ribeiro-Dantas](https://github.com/mribeirodantas).
+Many thanks to others who have helped out and contributed along the way too, including (but not limited to): [Phil Ewels](https://github.com/ewels), [Maxime Ulysse Garcia](https://github.com/maxulysse), [Friederike Hanssen](https://github.com/FriederikeHanssen), [Matthias Hörtenhuber](https://github.com/mashehu), [Marinicla Pascale](https://github.com/Marinicla), [Júlia Mir-Pedrol](https://github.com/mirpedrol) and [Marcel Ribeiro-Dantas](https://github.com/mribeirodantas).
 
 ## Acknowledgements
 
