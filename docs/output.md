@@ -106,65 +106,63 @@ The generated signal tracks represent read coverage and can be normalized using 
 
 DeepTools is used to perform quality control analysis at the aligned fraction level. The pipeline uses several DeepTools commands to generate comprehensive QC metrics and visualizations.
 
-#### Correlation Heatmap
+### MultiBigwigSummary
 
-The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotCorrelation command is used to compute the overall similarity between samples based on genome-wide read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') by setting the `--qc_corr_method` parameter (default is 'pearson').
+The process starts with multiBigwigSummary, which computes the read coverage for multiple BigWig files. This creates a matrix of read counts that serves as input for correlation and PCA analyses.
+
+### PCA (Principal Component Analysis)
+
+PCA is used to analyze and visualize variability in high-dimensional datasets. In the context of sequencing data analysis, PCA helps to determine if samples show greater variability between experimental conditions than between replicates of the same treatment.
 
 <details markdown="1"> <summary>Output files</summary>
 
-    reports/deeptools/plotcorrelation/
+    deeptools/quality_control/plotpca/
+        ${meta.id}.pdf: PCA plot
+        ${meta.id}.tab: Table with PCA coordinates
+
+</details>
+
+### Correlation Heatmap
+
+The correlation analysis computes the overall similarity between samples based on read coverage. The result is visualized as a heatmap of correlation coefficients, indicating the strength of the relationship between samples. You can specify the correlation method (e.g., 'spearman', 'pearson') if the parameter qc_corr_method is provided (default is spearman)
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/plotcorrelation/
         ${meta.id}.pdf: Correlation heatmap
         ${meta.id}.tab: Table with correlation coefficients
 
 </details>
 
-#### Fingerprint Plot
+### Fingerprint Plot (Optional)
 
-The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotFingerprint command is useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions.
+This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions. This analysis uses BAM files and can be disabled using --plotfingerprint false.
 
-Two types of fingerprint plots are generated:
+#### MultiBAMSummary
 
-Global Fingerprint Plot: Covers the entire genome
+When fingerprint analysis is enabled, multiBamSummary computes read coverage from BAM files to generate the data matrix required for fingerprint plotting.
+
+#### Global Fingerprint Plot
+
+Covers the entire genome to assess overall signal enrichment patterns.
 
 <details markdown="1"> <summary>Output files</summary>
 
-    reports/deeptools/plotfingerprint/global/
+    deeptools/quality_control/plotfingerprint/global/
         ${meta.id}_global.pdf: Global fingerprint plot
         ${meta.id}_global.raw.txt: Raw data for the global fingerprint plot
 
 </details>
 
-Region-specific Fingerprint Plot: Focuses on a user-specified genomic region (if `--region` parameter is provided (e.g., 'chr1', 'chr2:1000000-2000000'))
+#### Region-specific Fingerprint Plot
+
+Focuses on a user-specified genomic region (if --region parameter is provided, e.g., 'chr1', 'chr2:1000000-2000000').
 
 <details markdown="1"> <summary>Output files</summary>
 
-    reports/deeptools/plotfingerprint/${params.region}/
+    deeptools/quality_control/plotfingerprint/${params.region}/
         ${meta.id}_region_${params.region}.pdf: Region-specific fingerprint plot
         ${meta.id}_region_${params.region}.raw.txt: Raw data for the region-specific fingerprint plot
-
-</details>
-
-#### PCA (Principal Component Analysis)
-
-The [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotPCA command is used to determine whether samples vary more between experimental conditions than between replicates. The output PDF includes both the PCA plot and the corresponding scree plot, which displays the proportion of variance explained by each principal component.
-
-<details markdown="1"> <summary>Output files</summary>
-
-    deeptools/quality_control/plotpca/
-        ${meta.id}.pdf: PCA plot (including scree plot)
-        ${meta.id}.tab: Table with PCA coordinates
-
-</details>
-
-#### Plot Profile
-
-If the `--tss_bed` parameter is provided, the [deepTools](https://deeptools.readthedocs.io/en/develop/content/list_of_tools.html) plotProfile command will generate TSS-centered signal profile plots, which help visualize the average distribution of sequencing signal (e.g. coverage or enrichment) around transcription start sites (TSS). All fractions belonging to the same sample are grouped and their signal tracks aggregated to produce a single profile per sample.
-
-<details markdown="1"> <summary>Output files</summary>
-
-    reports/deeptools/plotprofile/{$params.tss_bed}/
-        ${meta.id}.${params.tss_bed}.plotProfile.pdf: Line plot showing the average signal across TSS for all fractions of a given sample.
-        ${meta.id}.${params.tss_bed}.plotProfile.tab: Tabular file with the raw values used in the plot.
 
 </details>
 
