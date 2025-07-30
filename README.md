@@ -36,7 +36,7 @@ Here is an outline of the analysis steps:
 
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 
-4. Remove duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
+4. Mark duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
 
 5. BAM filtering and generate alignment statistics ([`samtools`](http://www.htslib.org/))
 
