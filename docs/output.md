@@ -171,7 +171,7 @@ This analysis uses computeMatrix in reference-point mode to generate coverage pr
         ${meta.id}_tss.pdf: TSS centered coverage profile
         ${meta.id}_tss.tab: Matrix of values used for the plot
 
-</details> 
+</details>
 
 ### Comparisons
 
