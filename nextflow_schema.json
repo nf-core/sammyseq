@@ -330,13 +330,13 @@
                 },
                 "keep_regions_bed": {
                     "type": "string",
-                    "description": "-L options filter the alignments that will be included in the output to only those alignments that match certain criteria.",
+                    "description": "A list of regions that will be kept in the output after filtering the alignment with samtools using -L option in addition to the flag and quality threshold filters",
                     "fa_icon": "fas fa-align-justify"
                 },
                 "q_score": {
                     "type": "integer",
                     "default": 1,
-                    "description": "kip alignments with MAPQ smaller than 'value' (1 default).",
+                    "description": "skip alignments with MAPQ smaller than 'value' (1 default)",
                     "fa_icon": "fas fa-align-justify"
                 },
                 "flag": {
