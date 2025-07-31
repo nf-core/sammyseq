@@ -122,7 +122,7 @@ A blacklist of regions that will be excluded by signal tracks can be provided us
 
 ### Keep regions bed file
 
-A list of regions that will be kept in the output after filtering the alignment with samtools using -L option (in addition to the flag and quality threshold filters) can be passed with the optional parameter `--keep_regions_bed` with full path to a coordinate file in bed format. 
+A list of regions that will be kept in the output after filtering the alignment with samtools using -L option (in addition to the flag and quality threshold filters) can be passed with the optional parameter `--keep_regions_bed` with full path to a coordinate file in bed format.
 
 ### TSS bed file
 
