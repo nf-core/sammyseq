@@ -20,27 +20,11 @@ include { TRIMMOMATIC                 } from '../modules/nf-core/trimmomatic'
 include { TRIMGALORE                  } from '../modules/nf-core/trimgalore/main'
 include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamcoverage'
 include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewindows/main'
-include { BIN_BY_CHROMOSOME           } from '../modules/local/bin_by_chromosome'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
 include { FASTQ_ALIGN_DNA             } from '../subworkflows/nf-core/fastq_align_dna/main'
 include { FASTQ_ALIGN_BOWTIE2         } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
-
-include { DEEPTOOLS_MULTIBAMSUMMARY   } from '../modules/nf-core/deeptools/multibamsummary/main'
-include { DEEPTOOLS_MULTIBIGWIGSUMMARY} from '../modules/nf-core/deeptools/multibigwigsummary/main'
-include { DEEPTOOLS_PLOTCORRELATION   } from '../modules/nf-core/deeptools/plotcorrelation/main'
-include { DEEPTOOLS_PLOTPCA           } from '../modules/nf-core/deeptools/plotpca/main'
-include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_GLOBAL } from '../modules/nf-core/deeptools/plotfingerprint/main'
-include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_REGION } from '../modules/nf-core/deeptools/plotfingerprint/main'
-
-include { DEEPTOOLS_COMPUTEMATRIX     } from '../modules/nf-core/deeptools/computematrix/main'
-include { DEEPTOOLS_PLOTPROFILE       } from '../modules/nf-core/deeptools/plotprofile/main'
-include { DEEPTOOLS_PLOTHEATMAP       } from '../modules/nf-core/deeptools/plotheatmap/main'
-
-// include { SAMTOOLS_VIEW as SAMTOOLS_VIEW_FILTER     }   from '../modules/nf-core/samtools/view/main'
-// include { SAMTOOLS_SORT as SAMTOOLS_SORT_FILTERED   }   from '../modules/nf-core/samtools/sort/main'
-// include { SAMTOOLS_INDEX as SAMTOOLS_INDEX_FILTERED }   from '../modules/nf-core/samtools/index/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,6 +33,7 @@ include { DEEPTOOLS_PLOTHEATMAP       } from '../modules/nf-core/deeptools/ploth
 */
 
 include { PREPARE_GENOME            } from '../subworkflows/local/prepare_genome'
+include { GENOME_BINNING            } from '../subworkflows/local/genome_binning'
 include { CAT_FRACTIONS             } from '../subworkflows/local/cat_fractions'
 include { RTWOSAMPLESMLE            } from '../modules/local/rtwosamplesmle'
 include { FILTER_BAM_SAMTOOLS       } from '../subworkflows/local/filter_bam_samtools'
@@ -107,7 +92,8 @@ workflow SAMMYSEQ {
                     params.fai,
                     params.binsize,
                     params.gtf,
-                    params.gene_bed)
+                    params.gene_bed,
+                    params.tss_bed,)
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     if (params.stopAt == 'PREPARE_GENOME') {
@@ -310,6 +296,36 @@ if (params.stopAt == 'ALIGNMENT') {
     }
     ch_versions = ch_versions.mix(DEEPTOOLS_QC.out.versions)
 
+        if (params.tss_bed) {
+        ch_bw_by_sample = DEEPTOOLS_BAMCOVERAGE.out.bigwig
+            .map { meta, bw -> tuple(meta.experimentalID, [meta, bw]) }
+            .groupTuple()
+            .map { id, values ->
+                def sorted = values.sort { it[1].getBaseName() }
+                def sorted_bw = sorted.collect { it[1] }
+                def sorted_labels = sorted.collect { it[0].id }
+                tuple([id: id, labels: sorted_labels], sorted_bw)
+    }
+
+    BIGWIG_PLOT_DEEPTOOLS(
+        ch_bw_by_sample,
+        PREPARE_GENOME.out.tss_bed
+    )
+
+        ch_versions = ch_versions.mix(BIGWIG_PLOT_DEEPTOOLS.out.versions)
+    }
+
+    //
+    // GENOME BINNING: Run only if comparisonFile is provided
+    //
+    if (params.comparisonFile) {
+        GENOME_BINNING(
+            PREPARE_GENOME.out.filtered_bed,
+            params.keep_regions_bed
+        )
+        ch_versions = ch_versions.mix(GENOME_BINNING.out.versions)
+    }
+
     if (params.comparisonFile) {
         // Add the suffix "_T1" to each sample ID in the comparison file
 
@@ -442,6 +458,11 @@ if (params.stopAt == 'ALIGNMENT') {
     if (params.plotfingerprint) {
         ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_matrix_global.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_metrics_global.collect{it[1]}.ifEmpty([]))
+    }
+
+    if (params.tss_bed) {
+        ch_multiqc_files  = ch_multiqc_files.mix(BIGWIG_PLOT_DEEPTOOLS.out.plotprofile_pdf.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files  = ch_multiqc_files.mix(BIGWIG_PLOT_DEEPTOOLS.out.plotprofile_table.collect{it[1]}.ifEmpty([]))
     }
 
     MULTIQC (

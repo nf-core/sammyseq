@@ -2,7 +2,6 @@
  * Perform full suite of deep tools analysis on bam/bigwig files
  */
 
-include { DEEPTOOLS_MULTIBAMSUMMARY } from '../../modules/nf-core/deeptools/multibamsummary/main'
 include { DEEPTOOLS_MULTIBIGWIGSUMMARY } from '../../modules/nf-core/deeptools/multibigwigsummary/main'
 include { DEEPTOOLS_PLOTCORRELATION } from '../../modules/nf-core/deeptools/plotcorrelation/main'
 include { DEEPTOOLS_PLOTPCA         } from '../../modules/nf-core/deeptools/plotpca/main'
@@ -20,10 +19,12 @@ workflow DEEPTOOLS_QC {
     main:
     ch_versions = Channel.empty()
 
+    // Combine BAM and BAI files
     bam
         .join(bai)
         .set { ch_bam_bai }
 
+    // Prepare BigWig files for correlation and PCA analysis
     bigwig
         .map { row -> [row[0].id] }
         .collect()
@@ -40,6 +41,7 @@ workflow DEEPTOOLS_QC {
         .map { row -> [row[0], row[1], row[2]] }
         .set { ch_bigwig_all }
 
+    // BigWig correlation and PCA analysis
     DEEPTOOLS_MULTIBIGWIGSUMMARY(
         ch_bigwig_all,
         ch_blacklist
@@ -56,35 +58,15 @@ workflow DEEPTOOLS_QC {
     DEEPTOOLS_PLOTPCA(DEEPTOOLS_MULTIBIGWIGSUMMARY.out.matrix)
     ch_versions = ch_versions.mix(DEEPTOOLS_PLOTPCA.out.versions)
 
+    // Initialize empty channels for fingerprint outputs
     ch_fingerprint_matrix_global = Channel.empty()
     ch_fingerprint_metrics_global = Channel.empty()
     ch_fingerprint_region_matrix = Channel.empty()
     ch_fingerprint_region_metrics = Channel.empty()
 
+    // Fingerprint analysis - SIMPLIFIED: use BAM files directly
     if (params.plotfingerprint) {
-        ch_bam_bai
-            .map { row -> [row[0].id] }
-            .collect()
-            .map { row -> [row] }
-            .set { ch_bam_ids }
-
-        ch_bam_bai
-            .map { row -> [row[1]] }
-            .collect()
-            .map { row -> [row] }
-            .combine(ch_bam_bai.map { row -> [row[2]] }.collect().map { row -> [row] })
-            .combine(ch_bam_ids)
-            .map { row -> [[id: 'all_target_bams'], row[0], row[1], row[2], row[1].size()] }
-            .filter { row -> row[4] > 1 }
-            .map { row -> [row[0], row[1], row[2], row[3]] }
-            .set { ch_bam_bai_all }
-
-        DEEPTOOLS_MULTIBAMSUMMARY(
-            ch_bam_bai_all,
-            ch_blacklist
-        )
-        ch_versions = ch_versions.mix(DEEPTOOLS_MULTIBAMSUMMARY.out.versions)
-
+        // Group BAM files by sample prefix (remove suffix after first underscore)
         ch_bam_bai
             .map { meta, bam, bai ->
                 def new_meta = [id: meta.id.split('_')[0]]
@@ -94,12 +76,14 @@ workflow DEEPTOOLS_QC {
             .map { meta, bams, bais -> [meta, bams.flatten(), bais.flatten()] }
             .set { ch_grouped_bam_bai }
 
+        // Global fingerprint analysis
         DEEPTOOLS_PLOTFINGERPRINT_GLOBAL(ch_grouped_bam_bai)
         ch_versions = ch_versions.mix(DEEPTOOLS_PLOTFINGERPRINT_GLOBAL.out.versions)
 
         ch_fingerprint_matrix_global = DEEPTOOLS_PLOTFINGERPRINT_GLOBAL.out.matrix
         ch_fingerprint_metrics_global = DEEPTOOLS_PLOTFINGERPRINT_GLOBAL.out.metrics
 
+        // Region-specific fingerprint analysis (if region parameter is provided)
         if (params.region) {
             DEEPTOOLS_PLOTFINGERPRINT_REGION(ch_grouped_bam_bai)
             ch_versions = ch_versions.mix(DEEPTOOLS_PLOTFINGERPRINT_REGION.out.versions)

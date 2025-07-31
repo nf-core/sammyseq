@@ -1,11 +1,8 @@
 {
     "-profile test": {
         "content": [
-            55,
+            53,
             {
-                "BEDTOOLS_MAKEWINDOWS": {
-                    "bedtools": "2.31.1"
-                },
                 "BWAMEM1_MEM": {
                     "bwa": "0.7.18-r1243-dirty",
                     "samtools": 1.21
@@ -91,8 +88,6 @@
                 "fastqc/CTRL004_S4_trim_fastqc.html",
                 "fastqc/CTRL004_S4_trim_fastqc.zip",
                 "genome",
-                "genome/bin_by_chromosome",
-                "genome/bin_by_chromosome/chr22.binned.bed",
                 "genome/chr22.fa.fai",
                 "genome/chr22.fa.sizes",
                 "genome/versions.yml",
@@ -279,7 +274,6 @@
                 "CTRL004_S3.md.bam.bai:md5,24b4f0825a54e35af9dcc14aab9f0abe",
                 "CTRL004_S4.md.bam:md5,842743814d1e0e6247756cfa7a9981a8",
                 "CTRL004_S4.md.bam.bai:md5,44953bdb1d9c05d4ec1660a3e0aa9100",
-                "chr22.binned.bed:md5,1f50a634c5057be8b5cf576dabd8140b",
                 "chr22.fa.fai:md5,6d0b824b29dd8593c2b7575ddc345ece",
                 "chr22.fa.sizes:md5,3b8cd381d92f11c1a6cd64a01a5c4b66",
                 "deeptools_correlation_plot.txt:md5,12bfd9694ca8122209d849713e025a3c",
@@ -338,6 +332,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-30T17:28:32.165776453"
+        "timestamp": "2025-07-31T11:44:16.202721709"
     }
 }

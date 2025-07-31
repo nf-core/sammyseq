@@ -399,6 +399,11 @@
                     "type": "string",
                     "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified.",
                     "fa_icon": "fas fa-align-justify"
+                },
+                "tss_bed": {
+                    "type": "string",
+                    "fa_icon": "fas fa-align-justify",
+                    "description": "Path to BED file containing TSS regions"
                 }
             }
         }
