@@ -6,7 +6,10 @@ include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GTF
     GUNZIP as GUNZIP_GFF
+    GUNZIP as GUNZIP_TSS_BED
     GUNZIP as GUNZIP_GENE_BED
+    GUNZIP as GUNZIP_CHROM_SIZES
+    GUNZIP as GUNZIP_FAI
     GUNZIP as GUNZIP_BLACKLIST } from '../../modules/nf-core/gunzip/main'
 
 include {
@@ -23,7 +26,6 @@ include { BWA_INDEX                } from '../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD            } from '../../modules/nf-core/bowtie2/build/main'
 include { BEDTOOLS_MAKEWINDOWS     } from '../../modules/nf-core/bedtools/makewindows/main'
 include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
-include { BIN_BY_CHROMOSOME        } from '../../modules/local/bin_by_chromosome'
 
 workflow PREPARE_GENOME {
 
@@ -33,6 +35,7 @@ workflow PREPARE_GENOME {
     fasta              //    path: path to genome fasta file
     aligner            //    string: aligner name
     gtf                //    file: /path/to/genome.gtf
+    tss_bed            //    file: /path/to/tss.bed
 //    gff                //    file: /path/to/genome.gff
     blacklist          //    file: /path/to/blacklist.bed
     gene_bed           //    file: /path/to/gene.bed
@@ -76,6 +79,19 @@ workflow PREPARE_GENOME {
             ch_versions = ch_versions.mix(GUNZIP_GTF.out.versions)
         } else {
             ch_gtf = Channel.value(file(params.gtf))
+        }
+    }
+
+    //
+    //  Uncompress bed file
+    //
+    ch_tss_bed = Channel.empty()
+    if (params.tss_bed) {
+        if (params.tss_bed.endsWith('.gz')) {
+            ch_tss_bed = GUNZIP_TSS_BED ( [ [:], params.tss_bed ] ).gunzip.map{ it[1] }
+            ch_versions = ch_versions.mix(GUNZIP_TSS_BED.out.versions)
+        } else {
+            ch_tss_bed = Channel.value(file(params.tss_bed))
         }
     }
 
@@ -183,36 +199,17 @@ workflow PREPARE_GENOME {
             ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         }
     }
-    //
-    // Binning the genome bedtools/make_windows
-    //
-    ch_binned_genome = Channel.empty()
-
-    BEDTOOLS_MAKEWINDOWS (
-        ch_genome_filtered_bed.map { bed -> [ [id: bed.simpleName], bed ] }
-    )
-    ch_versions = ch_versions.mix(BEDTOOLS_MAKEWINDOWS.out.versions)
-
-    //
-    // Splitting the binned genome by chromosome
-    //
-    BIN_BY_CHROMOSOME (
-        BEDTOOLS_MAKEWINDOWS.out.bed,
-        ch_chrom_sizes
-    )
-
-    ch_binned_genome = BIN_BY_CHROMOSOME.out.chrom_beds
 
     emit:
     fasta         = ch_fasta                  //    path: genome.fasta
     fai           = ch_fai                    //    path: genome.fai
     gtf           = ch_gtf                    //    path: genome.gtf
+    tss_bed          = ch_tss_bed                //    path: tss.bed
     // gene_bed      = ch_gene_bed               //    path: gene.bed
     chrom_sizes   = ch_chrom_sizes            //    path: genome.sizes
     filtered_bed  = ch_genome_filtered_bed    //    path: *.include_regions.bed
     bwa_index     = ch_bwa_index              //    path: bwa/index/
     bowtie2_index = ch_bowtie2_index          //    path: bowtie2/index/
     blacklist     = ch_blacklist
-    binned_genome = ch_binned_genome
     versions      = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }

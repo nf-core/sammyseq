@@ -66,12 +66,6 @@
                         "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["modules"]
                     },
-                    "deeptools/multibamsummary": {
-                        "branch": "master",
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/deeptools/multibamsummary/deeptools-multibamsummary.diff"
-                    },
                     "deeptools/multibigwigsummary": {
                         "branch": "master",
                         "git_sha": "6be688fa14098c2ef703552585f06a26c6655ac2",

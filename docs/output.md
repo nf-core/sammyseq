@@ -137,10 +137,6 @@ The correlation analysis computes the overall similarity between samples based o
 
 This fingerprint plot is particularly useful for assessing the strength of the experiment for factors with enrichment in well-defined and relatively narrow regions. This analysis uses BAM files and can be disabled using --plotfingerprint false.
 
-#### MultiBAMSummary
-
-When fingerprint analysis is enabled, multiBamSummary computes read coverage from BAM files to generate the data matrix required for fingerprint plotting.
-
 #### Global Fingerprint Plot
 
 Covers the entire genome to assess overall signal enrichment patterns.
@@ -162,6 +158,18 @@ Focuses on a user-specified genomic region (if --region parameter is provided, e
     deeptools/quality_control/plotfingerprint/${params.region}/
         ${meta.id}_region_${params.region}.pdf: Region-specific fingerprint plot
         ${meta.id}_region_${params.region}.raw.txt: Raw data for the region-specific fingerprint plot
+
+</details>
+
+### TSS Profile Plot (Optional)
+
+This analysis uses computeMatrix in reference-point mode to generate coverage profiles centered around transcription start sites (TSS). By supplying a BED file with genomic TSS coordinates through the `--tss_bed` parameter, the pipeline produces a line plot for each fraction of every sample, showing signal distribution around the TSS. This helps assess patterns of accessibility or enrichment near promoters.
+
+<details markdown="1"> <summary>Output files</summary>
+
+    deeptools/quality_control/plotprofile/
+        ${meta.id}_tss.pdf: TSS centered coverage profile
+        ${meta.id}_tss.tab: Matrix of values used for the plot
 
 </details>
 
