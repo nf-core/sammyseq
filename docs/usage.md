@@ -94,19 +94,40 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
 | `experimentalID` | Experimental sample identifier. This represents the biological specimen of interest and will be the same for all fractions exctracted.                                                 |
 | `fraction`       | Fraction derived from SAMMY protocol, e.g. depending on the protocol it can be S2, S2L, S2S, S3, S4.                                                                                   |
 
-### Pairwise comparisons
+### Fraction comparisons
 
-It is possible to generate pairwise comparisons between two samples by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
+It is possible to generate one or more pairwise comparisons between fractions from the same experimental replicate by providing the `--comparison` parameter. You can specify a single comparison or multiple comparisons separated by commas:
 
-`comparisons.csv`:
-
-```csv
-sample1,sample2
-CTRL004_S2,CTRL004_S3
-CTRL004_S2,CTRL004_S4
+**Single comparison:**
+```bash
+--comparison S2SvsS3
 ```
 
-It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file. When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
+**Multiple comparisons:**
+
+```
+--comparison S2SvsS3,S2SvsS4,S4vsS3
+```
+
+For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
+
+    S2SvsS3  - Compare S2S fraction vs S3 fraction
+    S2LvsS3  - Compare S2L fraction vs S3 fraction
+    S2SvsS4  - Compare S2S fraction vs S4 fraction
+    S2LvsS4  - Compare S2L fraction vs S4 fraction
+    S3vsS4   - Compare S3 fraction vs S4 fraction
+    S2SvsS2L - Compare S2S fraction vs S2L fraction
+
+> [!NOTE]
+> For 3f-SAMMYseq protocols (S2, S3, S4), valid comparisons are:
+
+    S2vsS3   - Compare S2 fraction vs S3 fraction
+    S2vsS4   - Compare S2 fraction vs S4 fraction
+    S4vsS3   - Compare S4 fraction vs S3 fraction
+
+The pipeline will automatically create comparisons only between fractions from the same experimentalID (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
+
+Any valid comparisons from the protocol type can be combined, and the fractions must correspond to those present in the fraction column of the samplesheet. When `--comparison` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
 
 ### Combine fractions
 

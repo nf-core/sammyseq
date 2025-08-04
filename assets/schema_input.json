@@ -35,8 +35,9 @@
             },
             "fraction": {
                 "type": "string",
+                "enum": ["S2", "S2S", "S2L", "S3", "S4"],
                 "pattern": "^\\S+$",
-                "errorMessage": "fraction must be provided and cannot contain spaces",
+                "errorMessage": "fraction cannot contain spaces and must be one of: S2, S2S, S2L, S3, S4",
                 "meta": ["fraction"]
             },
             "sample_group": {

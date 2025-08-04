@@ -93,7 +93,8 @@ workflow SAMMYSEQ {
                     params.binsize,
                     params.gtf,
                     params.gene_bed,
-                    params.tss_bed,)
+                    params.tss_bed)
+
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     if (params.stopAt == 'PREPARE_GENOME') {
@@ -318,7 +319,7 @@ if (params.stopAt == 'ALIGNMENT') {
     //
     // GENOME BINNING: Run only if comparisonFile is provided
     //
-    if (params.comparisonFile) {
+    if (params.comparison) {
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
             params.keep_regions_bed
@@ -326,34 +327,41 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_versions = ch_versions.mix(GENOME_BINNING.out.versions)
     }
 
-    if (params.comparisonFile) {
-        // Add the suffix "_T1" to each sample ID in the comparison file
+    //
+    // rtwosamplesmle.R module
+    //
 
-        ch_bam_input=FILTER_BAM_SAMTOOLS.out.bam
+    if (params.comparison) {
+        def comparison_list = params.comparison.split(',').collect { it.trim() }
 
-        ch_bam_input.view()
+        ch_bam_input = FILTER_BAM_SAMTOOLS.out.bam
+        //ch_bam_input.view()
 
-        // 1. Create a Comparisons Channels (one for sample 1 in comparison and another for sample 2 in comparison)
+        // 1. Create comparison channels (one for sample1 and one for sample2 in each comparison)
+        ch_samplesheet
+            .map { meta, fastqs -> meta }                   
+            .collect()                                       
+            .flatMap { meta_list ->                         
+                comparison_list.collectMany { comp ->        
+                    def (frac1, frac2) = comp.split('vs')   // Split comparison string into two fractions
+                    def samples_by_expID = meta_list.groupBy { it.experimentalID } // Group samples by experimental ID
+                    // For each experimental ID, find samples for the two fractions and create a list of comparisons
+                    samples_by_expID.collectMany { exp_id, samples -> 
+                        def s1 = samples.find { it.fraction == frac1 }?.id
+                        def s2 = samples.find { it.fraction == frac2 }?.id
 
-        Channel
-            .fromPath(params.comparisonFile)
-            .splitCsv(header : true)
-            .map{ row ->
-                //[ row.sample1 + "_T1", row.sample2 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-                //[ row.sample1 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-                [ row.sample1 , row.sample1 + "_VS_" + row.sample2 ]
+                        (s1 && s2) ? [[sample1: s1, sample2: s2]] : [] // Return comparison map if both samples exist, empty list otherwise
+                    }
                 }
-                .set { comparisons_ch_s1 }
+            }
+            .multiMap { row ->      // Split into separate channels for sample1 and sample2
+                comparisons_ch_s1: [row.sample1, "${row.sample1}_VS_${row.sample2}"]  
+                comparisons_ch_s2: [row.sample2, "${row.sample1}_VS_${row.sample2}"]  
+            }
+            .set { comparisons_ch }                          
 
-
-        Channel.fromPath(params.comparisonFile)
-                .splitCsv(header : true)
-                .map{ row ->
-                    // [ row.sample2 + "_T1", row.sample1 + "_T1",row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-                    //[ row.sample2 + "_T1", row.sample1 + "_T1_VS_" + row.sample2 + "_T1"]
-                    [ row.sample2 , row.sample1 + "_VS_" + row.sample2 ]
-                }
-                .set { comparisons_ch_s2 }
+        comparisons_ch_s1 = comparisons_ch.comparisons_ch_s1  
+        comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2  
 
         //2. convert bam file to input
         // [[id:ggg, paired:true],path.bam]
@@ -361,7 +369,6 @@ if (params.stopAt == 'ALIGNMENT') {
                 .map {meta, bam ->
                     id=meta.subMap('id')
                     [id.id, bam]
-
                     }
                 .set { ch_bam_reformat }
 
@@ -374,7 +381,6 @@ if (params.stopAt == 'ALIGNMENT') {
                 }
                 .set { bam1_comparison }
 
-                        //.view{"join= ${it}"}
         comparisons_ch_s2
                 .combine(ch_bam_reformat, by:0)
                 .map{ sample2, comparison, bam ->
@@ -386,7 +392,7 @@ if (params.stopAt == 'ALIGNMENT') {
         bam1_comparison
                 .join(bam2_comparison, remainder: false, by: 0 )
                 .set{comparisons_merge_ch}
-
+        
         //comparisons_merge_ch
         //        .view{ "comparisons_merge_ch: ${it}" }
 

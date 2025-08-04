@@ -23,13 +23,11 @@
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 5 columns, and a header row. See [usage docs](https://nf-co.re/sammyseq/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
                 },
-                "comparisonFile": {
+                "comparison": {
                     "type": "string",
-                    "fa_icon": "fas fa-file-csv",
-                    "description": "Path to comma-separated file containing the sample names for the desired paired comparisons.",
-                    "help_text": "You will need to create a comparisons file with information about the desired comparisons in your experiment before running the pipeline. It has to be a comma-separated file with 2 columns: one for the first sample to compare and the second one to sample against which to do it. The sample names must match the sample names present in the first column of the samplesheet (`--input` parameter).",
-                    "format": "file-path",
-                    "mimetype": "text/csv"
+                    "fa_icon": "fas fa-percentage",
+                    "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\" or \"S2SvsS3,S2LvsS3\")",
+                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2SvsS2L|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2SvsS2L|S2vsS3|S2vsS4|S4vsS3))*$"
                 },
                 "outdir": {
                     "type": "string",
