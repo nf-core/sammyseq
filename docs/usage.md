@@ -96,7 +96,9 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
 
 ### Pairwise comparisons
 
-It is possible to generate one or more pairwise comparisons between fractions from the same experimental replicate by providing the `--comparison` parameter. You can specify a single comparison or multiple comparisons separated by commas:
+It is possible to generate one or more pairwise comparisons between fractions from the same experimental replicate by providing the `--comparison` parameter. The difference between each fraction read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
+
+You can specify a single comparison or multiple comparisons separated by commas:
 
 **Single comparison:**
 
@@ -128,7 +130,17 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
 
 The pipeline will automatically create comparisons only between fractions from the same experimentalID (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
 
-Any valid comparisons from the protocol type can be combined, and the fractions must correspond to those present in the fraction column of the samplesheet. When `--comparison` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
+Alternatively, it is possible to generate any pairwise comparisons between any sample by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
+
+`comparisons.csv`:
+
+```csv
+sample1,sample2
+CTRL004_S2,CTRL004_S3
+CTRL004_S2,CTRL004_S4
+```
+
+It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file.
 
 ### Combine fractions
 

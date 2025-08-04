@@ -317,9 +317,10 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     //
-    // GENOME BINNING: Run only if comparisonFile is provided
+    // GENOME BINNING: Run only if comparisonFile or comparison is provided
     //
-    if (params.comparison) {
+    
+    if (params.comparisonFile || params.comparison) {   // comparisonFile will be deprecated in future versions
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
             params.keep_regions_bed
@@ -331,11 +332,31 @@ if (params.stopAt == 'ALIGNMENT') {
     // rtwosamplesmle.R module
     //
 
-    if (params.comparison) {
-        def comparison_list = params.comparison.split(',').collect { it.trim() }
-
+    // Handle comparisons - either from CSV file or parameter string
+    if (params.comparisonFile || params.comparison) {   // comparisonFile will be deprecated in future versions
         ch_bam_input = FILTER_BAM_SAMTOOLS.out.bam
         //ch_bam_input.view()
+
+        // comparisonFile CSV based approach
+        if (params.comparisonFile) {
+            Channel
+                .fromPath(params.comparisonFile)
+                .splitCsv(header: true)
+                .map { row ->
+                    [row.sample1, row.sample1 + "_VS_" + row.sample2]
+                }
+                .set { comparisons_ch_s1 }
+            Channel
+                .fromPath(params.comparisonFile)
+                .splitCsv(header: true)
+                .map { row ->
+                    [row.sample2, row.sample1 + "_VS_" + row.sample2]
+                }
+                .set { comparisons_ch_s2 }
+
+        } else if (params.comparison) { // Comparison string-based approach
+            
+            def comparison_list = params.comparison.split(',').collect { it.trim() }
 
         // 1. Create comparison channels (one for sample1 and one for sample2 in each comparison)
         ch_samplesheet
@@ -362,7 +383,7 @@ if (params.stopAt == 'ALIGNMENT') {
 
         comparisons_ch_s1 = comparisons_ch.comparisons_ch_s1
         comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2
-
+        }
         //2. convert bam file to input
         // [[id:ggg, paired:true],path.bam]
         ch_bam_input
@@ -406,7 +427,7 @@ if (params.stopAt == 'ALIGNMENT') {
         return
         }
     }
-
+    
     //
     // Collate and save software versions
     //
