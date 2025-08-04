@@ -99,6 +99,7 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
 It is possible to generate one or more pairwise comparisons between fractions from the same experimental replicate by providing the `--comparison` parameter. You can specify a single comparison or multiple comparisons separated by commas:
 
 **Single comparison:**
+
 ```bash
 --comparison S2SvsS3
 ```
