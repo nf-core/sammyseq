@@ -319,7 +319,7 @@ if (params.stopAt == 'ALIGNMENT') {
     //
     // GENOME BINNING: Run only if comparisonFile or comparison is provided
     //
-    
+
     if (params.comparisonFile || params.comparison) {   // comparisonFile will be deprecated in future versions
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
@@ -355,7 +355,7 @@ if (params.stopAt == 'ALIGNMENT') {
                 .set { comparisons_ch_s2 }
 
         } else if (params.comparison) { // Comparison string-based approach
-            
+
             def comparison_list = params.comparison.split(',').collect { it.trim() }
 
         // 1. Create comparison channels (one for sample1 and one for sample2 in each comparison)
@@ -427,7 +427,7 @@ if (params.stopAt == 'ALIGNMENT') {
         return
         }
     }
-    
+
     //
     // Collate and save software versions
     //
