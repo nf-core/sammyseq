@@ -80,7 +80,7 @@ nextflow run nf-core/sammyseq \
    --fasta reference_genome.fa \
    --input samplesheet.csv \
    --outdir <OUTDIR> \
-   --comparisonFile comparisons.csv
+   --comparison S2SvsS3
 ```
 
 > [!WARNING]
