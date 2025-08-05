@@ -80,10 +80,10 @@ CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.g
 The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can contain a mixture of single- and paired-end but in case of multiple runs of the same `sample` they have to be of the same type to be correctly merged. There can be additional columns but the first 5 have to match those defined in the table below.
 
 ```console
-sample,fastq_1,fastq_2,experimentalID,fraction
-CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2
-CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3
-CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
+sample,fastq_1,fastq_2,experimentalID,fraction,sample_group
+CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2,CTRL
+CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3,CTRL
+CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 ```
 
 | Column           | Description                                                                                                                                                                            |
@@ -93,6 +93,8 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
 | `fastq_2`        | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
 | `experimentalID` | Experimental sample identifier. This represents the biological specimen of interest and will be the same for all fractions exctracted.                                                 |
 | `fraction`       | Fraction derived from SAMMY protocol, e.g. depending on the protocol it can be S2, S2L, S2S, S3, S4.                                                                                   |
+| `sample_group`   | Identifier used to group samples that belong to the same biological condition condition.                                                                                               |
+|  |
 
 ### Pairwise comparisons
 
@@ -130,7 +132,7 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
 
 The pipeline will automatically create comparisons only between fractions from the same experimentalID (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
 
-Alternatively, it is possible to generate any pairwise comparisons between any sample by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
+Alternatively, it is possible to generate any pairwise comparisons between any fraction by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
 
 `comparisons.csv`:
 
