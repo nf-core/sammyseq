@@ -333,7 +333,7 @@ if (params.stopAt == 'ALIGNMENT') {
     //
 
     // Handle comparisons - either from CSV file or parameter string
-    if (params.comparisonFile || params.comparison) {   // comparisonFile will be deprecated in future versions
+    if (params.comparisonFile || params.comparison) {   // comparisonFile will be DEPRECATED in future versions
         ch_bam_input = FILTER_BAM_SAMTOOLS.out.bam
         //ch_bam_input.view()
 
@@ -355,35 +355,43 @@ if (params.stopAt == 'ALIGNMENT') {
                 .set { comparisons_ch_s2 }
 
         } else if (params.comparison) { // Comparison string-based approach
-
+        
             def comparison_list = params.comparison.split(',').collect { it.trim() }
-
-        // 1. Create comparison channels (one for sample1 and one for sample2 in each comparison)
-        ch_samplesheet
-            .map { meta, fastqs -> meta }
-            .collect()
-            .flatMap { meta_list ->
-                comparison_list.collectMany { comp ->
-                    def (frac1, frac2) = comp.split('vs')   // Split comparison string into two fractions
-                    def samples_by_expID = meta_list.groupBy { it.experimentalID } // Group samples by experimental ID
-                    // For each experimental ID, find samples for the two fractions and create a list of comparisons
-                    samples_by_expID.collectMany { exp_id, samples ->
-                        def s1 = samples.find { it.fraction == frac1 }?.id
-                        def s2 = samples.find { it.fraction == frac2 }?.id
-
-                        (s1 && s2) ? [[sample1: s1, sample2: s2]] : [] // Return comparison map if both samples exist, empty list otherwise
+        
+            // 1. Create comparison channels (one for sample1 and one for sample2 in each comparison)
+            ch_samplesheet
+                .map { meta, fastqs -> meta }
+                .collect()
+                .flatMap { meta_list ->
+                    comparison_list.collectMany { comp ->
+                        def (frac1, frac2) = comp.split('vs')   // Split comparison string into two fractions
+                        def samples_by_expID = meta_list.groupBy { it.experimentalID } // Group samples by experimental ID
+                        // For each experimental ID, find samples for the two fractions and create a list of comparisons
+                        samples_by_expID.collectMany { exp_id, samples ->
+                            def s1 = samples.find { it.fraction == frac1 }?.id
+                            def s2 = samples.find { it.fraction == frac2 }?.id
+        
+                            if (s1 && s2) {
+                                return [[sample1: s1, sample2: s2]]
+                            } else {
+                                // If one of the fractions is missing, log a warning and skip this comparison
+                                def missing = [!s1 ? frac1 : null, !s2 ? frac2 : null].findAll()
+                                log.warn "Skipping ${comp} for ${exp_id}: missing ${missing.join(' and ')} fraction(s)"
+                                return []
+                            }
+                        }
                     }
                 }
-            }
-            .multiMap { row ->      // Split into separate channels for sample1 and sample2
-                comparisons_ch_s1: [row.sample1, "${row.sample1}_VS_${row.sample2}"]
-                comparisons_ch_s2: [row.sample2, "${row.sample1}_VS_${row.sample2}"]
-            }
-            .set { comparisons_ch }
-
-        comparisons_ch_s1 = comparisons_ch.comparisons_ch_s1
-        comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2
+                .multiMap { row ->      // Split into separate channels for sample1 and sample2
+                    comparisons_ch_s1: [row.sample1, "${row.sample1}_VS_${row.sample2}"]
+                    comparisons_ch_s2: [row.sample2, "${row.sample1}_VS_${row.sample2}"]
+                }
+                .set { comparisons_ch }
+        
+            comparisons_ch_s1 = comparisons_ch.comparisons_ch_s1
+            comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2
         }
+        
         //2. convert bam file to input
         // [[id:ggg, paired:true],path.bam]
         ch_bam_input
