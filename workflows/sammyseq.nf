@@ -355,9 +355,9 @@ if (params.stopAt == 'ALIGNMENT') {
                 .set { comparisons_ch_s2 }
 
         } else if (params.comparison) { // Comparison string-based approach
-        
+
             def comparison_list = params.comparison.split(',').collect { it.trim() }
-        
+
             // 1. Create comparison channels (one for sample1 and one for sample2 in each comparison)
             ch_samplesheet
                 .map { meta, fastqs -> meta }
@@ -370,7 +370,7 @@ if (params.stopAt == 'ALIGNMENT') {
                         samples_by_expID.collectMany { exp_id, samples ->
                             def s1 = samples.find { it.fraction == frac1 }?.id
                             def s2 = samples.find { it.fraction == frac2 }?.id
-        
+
                             if (s1 && s2) {
                                 return [[sample1: s1, sample2: s2]]
                             } else {
@@ -387,11 +387,11 @@ if (params.stopAt == 'ALIGNMENT') {
                     comparisons_ch_s2: [row.sample2, "${row.sample1}_VS_${row.sample2}"]
                 }
                 .set { comparisons_ch }
-        
+
             comparisons_ch_s1 = comparisons_ch.comparisons_ch_s1
             comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2
         }
-        
+
         //2. convert bam file to input
         // [[id:ggg, paired:true],path.bam]
         ch_bam_input
