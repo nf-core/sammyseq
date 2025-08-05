@@ -332,6 +332,10 @@ if (params.stopAt == 'ALIGNMENT') {
     // rtwosamplesmle.R module
     //
 
+    if (params.comparisonFile && params.comparison) {
+        error "Cannot specify both --comparisonFile and --comparison parameters. Please use only one method."
+    }
+
     // Handle comparisons - either from CSV file or parameter string
     if (params.comparisonFile || params.comparison) {   // comparisonFile will be DEPRECATED in future versions
         ch_bam_input = FILTER_BAM_SAMTOOLS.out.bam
