@@ -70,9 +70,9 @@ It has to be a comma-separated file with 5 columns, and a header row as shown in
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample fraction sequenced across 2 lanes:
 
 ```console
-sample,fastq_1,fastq_2,experimentalID,fraction
-CONTROL_REP1_S2,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,CONTROL_REP1,S2
-CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,CONTROL_REP1,S2
+sample,fastq_1,fastq_2,experimentalID,fraction,sample_group
+CONTROL_REP1_S2,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,CONTROL_REP1,S2,CONTROL
+CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,CONTROL_REP1,S2,CONTROL
 ```
 
 ### Full samplesheet
