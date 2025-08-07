@@ -70,9 +70,9 @@ It has to be a comma-separated file with 5 columns, and a header row as shown in
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample fraction sequenced across 2 lanes:
 
 ```console
-sample,fastq_1,fastq_2,experimentalID,fraction
-CONTROL_REP1_S2,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,CONTROL_REP1,S2
-CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,CONTROL_REP1,S2
+sample,fastq_1,fastq_2,experimentalID,fraction,sample_group
+CONTROL_REP1_S2,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,CONTROL_REP1,S2,CONTROL
+CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,CONTROL_REP1,S2,CONTROL
 ```
 
 ### Full samplesheet
@@ -80,10 +80,10 @@ CONTROL_REP1_S2,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.g
 The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can contain a mixture of single- and paired-end but in case of multiple runs of the same `sample` they have to be of the same type to be correctly merged. There can be additional columns but the first 5 have to match those defined in the table below.
 
 ```console
-sample,fastq_1,fastq_2,experimentalID,fraction
-CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2
-CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3
-CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
+sample,fastq_1,fastq_2,experimentalID,fraction,sample_group
+CTRL004_S2,/home/sammy/test_data/CTRL004_S2_chr22only.fq.gz,,CTRL004,S2,CTRL
+CTRL004_S3,/home/sammy/test_data/CTRL004_S3_chr22only.fq.gz,,CTRL004,S3,CTRL
+CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 ```
 
 | Column           | Description                                                                                                                                                                            |
@@ -93,10 +93,45 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4
 | `fastq_2`        | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
 | `experimentalID` | Experimental sample identifier. This represents the biological specimen of interest and will be the same for all fractions exctracted.                                                 |
 | `fraction`       | Fraction derived from SAMMY protocol, e.g. depending on the protocol it can be S2, S2L, S2S, S3, S4.                                                                                   |
+| `sample_group`   | Identifier used to group samples that belong to the same biological condition condition.                                                                                               |
+|                  |
 
 ### Pairwise comparisons
 
-It is possible to generate pairwise comparisons between two samples by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
+It is possible to generate one or more pairwise comparisons between fractions from the same experimental replicate by providing the `--comparison` parameter. The difference between each fraction read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
+
+You can specify a single comparison or multiple comparisons separated by commas:
+
+**Single comparison:**
+
+```bash
+--comparison S2SvsS3
+```
+
+**Multiple comparisons:**
+
+```
+--comparison S2SvsS3,S2SvsS4,S4vsS3
+```
+
+For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
+
+    S2SvsS3  - Compare S2S fraction vs S3 fraction
+    S2LvsS3  - Compare S2L fraction vs S3 fraction
+    S2SvsS4  - Compare S2S fraction vs S4 fraction
+    S2LvsS4  - Compare S2L fraction vs S4 fraction
+    S4vsS3   - Compare S4 fraction vs S3 fraction
+
+> [!NOTE]
+> For 3f-SAMMYseq protocols (S2, S3, S4), valid comparisons are:
+
+    S2vsS3   - Compare S2 fraction vs S3 fraction
+    S2vsS4   - Compare S2 fraction vs S4 fraction
+    S4vsS3   - Compare S4 fraction vs S3 fraction
+
+The pipeline will automatically create comparisons only between fractions from the same experimentalID (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
+
+Alternatively, it is possible to generate any pairwise comparisons between any fraction by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
 
 `comparisons.csv`:
 
@@ -106,15 +141,17 @@ CTRL004_S2,CTRL004_S3
 CTRL004_S2,CTRL004_S4
 ```
 
-It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file. When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
+It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file.
 
 ### Combine fractions
 
 Optionally, the fractions extracted from the same `experimentalID` can be combined together for later use by setting the parameter `--combine_fractions`.
 
-## Reference genome files
+## Reference files
 
-The minimum reference genome requirements is the FASTA file, provided with the mandatory parameter `--fasta`, the aligner index will be generated by the pipeline and can be saved for later reuse if the `--save_reference` parameter is passed. The index building step can be quite a time-consuming process and it permits their reuse for future runs of the pipeline to save disk space, if already present it can be passed using the `--bwa_index '/path/to/bwa/index/'` or `--bowtie2_index '/path/to/bowtie2/index/'` parameter, depending on the chosen algorithm. Also the `--fai` fasta index and the `--chrom_sizes` chromosome sizes file can be passed if available, otherwise will be generated. Optionally, a BED file of transcription start sites can be provided with --tss_bed to run promoter level signal enrichment analyses. The genome coordinates is binned into windows of the size defined by the --binsize parameter for downstream analysis.
+### Genome
+
+The minimum reference genome requirements is the FASTA file, provided with the mandatory parameter `--fasta`, the aligner index will be generated by the pipeline and can be saved for later reuse if the `--save_reference` parameter is passed. The index building step can be quite a time-consuming process and it permits their reuse for future runs of the pipeline to save disk space, if already present it can be passed using the `--bwa_index '/path/to/bwa/index/'` or `--bowtie2_index '/path/to/bowtie2/index/'` parameter, depending on the chosen algorithm. Also the `--fai` fasta index and the `--chrom_sizes` chromosome sizes file can be passed if available, otherwise will be generated. The genome coordinates is binned into windows of the size defined by the `--binsize` parameter for downstream analysis.
 
 ### Blacklist bed file
 
@@ -127,6 +164,10 @@ A list of regions that will be kept in the output after filtering the alignment 
 ### TSS bed file
 
 Path to BED file containing TSS regions provided using the optional parameter `--tss_bed`, it will be used to a file for each sample with fraction signal profiles across the TSS coordinates.
+
+### GTF file
+
+Path to GTF file containing genes coordinates provided using the optional parameter `--gtf`.
 
 ## Updating the pipeline
 

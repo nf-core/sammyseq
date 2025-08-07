@@ -175,7 +175,7 @@ This analysis uses computeMatrix in reference-point mode to generate coverage pr
 
 ### Comparisons
 
-When `--comparisonFile` is set, the difference between sample1 and sample2 read density profile smoothed by the Gaussian kernel is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat. Biotech. doi:10.1038/nbt.1508
+When comparisons are generated (either by `--comparison` or `--comparisonFile`) the difference between each fraction read density profile, smoothed by the Gaussian kernel is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat. Biotech. doi:10.1038/nbt.1508
 
 <details markdown="1">
 <summary>Output files</summary>
