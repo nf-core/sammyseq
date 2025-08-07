@@ -415,6 +415,7 @@ if (params.stopAt == 'ALIGNMENT') {
     //
     // MODULE: MultiQC
     //
+    if (!params.skip_multiqc) {
     ch_multiqc_config        = Channel.fromPath(
         "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
     ch_multiqc_custom_config = params.multiqc_config ?
@@ -473,8 +474,9 @@ if (params.stopAt == 'ALIGNMENT') {
         [],
         []
     )
-
-    emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    } 
+    emit:
+    multiqc_report = !params.skip_multiqc ? MULTIQC.out.report.toList() : Channel.empty() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
 }
