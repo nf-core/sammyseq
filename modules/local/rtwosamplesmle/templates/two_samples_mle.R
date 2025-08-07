@@ -36,7 +36,7 @@ require(rtracklayer)
 ip_file <- "${bam1}"
 input_file <- "${bam2}"
 chromsizes_file <- "${chromsizes_file}"
-mle_output_file <- "${bam1.baseName}_VS_${bam2.baseName}_mle.bw"
+mle_output_file <- "${output_mle_name}_mle.bw"
 
 ################################################
 # DEFAULT PARAMETERS

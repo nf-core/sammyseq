@@ -44,7 +44,7 @@ process RTWOSAMPLESMLE {
     // TODO nf-core: Where applicable please provide/convert compressed files as input/output
     //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
     //tuple val(meta1), val(meta2), path(bam1), path(bam2)
-    tuple val(meta), path(bam1), path(bam2)
+    tuple val(meta), path(bam1), path(bam2), val(output_mle_name)
     path chromsizes_file
 
 
