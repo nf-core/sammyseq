@@ -474,7 +474,7 @@ if (params.stopAt == 'ALIGNMENT') {
         [],
         []
     )
-    } 
+    }
     emit:
     multiqc_report = !params.skip_multiqc ? MULTIQC.out.report.toList() : Channel.empty() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
