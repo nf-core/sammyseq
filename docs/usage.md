@@ -120,7 +120,7 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
     S2LvsS3  - Compare S2L fraction vs S3 fraction
     S2SvsS4  - Compare S2S fraction vs S4 fraction
     S2LvsS4  - Compare S2L fraction vs S4 fraction
-    S3vsS4   - Compare S3 fraction vs S4 fraction
+    S4vsS3   - Compare S4 fraction vs S3 fraction
     S2SvsS2L - Compare S2S fraction vs S2L fraction
 
 > [!NOTE]
