@@ -394,7 +394,7 @@ if (params.stopAt == 'ALIGNMENT') {
             comparisons_ch_s1 = comparisons_ch.comparisons_ch_s1
             comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2
         }
-        
+
         //2. convert bam file to input
         // [[id:ggg, paired:true],path.bam]
         ch_bam_input
@@ -422,25 +422,25 @@ if (params.stopAt == 'ALIGNMENT') {
             .join(bam2_comparison, remainder: false, by: 0 )
             .map { comparison, bam1, meta_bam1, bam2, meta_bam2 ->
 
-                def expid1 = meta_bam1.experimentalID    
-                def fraction1 = meta_bam1.fraction        
-                def expid2 = meta_bam2.experimentalID    
-                def fraction2 = meta_bam2.fraction        
-            
+                def expid1 = meta_bam1.experimentalID
+                def fraction1 = meta_bam1.fraction
+                def expid2 = meta_bam2.experimentalID
+                def fraction2 = meta_bam2.fraction
+
                 def output_mle_name
                 if (expid1 == expid2) {
                     output_mle_name = "${expid1}_${fraction1}vs${fraction2}"
                 } else {
                     output_mle_name = "${expid1}_${fraction1}_vs_${expid2}_${fraction2}"
                 }
-                
+
                 def meta_csv = [
                     experimentalID: expid1,
                     sample_group: meta_bam1.sample_group,
                     ratio: "${fraction1}vs${fraction2}",
                     csv_expid_filter: expid1 == expid2 // in GENERATE_MLE_RATIO_CSV filter out comparisons with different experimentalID
                 ]
-            
+
                 [meta_csv, bam1, bam2, output_mle_name]
             }
             .set{comparisons_merge_ch}
