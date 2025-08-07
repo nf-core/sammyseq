@@ -27,7 +27,7 @@
                     "type": "string",
                     "fa_icon": "fas fa-percentage",
                     "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\" or \"S2SvsS3,S2LvsS3\")",
-                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2SvsS2L|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2SvsS2L|S2vsS3|S2vsS4|S4vsS3))*$"
+                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3))*$"
                 },
                 "comparisonFile": {
                     "type": "string",
