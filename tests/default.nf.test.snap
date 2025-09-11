@@ -262,18 +262,18 @@
                 "single_tracks/deeptools/CTRL004_S4.q1.RPKM.bw"
             ],
             [
-                "CTRL004_S2.q1.bam:md5,1337558dd8adb9b97de4b06149d14893",
-                "CTRL004_S2.q1.bam.bai:md5,4284738312437fcff143a94117b4ceeb",
-                "CTRL004_S3.q1.bam:md5,04a683a4a674235c25127a15ebb2f682",
-                "CTRL004_S3.q1.bam.bai:md5,da86246144507e59fb021621372e63fb",
-                "CTRL004_S4.q1.bam:md5,329c7940efc1d84b892019c9d6eee700",
-                "CTRL004_S4.q1.bam.bai:md5,9f3af78d91bfb113b305e99de2e0c041",
-                "CTRL004_S2.md.bam:md5,12366e5e3bceb57be29294a2360685b7",
-                "CTRL004_S2.md.bam.bai:md5,b9ab9c78a407c4cead2a336f6cdff623",
-                "CTRL004_S3.md.bam:md5,a004bd2516115c833a845160f3426caf",
-                "CTRL004_S3.md.bam.bai:md5,24b4f0825a54e35af9dcc14aab9f0abe",
-                "CTRL004_S4.md.bam:md5,842743814d1e0e6247756cfa7a9981a8",
-                "CTRL004_S4.md.bam.bai:md5,44953bdb1d9c05d4ec1660a3e0aa9100",
+                "CTRL004_S2.q1.bam:md5,b9434efe07680fad02317a524c01912e",
+                "CTRL004_S2.q1.bam.bai:md5,02e56342a3342c645c7279bbd7503de9",
+                "CTRL004_S3.q1.bam:md5,b5c2287e03aa86307d2093360ececc88",
+                "CTRL004_S3.q1.bam.bai:md5,6fe090a3d234c9f5b201fa5b71fea770",
+                "CTRL004_S4.q1.bam:md5,3d09f8827b6f28ec31ff82402240b1b1",
+                "CTRL004_S4.q1.bam.bai:md5,0c58f891cafe6c277b905c63fdeed475",
+                "CTRL004_S2.md.bam:md5,86ae52443e978421d4f78e557680c900",
+                "CTRL004_S2.md.bam.bai:md5,6e40b06ce02da78f71e9529a718c8279",
+                "CTRL004_S3.md.bam:md5,37404dd5908eb6099f536a9d2e234fa8",
+                "CTRL004_S3.md.bam.bai:md5,917818fd2dbf40d36fb31da7048b3588",
+                "CTRL004_S4.md.bam:md5,142375498418fc724946a5d78dbe2f06",
+                "CTRL004_S4.md.bam.bai:md5,9912f3676040d13ad2de07dcc46a077f",
                 "chr22.fa.fai:md5,6d0b824b29dd8593c2b7575ddc345ece",
                 "chr22.fa.sizes:md5,3b8cd381d92f11c1a6cd64a01a5c4b66",
                 "deeptools_correlation_plot.txt:md5,12bfd9694ca8122209d849713e025a3c",
@@ -332,6 +332,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-31T11:44:16.202721709"
+        "timestamp": "2025-09-11T14:21:04.276289138"
     }
 }
