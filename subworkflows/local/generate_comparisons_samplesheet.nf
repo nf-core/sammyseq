@@ -2,7 +2,7 @@
 // GENERATE_MLE_RATIO_CSV
 //
 
-workflow GENERATE_MLE_RATIO_CSV {
+workflow GENERATE_COMPARISONS_SAMPLESHEET {
     take:
         mle_results     // channel: [mandatory] csv_meta, mle_file.bw
         outdir          // string: output directory path
