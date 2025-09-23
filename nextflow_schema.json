@@ -104,7 +104,7 @@
                 "comparison_maker": {
                     "type": "string",
                     "default": "spp",
-                    "enum": ["spp", "bigwigCompare"],
+                    "enum": ["spp", "bigwigcompare"],
                     "fa_icon": "fas fa-percentage",
                     "description": "Specify the tool to be used to generate comparisons"
                 },

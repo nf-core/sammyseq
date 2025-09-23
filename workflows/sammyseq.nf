@@ -347,7 +347,7 @@ if (params.stopAt == 'ALIGNMENT') {
             )
             ch_comparison_results = GENERATE_COMPARISONS_MLE.out.mle_results
 
-        } else if (params.comparison_maker == 'bigwigCompare') {
+        } else if (params.comparison_maker == 'bigwigcompare') {
             // TODO: Implement bigwigCompare comparison analysis
             // 
             // GENERATE_COMPARISONS_BIGWIG(
