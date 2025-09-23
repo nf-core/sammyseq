@@ -349,7 +349,7 @@ if (params.stopAt == 'ALIGNMENT') {
 
         } else if (params.comparison_maker == 'bigwigcompare') {
             // TODO: Implement bigwigCompare comparison analysis
-            // 
+            //
             // GENERATE_COMPARISONS_BIGWIG(
             //     ch_bigwig1,
             //     ch_bigwig2,

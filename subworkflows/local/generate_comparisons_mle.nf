@@ -5,21 +5,21 @@
 include { RTWOSAMPLESMLE } from '../../modules/local/rtwosamplesmle/main'
 
 workflow GENERATE_COMPARISONS_MLE {
-    
+
     take:
     ch_bam_input        // channel: [meta, bam]
     ch_samplesheet      // channel: samplesheet data for comparison string approach
     chrom_sizes         // path: chromosome sizes file
-    
+
     main:
-    
+
     ch_versions = Channel.empty()
-    
+
     // Initialize comparison channels
     comparisons_ch_s1 = Channel.empty()
     comparisons_ch_s2 = Channel.empty()
-    
-    if (params.comparisonFile) {    
+
+    if (params.comparisonFile) {
         // comparisonFile CSV based approach
         Channel
             .fromPath(params.comparisonFile)
@@ -28,7 +28,7 @@ workflow GENERATE_COMPARISONS_MLE {
                 [row.sample1, row.sample1 + "_VS_" + row.sample2]
             }
             .set { comparisons_ch_s1 }
-            
+
         Channel
             .fromPath(params.comparisonFile)
             .splitCsv(header: true)
@@ -37,7 +37,7 @@ workflow GENERATE_COMPARISONS_MLE {
             }
             .set { comparisons_ch_s2 }
 
-    } else if (params.comparison) { 
+    } else if (params.comparison) {
         // comparison string-based approach
         def comparison_list = params.comparison.split(',').collect { it.trim() }
 
