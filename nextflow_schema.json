@@ -101,6 +101,13 @@
                     "description": "Specify aligner to be used to map reads to reference genome.",
                     "enum": ["bwamem", "bwaaln", "bowtie2"]
                 },
+                "comparison_maker": {
+                    "type": "string",
+                    "default": "spp",
+                    "enum": ["spp", "bigwigcompare"],
+                    "fa_icon": "fas fa-percentage",
+                    "description": "Specify the tool to be used to generate comparisons"
+                },
                 "trimmer": {
                     "type": "string",
                     "default": "trimgalore",
