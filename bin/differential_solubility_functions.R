@@ -53,26 +53,26 @@ check_sign<- function(x,meann){
 #####################################################################
 ##standard error
 
-confidence_interval <- function(vector, nm="prove") {
-    # Standard deviation of sample
-    vec_serr <- sd(vector)/sqrt(length(vector))
-    vec_serr2x<- vec_serr*2
-    # Sample size
-    n <- length(vector)
-    # Mean of sample
-    vec_mean <- mean(vector)
-    nm_confint_low<-paste0(nm,"_serrx2_lower")
-    nm_confint_up<-paste0(nm,"_serrx2_upper")
-    name_mean <- paste0(nm,"_mean")
-    name_serr <- paste0(nm,"_serrX2")
-    result <- c(nm_confint_low = vec_mean - vec_serr2x,
-                nm_confint_up = vec_mean + vec_serr2x, 
-                name_mean = vec_mean, 
-                name_serr = vec_serr2x
-                )
-    names(result) <- c(nm_confint_low,nm_confint_up,name_mean,name_serr)
-    return(result)
-}
+    confidence_interval <- function(vector, nm="prove") {
+        # Standard deviation of sample
+        vec_serr <- sd(vector)/sqrt(length(vector))
+        vec_serr2x<- vec_serr*2
+        # Sample size
+        n <- length(vector)
+        # Mean of sample
+        vec_mean <- mean(vector)
+        nm_confint_low<-paste0(nm,"_serrx2_lower")
+        nm_confint_up<-paste0(nm,"_serrx2_upper")
+        name_mean <- paste0(nm,"_mean")
+        name_serr <- paste0(nm,"_serrX2")
+        result <- c(nm_confint_low = vec_mean - vec_serr2x,
+                    nm_confint_up = vec_mean + vec_serr2x, 
+                    name_mean = vec_mean, 
+                    name_serr = vec_serr2x
+                    )
+        names(result) <- c(nm_confint_low,nm_confint_up,name_mean,name_serr)
+        return(result)
+    }
 
 #####################################################################
 ## RANGE CHECK FUNCTION
@@ -98,8 +98,8 @@ is_in_serrx2_range_and_shift <-function(vector,
     mean_sign <-''
     shift_solubility<- ''
     
-    col_is_in_confint_name<-paste0(y_name,"_ov_check")
-    col_whereis_tp_name<- paste0(y_name,"_ov_specs")
+    col_is_in_confint_name<-paste0(y_name,"_sign") # cambiato da ov_check a _sign
+    col_whereis_tp_name<- paste0(y_name,"_shift") # cambiato da ov_specs a _shift
     shift_solubility_name<- paste0(y_name, "_sol_shift")
     mean_startsign_name<- paste0(xgroup_name, "_mean_startsign")
     ##########check if both or one mean is in the confint of the other mean
@@ -150,7 +150,7 @@ is_in_serrx2_range_and_shift <-function(vector,
 
 #Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", fraction2 = "S3") { ##aggiunto ths alla funzione
 Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", fraction2 = "S3", ths = 0.1) {
-    
+##define groups to compare and select their samples
     cat("Running Bins_selector for combination:", combination, "\n")
     
     # Define groups to compare and select their samples
@@ -161,22 +161,21 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     
     cat("Groups:", paste(x, collapse = ", "), "vs", paste(y, collapse = ", "), "\n")
     
-    # Define constraints for name uniqueness
+##definire vincoli per unicità del nome e se repX va obbligatoriamente finale sep da . o _
     xgroup <- gsub("_.*", "", x[1], perl = TRUE)
     ygroup <- gsub("_.*", "", y[1], perl = TRUE)
     
     cat("Group names:", xgroup, "vs", ygroup, "\n")
 
-    ##new_selection<-NULL
-    new_selection <- allmixeddf_grobj ## Assigned
+    new_selection <- allmixeddf_grobj
     mcols(new_selection) <- mcols(new_selection)[c(x, y)]
 
-    # Calculations   
-    # Confidence intervals and means
-    confint_mean_sd_first <- apply(as.matrix(mcols(new_selection)[c(x)]), 1, confidence_interval, nm = xgroup) 
-    confint_mean_sd_second <- apply(as.matrix(mcols(new_selection)[c(y)]), 1, confidence_interval, nm = ygroup)     
-    delta <- confint_mean_sd_first[1, ] - confint_mean_sd_second[1, ]
-    res <- cbind(t(confint_mean_sd_first), t(confint_mean_sd_second), delta) 
+# Calculations   
+#   1)calcolo int di confidenza, media e stdev per ogni gruppo
+    confint_mean_serr_first <- apply(as.matrix(mcols(new_selection)[c(x)]), 1, confidence_interval, nm = xgroup) 
+    confint_mean_serr_second <- apply(as.matrix(mcols(new_selection)[c(y)]), 1, confidence_interval, nm = ygroup)
+    delta <- confint_mean_serr_first[1, ] - confint_mean_serr_second[1, ]
+    res <- cbind(t(confint_mean_serr_first), t(confint_mean_serr_second), delta)
     df_toadd1 <- do.call("cbind", as.data.frame(res))
     mcols(new_selection) <- cbind(mcols(new_selection), df_toadd1)
 
@@ -209,46 +208,39 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     mcols(new_selection) <- cbind(mcols(new_selection), df_toadd2)
     
     # Select bins
+    #seleziona i bin le cui medie variano oltre ad un det ths e li divide in base a alterazione del segno (lower or higher),alterazione solubilità
     #   ths <- 0.1
     prvdf <- as.data.frame(new_selection)
-    
     # Out of range check
     prvdftest <- prvdf[abs(prvdf[paste0(xgroup, "_mean")]) >= ths, ]
-    pprvlow <- prvdftest[paste0(y, "_ov_specs")] == "lower"   # <-- cambiato da _shift a _ov_specs
-    pprvhigh <- prvdftest[paste0(y, "_ov_specs")] == "higher" # <-- cambiato da _shift a _ov_specs
-    
+    pprvlow <- prvdftest[paste0(y, "_shift")] == "lower"   # <-- cambiato da _ov_specs a _shift
+    pprvhigh <- prvdftest[paste0(y, "_shift")] == "higher" # <-- cambiato da _ov_specs a _shift
     # Sum up by group 1
-    prvdftest[, paste0(ygroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(y, "_ov_check")], as.numeric))
+    prvdftest[, paste0(ygroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(y, "_sign")], as.numeric)) # cambiato da _ov_check a _sign
     prvdftest$ovlow <- apply(pprvlow, 1, sum) * -1
     prvdftest$ovvhigh <- apply(pprvhigh, 1, sum)     
-
     # Commutative group testing
-    pprvlow_X <- prvdftest[paste0(x, "_ov_specs")] == "lower"   #  <-- cambiato da _shift a _ov_specs
-    pprvhigh_X <- prvdftest[paste0(x, "_ov_specs")] == "higher" #  <-- cambiato da _shift a _ov_specs
-
+    pprvlow_X <- prvdftest[paste0(x, "_shift")] == "lower"   #  <-- cambiato da  ov_specs a _shift
+    pprvhigh_X <- prvdftest[paste0(x, "_shift")] == "higher" #  <-- cambiato da  ov_specs a _shift
     # Sum up by group 2
-    ## PRIMA ERA prvdftest[, paste0(xgroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(x, "_sign")], as.numeric))
-    prvdftest[, paste0(xgroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(x, "_ov_check")], as.numeric))
+    prvdftest[, paste0(xgroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(x, "_sign")], as.numeric)) ## <-- cambiato da _ov_check a _sign
+    # Count characteristics
     prvdftest$ovlow_X <- apply(pprvlow_X, 1, sum) * -1
     prvdftest$ovvhigh_X <- apply(pprvhigh_X, 1, sum)
     prvdftest_gr <- makeGRangesFromDataFrame(prvdftest, keep.extra.columns = TRUE)
-    
     # INFORMATIVE over THS BINS SELECTION
     # Separate bins according to group X start sign
     a <- paste0(xgroup, "_mean")
     column <- which(names(prvdftest_gr@elementMetadata@listData) == a)
     startmeanpos <- prvdftest_gr[prvdftest_gr@elementMetadata[[column]] >= 0]  
     startmeanneg <- prvdftest_gr[prvdftest_gr@elementMetadata[[column]] < 0]  
-    
     # Select coherent bins with value out of the IC range of the comparison group for all the values 
     ovvhighconservedpos <- startmeanpos[startmeanpos$ovvhigh == length(y) & startmeanpos$ovlow_X == -length(x)] 
     ovlowconservedpos <- startmeanpos[startmeanpos$ovlow == -length(y) & startmeanpos$ovvhigh_X == length(x)]
     ovvhighconservedneg <- startmeanneg[startmeanneg$ovvhigh == length(y) & startmeanneg$ovlow_X == -length(x)] 
     ovlowconservedneg <- startmeanneg[startmeanneg$ovlow == -length(y) & startmeanneg$ovvhigh_X == length(x)]
-    
     # Make a list of bins to save and analyze 
     #(GENERALIZED for different comparisons in nextflow)
-
     list_ofbins_to_save_and_analyse <- setNames(
         list(
         ovvhighconservedpos,
