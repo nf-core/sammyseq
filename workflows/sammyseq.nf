@@ -22,7 +22,6 @@ include { DEEPTOOLS_BAMCOVERAGE       } from '../modules/nf-core/deeptools/bamco
 include { BEDTOOLS_MAKEWINDOWS        } from '../modules/nf-core/bedtools/makewindows/main'
 
 include { FASTQ_ALIGN_BWAALN          } from '../subworkflows/nf-core/fastq_align_bwaaln/main.nf'
-include { FASTQ_ALIGN_DNA             } from '../subworkflows/nf-core/fastq_align_dna/main'
 include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
 /*
@@ -32,7 +31,7 @@ include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markdu
 */
 
 include { DIFFERENTIAL_SOLUBILITY       } from '../modules/local/differential_solubility/main'
-
+include { FASTQ_ALIGN_DNA               } from '../subworkflows/local/fastq_align_dna/main'
 include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome'
 include { GENOME_BINNING                } from '../subworkflows/local/genome_binning'
 include { CAT_FRACTIONS                 } from '../subworkflows/local/cat_fractions'
@@ -334,7 +333,7 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_genome_bins = GENOME_BINNING.out.binned_genome
                 .map { meta, bed -> bed }
         ch_versions = ch_versions.mix(GENOME_BINNING.out.versions)
-        
+
     }
 
     //
@@ -381,7 +380,7 @@ if (params.stopAt == 'ALIGNMENT') {
     // DIFFERENTIAL SOLUBILITY ANALYSIS
     //
     if (params.differential_solubility) {
-            
+
     if (params.comparisonFile)
         error "ERROR: --differential_solubility does not support --comparisonFile. Use --comparison."
 
@@ -390,14 +389,14 @@ if (params.stopAt == 'ALIGNMENT') {
 
         ch_differential_samplesheet = GENERATE_COMPARISONS_SAMPLESHEET.out.samplesheet
             .map { file -> [[ id:'differential_analysis' ], file] }
-        
+
         DIFFERENTIAL_SOLUBILITY (
             ch_differential_samplesheet,
             ch_genome_bins,
             params.binsize,
             params.comparison
         )
-        
+
     }
 
     //

@@ -1,29 +1,48 @@
 Changes in component 'nf-core/deeptools/multibigwigsummary'
-'modules/nf-core/deeptools/multibigwigsummary/meta.yml' is unchanged
+Changes in 'deeptools/multibigwigsummary/meta.yml':
+--- modules/nf-core/deeptools/multibigwigsummary/meta.yml
++++ modules/nf-core/deeptools/multibigwigsummary/meta.yml
+@@ -33,19 +33,14 @@
+         type: list
+         description: Labels for the bigWig files used in the matrix
+ 
+-  - - meta2:
+-        type: map
+-        description: |
+-          Groovy Map containing blacklist metadata
+-          e.g. [ id:'blacklist' ]
+-    - blacklist:
+-        type: file
+-        description: BED/GTF file containing regions to exclude from analysis
+-        pattern: "*.{bed,gtf}"
+-        ontologies:
+-          - edam: "http://edamontology.org/data_3002"
+-          - edam: "http://edamontology.org/format_3003"
+-        optional: true
++  - blacklist:
++      type: file
++      description: BED/GTF file containing regions to exclude from analysis
++      pattern: "*.{bed,gtf}"
++      ontologies:
++        - edam: "http://edamontology.org/data_3002"
++        - edam: "http://edamontology.org/format_3003"
++      optional: true
+ 
+ output:
+   matrix:
+
 Changes in 'deeptools/multibigwigsummary/main.nf':
 --- modules/nf-core/deeptools/multibigwigsummary/main.nf
 +++ modules/nf-core/deeptools/multibigwigsummary/main.nf
-@@ -9,6 +9,7 @@
+@@ -9,7 +9,7 @@
  
      input:
-     tuple val(meta), path(bigwigs), val(labels)
+     tuple val(meta) , path(bigwigs) , val(labels)
+-    tuple val(meta2), path(blacklist)
 +    path(blacklist)
  
      output:
-     tuple val(meta), path("*.npz") , emit: matrix
-@@ -21,10 +22,12 @@
-     def args   = task.ext.args ?: ''
-     def prefix = task.ext.prefix ?: "all_bigwig"
-     def label  = labels ? "--labels ${labels.join(' ')}" : ''
-+    def blacklist_params = blacklist ? "--blackListFileName ${blacklist}" : ""
-     """
-     multiBigwigSummary bins \\
-         $args \\
-         $label \\
-+        $blacklist_params \\
-         --bwfiles ${bigwigs.join(' ')} \\
-         --numberOfProcessors $task.cpus \\
-         --outFileName ${prefix}.bigwigSummary.npz
+     tuple val(meta), path("*.npz"), emit: matrix
 
 'modules/nf-core/deeptools/multibigwigsummary/environment.yml' is unchanged
 'modules/nf-core/deeptools/multibigwigsummary/tests/main.nf.test' is unchanged

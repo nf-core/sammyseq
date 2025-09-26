@@ -1,58 +1,50 @@
 Changes in component 'nf-core/deeptools/bamcoverage'
-'modules/nf-core/deeptools/bamcoverage/environment.yml' is unchanged
-'modules/nf-core/deeptools/bamcoverage/meta.yml' is unchanged
+Changes in 'deeptools/bamcoverage/meta.yml':
+--- modules/nf-core/deeptools/bamcoverage/meta.yml
++++ modules/nf-core/deeptools/bamcoverage/meta.yml
+@@ -42,19 +42,14 @@
+       description: Index of the reference file (optional, but recommended)
+       pattern: "*.{fai}"
+       ontologies: []
+-  - - meta2:
+-        type: map
+-        description: |
+-          Groovy Map containing blacklist metadata
+-          e.g. [ id:'blacklist' ]
+-    - blacklist:
+-        type: file
+-        description: BED/GTF file containing regions to exclude from analysis
+-        pattern: "*.{bed,gtf}"
+-        ontologies:
+-          - edam: "http://edamontology.org/data_3002"
+-          - edam: "http://edamontology.org/format_3003"
+-        optional: true
++  - blacklist:
++      type: file
++      description: BED/GTF file containing regions to exclude from analysis
++      pattern: "*.{bed,gtf}"
++      ontologies:
++        - edam: "http://edamontology.org/data_3002"
++        - edam: "http://edamontology.org/format_3003"
++      optional: true
+ output:
+   bigwig:
+     - - meta:
+
 Changes in 'deeptools/bamcoverage/main.nf':
 --- modules/nf-core/deeptools/bamcoverage/main.nf
 +++ modules/nf-core/deeptools/bamcoverage/main.nf
-@@ -11,9 +11,10 @@
-     tuple val(meta), path(input), path(input_index)
+@@ -11,7 +11,7 @@
+     tuple val(meta) , path(input)   , path(input_index)
      path(fasta)
      path(fasta_fai)
+-    tuple val(meta2), path(blacklist)
 +    path(blacklist)
  
      output:
--    tuple val(meta), path("*.bigWig")   , emit: bigwig, optional: true
-+    tuple val(meta), path("*.bw")       , emit: bigwig, optional: true
-     tuple val(meta), path("*.bedgraph") , emit: bedgraph, optional: true
-     path "versions.yml"                 , emit: versions
- 
-@@ -23,7 +24,8 @@
-     script:
-     def args      = task.ext.args ?: ''
-     def prefix    = task.ext.prefix ?: "${meta.id}"
--    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bigWig"
-+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bw"
-+    def blacklist = blacklist ? "--blackListFileName ${blacklist}" : ""
- 
-     // cram_input is currently not working with deeptools
-     // therefore it's required to convert cram to bam first
-@@ -39,6 +41,7 @@
-         bamCoverage \\
-             --bam $input_out \\
-             $args \\
-+            $blacklist \\
-             --numberOfProcessors ${task.cpus} \\
-             --outFileName ${prefix}.${extension}
- 
-@@ -54,6 +57,7 @@
-         bamCoverage \\
-             --bam $input_out \\
-             $args \\
-+            $blacklist \\
-             --numberOfProcessors ${task.cpus} \\
-             --outFileName ${prefix}.${extension}
- 
-@@ -66,7 +70,7 @@
- 
-     stub:
-     def prefix    = task.ext.prefix ?: "${meta.id}"
--    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bigWig"
-+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bw"
-     """
-     touch ${prefix}
- 
+     tuple val(meta), path("*.bigWig")  , emit: bigwig  , optional: true
 
-'modules/nf-core/deeptools/bamcoverage/tests/main.nf.test.snap' is unchanged
-'modules/nf-core/deeptools/bamcoverage/tests/tags.yml' is unchanged
+'modules/nf-core/deeptools/bamcoverage/environment.yml' is unchanged
 'modules/nf-core/deeptools/bamcoverage/tests/main.nf.test' is unchanged
+'modules/nf-core/deeptools/bamcoverage/tests/main.nf.test.snap' is unchanged
 ************************************************************

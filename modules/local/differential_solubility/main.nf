@@ -3,12 +3,12 @@ process DIFFERENTIAL_SOLUBILITY {
     label 'process_medium'
     errorStrategy 'terminate'
     maxRetries 0
-    
+
     input:
-    tuple val(meta), path(samplesheet)  
-    path(genome_bins)                   
+    tuple val(meta), path(samplesheet)
+    path(genome_bins)
     val(binsize)
-    val(comparison)                     
+    val(comparison)
 
     output:
     tuple val(meta), path("*_all_bins_complete.csv"), emit: all_bins

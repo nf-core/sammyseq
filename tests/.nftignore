@@ -13,6 +13,7 @@ multiqc/multiqc_plots/*
 multiqc/multiqc_data/deeptools_pca_plot.txt
 multiqc/multiqc_data/deeptools_plot_PCA.txt
 multiqc/multiqc_data/llms-full.txt
+multiqc/multiqc_data/multiqc.parquet
 reports/deeptools/multibamsummary/*
 reports/deeptools/plotcorrelation/*
 reports/deeptools/plotfingerprint/*
