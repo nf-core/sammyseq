@@ -37,16 +37,22 @@ add_metadata <- function(df, comparison_name, current_ratio, fraction, direction
 }
 
 # Function to save bins data into one CSV with a readable column order
+# Function to save bins data into one CSV with a readable column order
 save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffix, g1 = NULL, g2 = NULL) {
     if (length(data_list)) {
         
         df <- do.call(rbind, data_list)
         
-        base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison', 'fraction', 'direction')
-        
-        essential_stats_cols <- c()
+        if (grepl("all_bins", file_suffix)) {
+            # base columns for all_bins without fraction and direction (not informative)
+            base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison')
+        } else {
+            # base columns for selected_bins with fraction and direction (informative)
+            base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison', 'fraction', 'direction')
+        }       
+        selected_stats_cols <- c()
         if (!is.null(g1) && !is.null(g2)) {
-            essential_stats_cols <- c(
+            selected_stats_cols <- c(
                 paste0(g1, "_serrx2_lower"), paste0(g1, "_serrx2_upper"), 
                 paste0(g1, "_mean"), paste0(g1, "_serrX2"),
                 paste0(g2, "_serrx2_lower"), paste0(g2, "_serrx2_upper"), 
@@ -54,14 +60,10 @@ save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffi
                 "delta"
             )
         }
-        
-        essential_cols <- c(base_cols, essential_stats_cols)
-        
+        selected_cols <- c(base_cols, selected_stats_cols)
         available_cols <- colnames(df)
-        cols_to_keep <- intersect(essential_cols, available_cols)
-        
+        cols_to_keep <- intersect(selected_cols, available_cols)
         df <- df[, cols_to_keep]
-        
         output_file <- paste0(current_ratio, "_", comparison_name, "_", file_suffix, ".csv")
         write.csv(df, file = output_file, quote = FALSE, row.names = FALSE)
     } else {
