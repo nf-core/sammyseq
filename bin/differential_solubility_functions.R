@@ -22,7 +22,7 @@ import_and_rebin__bw <- function(files, bin_list, names, cores = 1, genome = NUL
     varname = "score"
     )
 
-    # CAHNGED -> set genome tag only if provided (we will provide the genome parameter later...)
+    # CHANGED -> set genome tag only if provided (we will provide the genome parameter later...)
     if (!is.null(genome)) GenomeInfoDb::genome(bw) <- genome
 
     bw
@@ -222,7 +222,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     prvdftest$ovlow <- apply(pprvlow, 1, sum) * -1
     prvdftest$ovvhigh <- apply(pprvhigh, 1, sum)     
 
-    # Commutative group testing - CAMBIA ANCHE QUI
+    # Commutative group testing
     pprvlow_X <- prvdftest[paste0(x, "_ov_specs")] == "lower"   #  <-- cambiato da _shift a _ov_specs
     pprvhigh_X <- prvdftest[paste0(x, "_ov_specs")] == "higher" #  <-- cambiato da _shift a _ov_specs
 
@@ -246,7 +246,8 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     ovvhighconservedneg <- startmeanneg[startmeanneg$ovvhigh == length(y) & startmeanneg$ovlow_X == -length(x)] 
     ovlowconservedneg <- startmeanneg[startmeanneg$ovlow == -length(y) & startmeanneg$ovvhigh_X == length(x)]
     
-    # Make a list of bins to save and analyze (GENERALIZED for different comparisons)
+    # Make a list of bins to save and analyze 
+    #(GENERALIZED for different comparisons in nextflow)
 
     list_ofbins_to_save_and_analyse <- setNames(
         list(
