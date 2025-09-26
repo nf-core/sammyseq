@@ -1,8 +1,5 @@
 #!/usr/bin/env Rscript
-
-#####################################################################
-## DIFFERENTIAL SOLUBILITY ANALYSIS FUNCTIONS
-#####################################################################
+# differential_solubility_functions.R
 
 #####################################################################
 ## IMPORT AND REBIN BIGWIG FUNCTION
@@ -211,7 +208,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     mcols(new_selection) <- cbind(mcols(new_selection), df_toadd2)
     
     # Select bins
- #   ths <- 0.1
+    #   ths <- 0.1
     prvdf <- as.data.frame(new_selection)
     
     # Out of range check
