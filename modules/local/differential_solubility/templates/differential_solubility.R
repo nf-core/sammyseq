@@ -37,35 +37,45 @@ add_metadata <- function(df, comparison_name, current_ratio, fraction, direction
 }
 
 # Function to save bins data into one CSV with a readable column order
-# Function to save bins data into one CSV with a readable column order
 save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffix, g1 = NULL, g2 = NULL) {
     if (length(data_list)) {
         
         df <- do.call(rbind, data_list)
         
-        if (grepl("all_bins", file_suffix)) {
-            # base columns for all_bins without fraction and direction (not informative)
-            base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison')
+        # for all_bins, remove fraction and direction columns if they exist
+        if (grepl("all_bins", file_suffix, ignore.case = TRUE)) {
+            # remove fraction and direction columns if they exist
+            cols_to_remove <- c('fraction', 'direction')
+            available_cols <- colnames(df)
+            cols_to_keep <- setdiff(available_cols, cols_to_remove)
+            df <- df[, cols_to_keep]
+            
         } else {
-            # base columns for selected_bins with fraction and direction (informative)
+            # base columns standard to keep
             base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison', 'fraction', 'direction')
-        }       
-        selected_stats_cols <- c()
-        if (!is.null(g1) && !is.null(g2)) {
-            selected_stats_cols <- c(
-                paste0(g1, "_serrx2_lower"), paste0(g1, "_serrx2_upper"), 
-                paste0(g1, "_mean"), paste0(g1, "_serrX2"),
-                paste0(g2, "_serrx2_lower"), paste0(g2, "_serrx2_upper"), 
-                paste0(g2, "_mean"), paste0(g2, "_serrX2"),
-                "delta"
-            )
+            
+            essential_stats_cols <- c()
+            if (!is.null(g1) && !is.null(g2)) {
+                essential_stats_cols <- c(
+                    paste0(g1, "_serrx2_lower"), paste0(g1, "_serrx2_upper"), 
+                    paste0(g1, "_mean"), paste0(g1, "_serrX2"),
+                    paste0(g2, "_serrx2_lower"), paste0(g2, "_serrx2_upper"), 
+                    paste0(g2, "_mean"), paste0(g2, "_serrX2"),
+                    "delta"
+                )
+            }
+            
+            essential_cols <- c(base_cols, essential_stats_cols)
+            
+            available_cols <- colnames(df)
+            cols_to_keep <- intersect(essential_cols, available_cols)
+            
+            df <- df[, cols_to_keep]
         }
-        selected_cols <- c(base_cols, selected_stats_cols)
-        available_cols <- colnames(df)
-        cols_to_keep <- intersect(selected_cols, available_cols)
-        df <- df[, cols_to_keep]
+        
         output_file <- paste0(current_ratio, "_", comparison_name, "_", file_suffix, ".csv")
         write.csv(df, file = output_file, quote = FALSE, row.names = FALSE)
+        
     } else {
         cat("No", file_suffix, "data found for", comparison_name, "\n")
     }
