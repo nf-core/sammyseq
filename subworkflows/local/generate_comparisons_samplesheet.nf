@@ -20,4 +20,8 @@ workflow GENERATE_COMPARISONS_SAMPLESHEET {
 
                 ["mle_comparisons.csv", "experimental_id,sample_group,ratio,file\n${experimental_id},${sample_group},${ratio},${mle_file}\n"]
             }
+            .set { ch_samplesheet }
+
+    emit:
+        samplesheet = ch_samplesheet
 }

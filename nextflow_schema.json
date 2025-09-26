@@ -101,6 +101,11 @@
                     "description": "Specify aligner to be used to map reads to reference genome.",
                     "enum": ["bwamem", "bwaaln", "bowtie2"]
                 },
+                "differential_solubility": {
+                    "type": "boolean",
+                    "description": "When set to true, this parameter activates the differential solubility analysis workflow",
+                    "fa_icon": "far fa-chart-bar"
+                },
                 "comparison_maker": {
                     "type": "string",
                     "default": "spp",

@@ -31,6 +31,8 @@ include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markdu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { DIFFERENTIAL_SOLUBILITY       } from '../modules/local/differential_solubility/main'
+
 include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome'
 include { GENOME_BINNING                } from '../subworkflows/local/genome_binning'
 include { CAT_FRACTIONS                 } from '../subworkflows/local/cat_fractions'
@@ -329,7 +331,10 @@ if (params.stopAt == 'ALIGNMENT') {
             PREPARE_GENOME.out.filtered_bed,
             params.keep_regions_bed
         )
+        ch_genome_bins = GENOME_BINNING.out.binned_genome
+                .map { meta, bed -> bed }
         ch_versions = ch_versions.mix(GENOME_BINNING.out.versions)
+        
     }
 
     //
@@ -369,6 +374,30 @@ if (params.stopAt == 'ALIGNMENT') {
             ch_comparison_results,
             params.outdir
         )
+    }
+
+
+    //
+    // DIFFERENTIAL SOLUBILITY ANALYSIS
+    //
+    if (params.differential_solubility) {
+            
+    if (params.comparisonFile)
+        error "ERROR: --differential_solubility does not support --comparisonFile. Use --comparison."
+
+    if (params.comparison && params.comparisonFile)
+        error "ERROR: Provide only --comparison for --differential_solubility; --comparisonFile is not supported."
+
+        ch_differential_samplesheet = GENERATE_COMPARISONS_SAMPLESHEET.out.samplesheet
+            .map { file -> [[ id:'differential_analysis' ], file] }
+        
+        DIFFERENTIAL_SOLUBILITY (
+            ch_differential_samplesheet,
+            ch_genome_bins,
+            params.binsize,
+            params.comparison
+        )
+        
     }
 
     //
