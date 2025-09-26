@@ -51,6 +51,7 @@ check_sign<- function(x,meann){
 #####################################################################
 ## CONFIDENCE INTERVAL FUNCTION
 #####################################################################
+##standard error
 
 confidence_interval <- function(vector, nm="prove") {
     # Standard deviation of sample

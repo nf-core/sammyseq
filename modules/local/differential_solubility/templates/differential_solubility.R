@@ -37,16 +37,30 @@ add_metadata <- function(df, comparison_name, current_ratio, fraction, direction
 }
 
 # Function to save bins data into one CSV with a readable column order
-save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffix) {
+save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffix, g1 = NULL, g2 = NULL) {
     if (length(data_list)) {
         
         df <- do.call(rbind, data_list)
         
         base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison', 'fraction', 'direction')
+        
+        essential_stats_cols <- c()
+        if (!is.null(g1) && !is.null(g2)) {
+            essential_stats_cols <- c(
+                paste0(g1, "_serrx2_lower"), paste0(g1, "_serrx2_upper"), 
+                paste0(g1, "_mean"), paste0(g1, "_serrX2"),
+                paste0(g2, "_serrx2_lower"), paste0(g2, "_serrx2_upper"), 
+                paste0(g2, "_mean"), paste0(g2, "_serrX2"),
+                "delta"
+            )
+        }
+        
+        essential_cols <- c(base_cols, essential_stats_cols)
+        
         available_cols <- colnames(df)
-        other_cols <- setdiff(available_cols, c(base_cols, 'width', 'strand'))
-        final_cols <- c(base_cols, other_cols)
-        df <- df[, final_cols[final_cols %in% available_cols]]
+        cols_to_keep <- intersect(essential_cols, available_cols)
+        
+        df <- df[, cols_to_keep]
         
         output_file <- paste0(current_ratio, "_", comparison_name, "_", file_suffix, ".csv")
         write.csv(df, file = output_file, quote = FALSE, row.names = FALSE)
@@ -146,8 +160,8 @@ for (current_ratio in selected_ratios) {
                 cat("No", category[['dir']], "bins found for fraction", category[['frac']], "in", comparison_name, "\n")
             }
         }
-        
-        save_bins_data(all_bins_data, current_ratio, comparison_name, "all_bins_complete")
-        save_bins_data(selected_bins_data, current_ratio, comparison_name, "selected_bins_filtered")
+        # Save results to CSV files
+        save_bins_data(all_bins_data, current_ratio, comparison_name, "all_bins_complete", g1, g2)
+        save_bins_data(selected_bins_data, current_ratio, comparison_name, "selected_bins_filtered", g1, g2)
     }
 }
