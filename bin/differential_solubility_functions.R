@@ -79,7 +79,6 @@ confidence_interval <- function(vector, nm="prove") {
 #####################################################################
 ## RANGE CHECK FUNCTION
 #####################################################################
-## La funzione valuta se le medie cadono nell'intervallo di confidenza dell'altro gruppo
 
 is_in_serrx2_range_and_shift <-function(vector,
                                         xgroup_name,
@@ -151,7 +150,7 @@ is_in_serrx2_range_and_shift <-function(vector,
 #(ex list_groups)
 #list_groups<- lapply(1:ncol(pr),Bins_selector(x,allmixeddf_grobj=allmixeddf_S2svsS3_grobj,fr1="S2S", fr2="S3"))
 
-#Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", fraction2 = "S3") {
+#Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", fraction2 = "S3") { ##aggiunto ths alla funzione
 Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", fraction2 = "S3", ths = 0.1) {
     
     cat("Running Bins_selector for combination:", combination, "\n")
@@ -266,8 +265,6 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
         )
     )
 
-    cat("Found bins keys: ", paste(names(list_ofbins_to_save_and_analyse), collapse = ", "), "\n")
-
     
     # Numeric coding for the groups
     mcols(ovvhighconservedpos)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(2, length(ovvhighconservedpos))
@@ -301,5 +298,3 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     cat("Results:", paste0(names(x[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]), "_", length(x[[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]]), "_bins"), "\n")
     return(x)
 }
-
-cat("Differential analysis functions loaded successfully!\n")
