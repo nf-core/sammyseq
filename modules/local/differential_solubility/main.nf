@@ -1,5 +1,7 @@
 process DIFFERENTIAL_SOLUBILITY {
     container 'docker.io/ciuki97/sammy_subcompartments_env:latest'
+    conda "${moduleDir}/environment.yml"
+
     label 'process_medium'
     errorStrategy 'terminate'
     maxRetries 0
