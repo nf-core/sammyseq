@@ -40,8 +40,8 @@ workflow GENOME_BINNING {
 
         ch_intersection_input = genome_filtered_bed
             .combine(ch_keep_regions_bed)
-            .map { bed1, bed2 -> 
-                tuple([id: "${bed2.simpleName}_filtered"], bed1, bed2) 
+            .map { bed1, bed2 ->
+                tuple([id: "${bed2.simpleName}_filtered"], bed1, bed2)
             }
 
         BEDTOOLS_INTERSECT(
@@ -51,8 +51,8 @@ workflow GENOME_BINNING {
         ch_versions = ch_versions.mix(BEDTOOLS_INTERSECT.out.versions)
 
         BEDTOOLS_MAKEWINDOWS(
-            BEDTOOLS_INTERSECT.out.intersect.map { meta, bed -> 
-                tuple([id: "${meta.id}_bins"], bed) 
+            BEDTOOLS_INTERSECT.out.intersect.map { meta, bed ->
+                tuple([id: "${meta.id}_bins"], bed)
             }
         )
     } else {

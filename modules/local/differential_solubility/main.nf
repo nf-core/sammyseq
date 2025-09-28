@@ -1,5 +1,5 @@
 process DIFFERENTIAL_SOLUBILITY {
-    container 'docker.io/ciuki97/differential-solubility-analysis:version_28092025'
+    container 'docker.io/ciuki97/differential-solubility-analysis:v0.0.1'
     conda "${moduleDir}/environment.yml"
 
     label 'process_medium'
