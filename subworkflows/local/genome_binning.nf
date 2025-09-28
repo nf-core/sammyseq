@@ -34,9 +34,17 @@ workflow GENOME_BINNING {
     //
     // Create bins for genome
     //
-    BEDTOOLS_MAKEWINDOWS(
-        genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
-    )
+    if (keep_regions_bed_param) {
+        // Use keep_regions_bed for binning (filtered)
+        BEDTOOLS_MAKEWINDOWS(
+            ch_keep_regions_bed.map { bed -> tuple([id: bed.simpleName], bed) }
+        )
+    } else {
+        // Use genome_filtered_bed for binning (complete)
+        BEDTOOLS_MAKEWINDOWS(
+            genome_filtered_bed.map { bed -> tuple([id: bed.simpleName], bed) }
+        )
+    }
     ch_versions = ch_versions.mix(BEDTOOLS_MAKEWINDOWS.out.versions)
 
     ch_binned_genome = BEDTOOLS_MAKEWINDOWS.out.bed
