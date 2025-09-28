@@ -13,15 +13,16 @@ samplesheet_file <- "${samplesheet}"
 genome_bins_file <- "${genome_bins}"
 binsize_param    <- "${binsize}"
 comparison_param <- "${comparison}"
+compare_groups <- "${compare_groups}"
+threshold <- "${solubility_threshold}"
 
-# Define threshold for Binselector
-ths <- 0.1 #(in future it could be a parameter...)
+# Define threshold for binselector
+ths <- as.numeric(threshold)
 
 selected_ratios <- if (grepl(",", comparison_param)) trimws(strsplit(comparison_param, ",")[[1]]) else trimws(comparison_param)
 
 comp_db <- fread(samplesheet_file, data.table = FALSE, header = TRUE)
 bins_gr <- import(genome_bins_file, format = "BED")
-
 ratio_col <- which(colnames(comp_db) == 'ratio')
 file_col  <- which(colnames(comp_db) == 'file')
 id_col    <- which(colnames(comp_db) == 'experimental_id')
@@ -39,21 +40,14 @@ add_metadata <- function(df, comparison_name, current_ratio, fraction, direction
 # Function to save bins data into one CSV with a readable column order
 save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffix, g1 = NULL, g2 = NULL) {
     if (length(data_list)) {
-
         df <- do.call(rbind, data_list)
-
-        # for all_bins, remove fraction and direction columns if they exist
         if (grepl("all_bins", file_suffix, ignore.case = TRUE)) {
-            # remove fraction and direction columns if they exist
             cols_to_remove <- c('fraction', 'direction')
             available_cols <- colnames(df)
             cols_to_keep <- setdiff(available_cols, cols_to_remove)
             df <- df[, cols_to_keep]
-
         } else {
-            # base columns standard to keep
             base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison', 'fraction', 'direction')
-
             essential_stats_cols <- c()
             if (!is.null(g1) && !is.null(g2)) {
                 essential_stats_cols <- c(
@@ -64,34 +58,26 @@ save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffi
                     "delta"
                 )
             }
-
             essential_cols <- c(base_cols, essential_stats_cols)
-
             available_cols <- colnames(df)
             cols_to_keep <- intersect(essential_cols, available_cols)
-
             df <- df[, cols_to_keep]
         }
-
         output_file <- paste0(current_ratio, "_", comparison_name, "_", file_suffix, ".csv")
         write.csv(df, file = output_file, quote = FALSE, row.names = FALSE)
-
     } else {
         cat("No", file_suffix, "data found for", comparison_name, "\n")
     }
 }
 
 for (current_ratio in selected_ratios) {
-
     ratio_data    <- comp_db[comp_db[, ratio_col] == current_ratio, ]
     Sample_names  <- ratio_data[, id_col]
     Sample_groups <- ratio_data[, group_col]
     Sample_files  <- ratio_data[, file_col]
-
-    fr_parts <- strsplit(current_ratio, "vs")[[1]]
-    fr1 <- fr_parts[1]
-    fr2 <- fr_parts[2]
-
+    fr_parts <- strsplit(current_ratio, "vs", perl = TRUE)[[1]]
+    fr1 <- trimws(fr_parts[1]); fr2 <- trimws(fr_parts[2])
+    
     bws <- import_and_rebin__bw(
         files    = Sample_files,
         bin_list = bins_gr,
@@ -99,30 +85,46 @@ for (current_ratio in selected_ratios) {
         cores    = 1,
         genome   = NULL
     )
-
+    
     bindf <- as.data.frame(bins_gr)[c(1,2,3,4,5)]
     for (sample_name in names(bws)) {
         dftomerge <- as.data.frame(bws[[sample_name]])
         colnames(dftomerge)[6] <- sample_name
-        bindf <- merge(bindf, dftomerge[, 1:6], by = c(1,2,3,4,5))
+        bindf <- merge(bindf, dftomerge[, 1:6], by = c(1,2,3,4,5), sort = FALSE)
     }
-
+    
     gr1 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
     gr2 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
     S4Vectors::mcols(gr1) <- preprocessCore::normalize.quantiles(as.matrix(S4Vectors::mcols(gr1)))
     names(gr1@elementMetadata) <- names(gr2@elementMetadata)
     allmixeddf_grobj <- GenomicRanges::sort(gr1)
-
     unique_groups <- unique(Sample_groups)
-    pr <- combn(unique_groups, 2)
-    assign("pr", pr, envir = .GlobalEnv)
 
+    # Process custom comparisons (guaranteed by workflow validation)
+    comps <- strsplit(compare_groups, ",")[[1]]
+    pr <- matrix(nrow = 2, ncol = length(comps))        
+    for (i in seq_along(comps)) {
+        parts <- strsplit(comps[i], "vs")[[1]]
+        test_group <- trimws(parts[1])
+        ref_group <- trimws(parts[2])
+        if (!test_group %in% unique_groups) {
+            stop("Group '", test_group, "' not found in ", current_ratio, ". Available groups: ", paste(unique_groups, collapse = ", "))
+        }
+        if (!ref_group %in% unique_groups) {
+            stop("Group '", ref_group, "' not found in ", current_ratio, ". Available groups: ", paste(unique_groups, collapse = ", "))
+        }
+        pr[1, i] <- ref_group  
+        pr[2, i] <- test_group 
+    }
+    cat("Custom comparisons:", paste(apply(pr, 2, function(x) paste0(x[2], "_vs_", x[1])), collapse = ", "), "\n")
+    
+    assign("pr", pr, envir = .GlobalEnv)
     for (i in 1:ncol(pr)) {
         g1 <- pr[1, i]; g2 <- pr[2, i]
         assign(g1, Sample_names[Sample_groups == g1], envir = .GlobalEnv)
         assign(g2, Sample_names[Sample_groups == g2], envir = .GlobalEnv)
     }
-
+    
     list_groups <- vector("list", ncol(pr))
     for (i in 1:ncol(pr)) {
         list_groups[[i]] <- Bins_selector(
@@ -134,17 +136,14 @@ for (current_ratio in selected_ratios) {
         )
     }
     names(list_groups) <- apply(pr, 2, function(x) paste(x[1], "vs", x[2], sep = "_"))
-
-    # iterate over each group comparison and save results
+    
     for (i in seq_along(list_groups)) {
         g1 <- pr[1, i]; g2 <- pr[2, i]
         res <- list_groups[[i]]
         comparison_name <- paste0(g2, "_vs_", g1)
-
         all_bins_data <- list()
         selected_bins_data <- list()
-
-        # keeping all bins without filtering
+        
         all_bins_result <- res[[paste0(g2, "_allgr_", g1)]]
         if (!is.null(all_bins_result) && length(all_bins_result) > 0) {
             df_all <- as.data.frame(all_bins_result)
@@ -153,15 +152,14 @@ for (current_ratio in selected_ratios) {
         } else {
             cat("No all_bins data available for", comparison_name, "\n")
         }
-
-        # bins selected based on differential criteria for each fraction and direction
+        
         bin_categories <- list(
             list(suffix = paste0(g2, "_", fr1, "_up_", g1),   frac = fr1, dir = "up"),
             list(suffix = paste0(g2, "_", fr1, "_down_", g1), frac = fr1, dir = "down"),
             list(suffix = paste0(g2, "_", fr2, "_up_", g1),   frac = fr2, dir = "up"),
             list(suffix = paste0(g2, "_", fr2, "_down_", g1), frac = fr2, dir = "down")
         )
-
+        
         for (category in bin_categories) {
             gr <- res[[category[['suffix']]]]
             if (!is.null(gr) && length(gr) > 0) {
@@ -172,7 +170,7 @@ for (current_ratio in selected_ratios) {
                 cat("No", category[['dir']], "bins found for fraction", category[['frac']], "in", comparison_name, "\n")
             }
         }
-        # Save results to CSV files
+        
         save_bins_data(all_bins_data, current_ratio, comparison_name, "all_bins_complete", g1, g2)
         save_bins_data(selected_bins_data, current_ratio, comparison_name, "selected_bins_filtered", g1, g2)
     }

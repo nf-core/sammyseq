@@ -30,16 +30,17 @@ include { BAM_MARKDUPLICATES_PICARD   } from '../subworkflows/nf-core/bam_markdu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { DIFFERENTIAL_SOLUBILITY       } from '../modules/local/differential_solubility/main'
-include { FASTQ_ALIGN_DNA               } from '../subworkflows/local/fastq_align_dna/main'
-include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome'
-include { GENOME_BINNING                } from '../subworkflows/local/genome_binning'
-include { CAT_FRACTIONS                 } from '../subworkflows/local/cat_fractions'
-include { FILTER_BAM_SAMTOOLS           } from '../subworkflows/local/filter_bam_samtools'
-include { BIGWIG_PLOT_DEEPTOOLS         } from '../subworkflows/local/bigwig_plot_deeptools'
-include { DEEPTOOLS_QC                  } from '../subworkflows/local/deeptools_qc'
-include { GENERATE_COMPARISONS_MLE      } from '../subworkflows/local/generate_comparisons_mle'
-include { GENERATE_COMPARISONS_SAMPLESHEET    } from '../subworkflows/local/generate_comparisons_samplesheet'
+include { DIFFERENTIAL_SOLUBILITY               } from '../modules/local/differential_solubility/main'
+include { FASTQ_ALIGN_DNA                       } from '../subworkflows/local/fastq_align_dna/main'
+include { VALIDATE_GROUPS                       } from '../modules/local/validate_groups'
+include { PREPARE_GENOME                        } from '../subworkflows/local/prepare_genome'
+include { GENOME_BINNING                        } from '../subworkflows/local/genome_binning'
+include { CAT_FRACTIONS                         } from '../subworkflows/local/cat_fractions'
+include { FILTER_BAM_SAMTOOLS                   } from '../subworkflows/local/filter_bam_samtools'
+include { BIGWIG_PLOT_DEEPTOOLS                 } from '../subworkflows/local/bigwig_plot_deeptools'
+include { DEEPTOOLS_QC                          } from '../subworkflows/local/deeptools_qc'
+include { GENERATE_COMPARISONS_MLE              } from '../subworkflows/local/generate_comparisons_mle'
+include { GENERATE_COMPARISONS_SAMPLESHEET      } from '../subworkflows/local/generate_comparisons_samplesheet'
 
 
 /*
@@ -376,28 +377,32 @@ if (params.stopAt == 'ALIGNMENT') {
         )
     }
 
-
     //
     // DIFFERENTIAL SOLUBILITY ANALYSIS
     //
     if (params.differential_solubility) {
-
-    if (params.comparisonFile)
-        error "ERROR: --differential_solubility does not support --comparisonFile. Use --comparison."
-
-    if (params.comparison && params.comparisonFile)
-        error "ERROR: Provide only --comparison for --differential_solubility; --comparisonFile is not supported."
-
+    
+        if (!params.compare_groups) {
+            error "ERROR: --differential_solubility requires --compare_groups"
+        }
+    
+        VALIDATE_GROUPS(
+            ch_comparison_results.collect(),
+            params.compare_groups
+        )
+    
         ch_differential_samplesheet = GENERATE_COMPARISONS_SAMPLESHEET.out.samplesheet
             .map { file -> [[ id:'differential_analysis' ], file] }
-
+    
         DIFFERENTIAL_SOLUBILITY (
             ch_differential_samplesheet,
             ch_genome_bins,
             params.binsize,
-            params.comparison
+            params.comparison,
+            params.compare_groups,
+            params.solubility_threshold,
+            VALIDATE_GROUPS.out.validation      
         )
-
     }
 
     //

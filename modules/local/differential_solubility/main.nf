@@ -11,6 +11,9 @@ process DIFFERENTIAL_SOLUBILITY {
     path(genome_bins)
     val(binsize)
     val(comparison)
+    val(compare_groups)
+    val(solubility_threshold)
+    val(validation_passed)
 
     output:
     tuple val(meta), path("*_all_bins_complete.csv"), emit: all_bins

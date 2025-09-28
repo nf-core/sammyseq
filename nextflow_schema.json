@@ -113,6 +113,20 @@
                     "fa_icon": "fas fa-percentage",
                     "description": "Specify the tool to be used to generate comparisons"
                 },
+                "compare_groups": {
+                    "type": "string",
+                    "default": null,
+                    "pattern": "^[A-Za-z0-9_]+vs[A-Za-z0-9_]+(,[A-Za-z0-9_]+vs[A-Za-z0-9_]+)*$",
+                    "fa_icon": "fas fa-balance-scale",
+                    "description": "Define comparison order for sample groups in differential solubility analysis using sample_group names from input samplesheet (format: 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'). Default: all groups in samplesheet order.",
+                    "errorMessage": "Must follow format 'GroupAvsGroupB' or 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'. Group names must match sample_group column in input samplesheet."
+                },
+                "solubility_threshold": {
+                    "type": "number",
+                    "default": 0.1,
+                    "fa_icon": "fas fa-cut",
+                    "description": "Minimum signal threshold for bin selection in differential solubility analysis."
+                },
                 "trimmer": {
                     "type": "string",
                     "default": "trimgalore",
