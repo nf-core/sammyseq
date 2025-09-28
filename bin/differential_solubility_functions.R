@@ -155,15 +155,15 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
 
     # Define groups to compare and select their samples
     x <- get(pr[, combination][1])
-    sample_typex <- pr[, combination][1]
-    sample_typey <- pr[, combination][2]
     y <- get(pr[, combination][2])
+    xgroup <- pr[, combination][1]
+    ygroup <- pr[, combination][2]
 
     cat("Groups:", paste(x, collapse = ", "), "vs", paste(y, collapse = ", "), "\n")
 
 ##definire vincoli per unicità del nome e se repX va obbligatoriamente finale sep da . o _
-    xgroup <- gsub("_.*", "", x[1], perl = TRUE)
-    ygroup <- gsub("_.*", "", y[1], perl = TRUE)
+    # xgroup <- gsub("_.*", "", x[1], perl = TRUE)
+    # ygroup <- gsub("_.*", "", y[1], perl = TRUE)
 
     cat("Group names:", xgroup, "vs", ygroup, "\n")
 

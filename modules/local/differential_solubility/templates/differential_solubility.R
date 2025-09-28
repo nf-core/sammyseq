@@ -98,15 +98,19 @@ for (current_ratio in selected_ratios) {
     }
 
     gr1 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
-    gr2 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
+    # gr2 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
+    gr1_names <- names(gr1@elementMetadata)
     S4Vectors::mcols(gr1) <- preprocessCore::normalize.quantiles(as.matrix(S4Vectors::mcols(gr1)))
-    names(gr1@elementMetadata) <- names(gr2@elementMetadata)
+    # names(gr1@elementMetadata) <- names(gr2@elementMetadata)
+    names(gr1@elementMetadata) <- gr1_names
     allmixeddf_grobj <- GenomicRanges::sort(gr1)
     unique_groups <- unique(Sample_groups)
 
     # Process custom comparisons (guaranteed by workflow validation)
     comps <- strsplit(compare_groups, ",")[[1]]
     pr <- matrix(nrow = 2, ncol = length(comps))
+    colnames(pr) <- comps
+    rownames(pr) <- c('ref_group', 'test_group')
     for (i in seq_along(comps)) {
         parts <- strsplit(comps[i], "vs")[[1]]
         test_group <- trimws(parts[1])
@@ -130,21 +134,22 @@ for (current_ratio in selected_ratios) {
     }
 
     list_groups <- vector("list", ncol(pr))
+    names(list_groups) <- comps
     for (i in 1:ncol(pr)) {
         list_groups[[i]] <- Bins_selector(
-            combination = i,
+            combination = comps[i],
             allmixeddf_grobj = allmixeddf_grobj,
             fraction1 = fr1,
             fraction2 = fr2,
             ths = ths
         )
     }
-    names(list_groups) <- apply(pr, 2, function(x) paste(x[1], "vs", x[2], sep = "_"))
+    # names(list_groups) <- apply(pr, 2, function(x) paste(x[1], "vs", x[2], sep = "_"))
 
     for (i in seq_along(list_groups)) {
         g1 <- pr[1, i]; g2 <- pr[2, i]
         res <- list_groups[[i]]
-        comparison_name <- paste0(g2, "_vs_", g1)
+        comparison_name <- names(list_groups)[i]
         all_bins_data <- list()
         selected_bins_data <- list()
 
