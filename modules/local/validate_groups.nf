@@ -14,9 +14,9 @@ process VALIDATE_GROUPS {
         available.add(comparison_results[i].sample_group)
     }
     available = available.unique()
-    
+
     def specified = compare_groups.split(/[,vs]/).collect { it.trim() }.unique() - ['']
-    
+
     def missing = specified - available
     if (missing) {
         error "ERROR: Groups ${missing} not found! Available: ${available.join(', ')}"

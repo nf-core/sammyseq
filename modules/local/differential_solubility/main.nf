@@ -18,6 +18,7 @@ process DIFFERENTIAL_SOLUBILITY {
     output:
     tuple val(meta), path("*_all_bins_complete.csv"), emit: all_bins
     tuple val(meta), path("*_selected_bins_filtered.csv"), emit: selected_bins
+    tuple val(meta), path("analysis_summary.txt"), emit: report
 
     when:
     task.ext.when == null || task.ext.when

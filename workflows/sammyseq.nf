@@ -381,19 +381,19 @@ if (params.stopAt == 'ALIGNMENT') {
     // DIFFERENTIAL SOLUBILITY ANALYSIS
     //
     if (params.differential_solubility) {
-    
+
         if (!params.compare_groups) {
             error "ERROR: --differential_solubility requires --compare_groups"
         }
-    
+
         VALIDATE_GROUPS(
             ch_comparison_results.collect(),
             params.compare_groups
         )
-    
+
         ch_differential_samplesheet = GENERATE_COMPARISONS_SAMPLESHEET.out.samplesheet
             .map { file -> [[ id:'differential_analysis' ], file] }
-    
+
         DIFFERENTIAL_SOLUBILITY (
             ch_differential_samplesheet,
             ch_genome_bins,
@@ -401,7 +401,7 @@ if (params.stopAt == 'ALIGNMENT') {
             params.comparison,
             params.compare_groups,
             params.solubility_threshold,
-            VALIDATE_GROUPS.out.validation      
+            VALIDATE_GROUPS.out.validation
         )
     }
 
