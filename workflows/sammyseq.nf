@@ -328,7 +328,8 @@ if (params.stopAt == 'ALIGNMENT') {
     if (params.comparisonFile || params.comparison) {
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
-            params.keep_regions_bed
+            params.keep_regions_bed,
+            PREPARE_GENOME.out.chrom_sizes
         )
         ch_genome_bins = GENOME_BINNING.out.binned_genome
                 .map { meta, bed -> bed }
