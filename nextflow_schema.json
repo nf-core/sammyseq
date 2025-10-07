@@ -103,7 +103,7 @@
                 },
                 "comparison_maker": {
                     "type": "string",
-                    "default": "spp",
+                    "default": "bigwigcompare",
                     "enum": ["spp", "bigwigcompare"],
                     "fa_icon": "fas fa-percentage",
                     "description": "Specify the tool to be used to generate comparisons"
@@ -450,7 +450,6 @@
         "bigwigcompare_fixed_step": {
             "type": "boolean",
             "description": "Write out all bins (of size \u2013binSize).",
-            "default": true,
             "fa_icon": "fas fa-chart-bar"
         },
         "bigwigcompare_skip_non_covered_regions": {
