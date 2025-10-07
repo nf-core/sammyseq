@@ -61,6 +61,11 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/deeptools/bamcoverage/deeptools-bamcoverage.diff"
                     },
+                    "deeptools/bigwigcompare": {
+                        "branch": "master",
+                        "git_sha": "eee262cd494d7043a1e4c8827ebbde180790ca80",
+                        "installed_by": ["modules"]
+                    },
                     "deeptools/computematrix": {
                         "branch": "master",
                         "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",

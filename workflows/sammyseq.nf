@@ -39,7 +39,7 @@ include { BIGWIG_PLOT_DEEPTOOLS         } from '../subworkflows/local/bigwig_plo
 include { DEEPTOOLS_QC                  } from '../subworkflows/local/deeptools_qc'
 include { GENERATE_COMPARISONS_MLE      } from '../subworkflows/local/generate_comparisons_mle'
 include { GENERATE_COMPARISONS_SAMPLESHEET    } from '../subworkflows/local/generate_comparisons_samplesheet'
-
+include { GENERATE_COMPARISONS_BIGWIG   } from '../subworkflows/local/generate_comparisons_bigwig'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -332,6 +332,7 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_versions = ch_versions.mix(GENOME_BINNING.out.versions)
     }
 
+
     //
     // Generate comparisons
     //
@@ -348,17 +349,11 @@ if (params.stopAt == 'ALIGNMENT') {
             ch_comparison_results = GENERATE_COMPARISONS_MLE.out.mle_results
 
         } else if (params.comparison_maker == 'bigwigcompare') {
-            // TODO: Implement bigwigCompare comparison analysis
-            //
-            // GENERATE_COMPARISONS_BIGWIG(
-            //     ch_bigwig1,
-            //     ch_bigwig2,
-            //     etc...
-            // )
-            // ch_comparison_results = GENERATE_COMPARISONS_BIGWIG.out.comparison_results
-
-            log.warn "bigwigCompare comparison tool is not yet implemented. Please use 'spp' for now."
-            error "bigwigCompare comparison tool is not available yet. Please use 'spp' instead."
+            GENERATE_COMPARISONS_BIGWIG(
+                DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+                ch_samplesheet,
+            )
+            ch_comparison_results = GENERATE_COMPARISONS_BIGWIG.out.comparison_results
 
         }
 
