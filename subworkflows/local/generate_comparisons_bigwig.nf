@@ -1,7 +1,7 @@
 //
 // Subworkflow to generate pairwise comparisons and run DEEPTOOLS_BIGWIGCOMPARE analysis
 //
- 
+
 include { DEEPTOOLS_BIGWIGCOMPARE } from '../../modules/nf-core/deeptools/bigwigcompare'
 
 workflow GENERATE_COMPARISONS_BIGWIG {
@@ -115,7 +115,7 @@ workflow GENERATE_COMPARISONS_BIGWIG {
                 experimentalID: expid1,
                 sample_group: meta_bigwig1.sample_group,
                 ratio: "${fraction1}vs${fraction2}",
-                csv_expid_filter: expid1 == expid2 
+                csv_expid_filter: expid1 == expid2
             ]
 
             def meta_for_module = meta_csv + [ id: output_bigwig_name ]
