@@ -17,10 +17,10 @@ workflow GENERATE_COMPARISONS_BIGWIG {
     comparisons_ch_s1 = Channel.empty()
     comparisons_ch_s2 = Channel.empty()
 
-    if (params.comparisonFile) {
-        // comparisonFile CSV based approach
+    if (params.comparison_file) {
+        // comparison_file CSV based approach
         Channel
-            .fromPath(params.comparisonFile)
+            .fromPath(params.comparison_file)
             .splitCsv(header: true)
             .map { row ->
                 [row.sample1, row.sample1 + "_VS_" + row.sample2]
@@ -28,7 +28,7 @@ workflow GENERATE_COMPARISONS_BIGWIG {
             .set { comparisons_ch_s1 }
 
         Channel
-            .fromPath(params.comparisonFile)
+            .fromPath(params.comparison_file)
             .splitCsv(header: true)
             .map { row ->
                 [row.sample2, row.sample1 + "_VS_" + row.sample2]
@@ -96,7 +96,7 @@ workflow GENERATE_COMPARISONS_BIGWIG {
 
     // Join the two comparison channels and prepare for DEEPTOOLS_BIGWIGCOMPARE
     bigwig1_comparison
-        .join(bigwig2_comparison, remainder: false, by: 0)
+        .join(bigwig2_comparison)
         .map { comparison, bigwig1, meta_bigwig1, bigwig2, meta_bigwig2 ->
 
             def expid1 = meta_bigwig1.experimentalID
