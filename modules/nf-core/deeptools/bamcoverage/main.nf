@@ -11,10 +11,10 @@ process DEEPTOOLS_BAMCOVERAGE {
     tuple val(meta), path(input), path(input_index)
     path(fasta)
     path(fasta_fai)
-    path(blacklist)
+    tuple val(meta2), path(blacklist)
 
     output:
-    tuple val(meta), path("*.bw")       , emit: bigwig, optional: true
+    tuple val(meta), path("*.bigWig")   , emit: bigwig, optional: true
     tuple val(meta), path("*.bedgraph") , emit: bedgraph, optional: true
     path "versions.yml"                 , emit: versions
 
@@ -24,7 +24,7 @@ process DEEPTOOLS_BAMCOVERAGE {
     script:
     def args      = task.ext.args ?: ''
     def prefix    = task.ext.prefix ?: "${meta.id}"
-    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bw"
+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bigWig"
     def blacklist_params = blacklist ? "--blackListFileName ${blacklist}" : ""
 
     // cram_input is currently not working with deeptools
@@ -70,7 +70,7 @@ process DEEPTOOLS_BAMCOVERAGE {
 
     stub:
     def prefix    = task.ext.prefix ?: "${meta.id}"
-    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? ".bedgraph" : ".bw"
+    def extension = args.contains("--outFileFormat bedgraph") || args.contains("-of bedgraph") ? "bedgraph" : "bigWig"
     """
     touch ${prefix}.${extension}
 

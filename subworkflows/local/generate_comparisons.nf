@@ -1,14 +1,19 @@
 //
-// Subworkflow to generate pairwise comparisons and run DEEPTOOLS_BIGWIGCOMPARE analysis
+// Subworkflow to generate pairwise comparisons and 
+// run RTWOSAMPLESMLE analysis or DEEPTOOLS_BIGWIGCOMPARE analysis
 //
 
+include { RTWOSAMPLESMLE }          from '../../modules/local/rtwosamplesmle/main'
 include { DEEPTOOLS_BIGWIGCOMPARE } from '../../modules/nf-core/deeptools/bigwigcompare'
 
 workflow GENERATE_COMPARISONS_BIGWIG {
 
     take:
-    ch_bigwig_input         // channel: [meta, bigwig]
-    ch_samplesheet          // channel: samplesheet data for comparison string approach
+    ch_input            // channel: [meta, bam|bigwig]
+    ch_samplesheet      // channel: samplesheet data for comparison string approach
+    chrom_sizes         // path:    chromosome sizes file (only for MLE)
+    module_name         // string:  'spp' o 'bigwigcompare'
+
     main:
 
     ch_versions = Channel.empty()
@@ -22,18 +27,14 @@ workflow GENERATE_COMPARISONS_BIGWIG {
         Channel
             .fromPath(params.comparison_file)
             .splitCsv(header: true)
-            .map { row ->
-                [row.sample1, row.sample1 + "_VS_" + row.sample2]
+            .multiMap { row ->
+                comparisons_ch_s1: [row.sample1, "${row.sample1}_VS_${row.sample2}"]
+                comparisons_ch_s2: [row.sample2, "${row.sample1}_VS_${row.sample2}"]
             }
-            .set { comparisons_ch_s1 }
+            .set { comparisons_ch }
 
-        Channel
-            .fromPath(params.comparison_file)
-            .splitCsv(header: true)
-            .map { row ->
-                [row.sample2, row.sample1 + "_VS_" + row.sample2]
-            }
-            .set { comparisons_ch_s2 }
+        comparisons_ch_s1 = comparisons_ch.comparisons_ch_s1
+        comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2
 
     } else if (params.comparison) {
         // comparison string-based approach
@@ -73,63 +74,72 @@ workflow GENERATE_COMPARISONS_BIGWIG {
         comparisons_ch_s2 = comparisons_ch.comparisons_ch_s2
     }
 
-    ch_bigwig_input
-        .map { meta, bigwig ->
-            [meta.id, bigwig, meta]
+    ch_input
+        .map { meta, f ->
+            [meta.id, f, meta]
         }
-        .set { ch_bigwig_reformat }
+        .set { ch_input_reformat }
 
-    // Combine comparison channel with bigwig list channel
+    // Combine comparison channel with input list channel
     comparisons_ch_s1
-        .combine(ch_bigwig_reformat, by: 0)
-        .map { sample1, comparison, bigwig, meta ->
-            [comparison, bigwig, meta]
+        .combine(ch_input_reformat, by: 0)
+        .map { sample1, comparison, file, meta ->
+            [comparison, file, meta]
         }
-        .set { bigwig1_comparison }
+        .set { f1_comparison }
 
     comparisons_ch_s2
-        .combine(ch_bigwig_reformat, by: 0)
-        .map { sample2, comparison, bigwig, meta ->
-            [comparison, bigwig, meta]
+        .combine(ch_input_reformat, by: 0)
+        .map { sample2, comparison, file, meta ->
+            [comparison, file, meta]
         }
-        .set { bigwig2_comparison }
+        .set { f2_comparison }
 
-    // Join the two comparison channels and prepare for DEEPTOOLS_BIGWIGCOMPARE
-    bigwig1_comparison
-        .join(bigwig2_comparison)
-        .map { comparison, bigwig1, meta_bigwig1, bigwig2, meta_bigwig2 ->
+    // Join the two comparison channels and prepare for module
+    f1_comparison
+        .join(f2_comparison)
+        .map { comparison, f1, meta1, f2, meta2 ->
 
-            def expid1 = meta_bigwig1.experimentalID
-            def fraction1 = meta_bigwig1.fraction
-            def expid2 = meta_bigwig2.experimentalID
-            def fraction2 = meta_bigwig2.fraction
+            def expid1 = meta1.experimentalID
+            def fraction1 = meta1.fraction
+            def expid2 = meta2.experimentalID
+            def fraction2 = meta2.fraction
 
-            def output_bigwig_name
+            def output_name
             if (expid1 == expid2) {
-                output_bigwig_name = "${expid1}_${fraction1}vs${fraction2}"
+                output_name = "${expid1}_${fraction1}vs${fraction2}"
             } else {
-                output_bigwig_name = "${expid1}_${fraction1}_vs_${expid2}_${fraction2}"
+                output_name = "${expid1}_${fraction1}_vs_${expid2}_${fraction2}"
             }
 
             def meta_csv = [
                 experimentalID: expid1,
-                sample_group: meta_bigwig1.sample_group,
+                sample_group: meta1.sample_group,
                 ratio: "${fraction1}vs${fraction2}",
-                csv_expid_filter: expid1 == expid2
+                csv_expid_filter: expid1 == expid2,
+                id: output_name
             ]
 
-            def meta_for_module = meta_csv + [ id: output_bigwig_name ]
-            [ meta_for_module, bigwig1, bigwig2 ]
+            [ meta_csv, f1, f2 ]
 
         }
         .set { comparisons_merge_ch }
 
-    // Run DEEPTOOLS_BIGWIGCOMPARE analysis
-    DEEPTOOLS_BIGWIGCOMPARE(
-        comparisons_merge_ch,
-        params.blacklist ? Channel.value([[:], file(params.blacklist)]) : Channel.value([[:], []])
-    )
+    // parameter check to run comparison analysis
+    if (method == 'spp') {
+        RTWOSAMPLESMLE(
+            comparisons_merge_ch.map { meta, f1, f2 -> [meta - [id: meta.id], f1, f2, meta.id] },
+            chrom_sizes
+        )
+        emit:
+        results = RTWOSAMPLESMLE.out.results
+    } else if (method == 'bigwigcompare') {
+        def blacklist_ch = params.blacklist
+            ? Channel.value([[:], file(params.blacklist)])
+            : Channel.value([[:], []])
 
-    emit:
-    comparison_results = DEEPTOOLS_BIGWIGCOMPARE.out.output
+        DEEPTOOLS_BIGWIGCOMPARE(comparisons_merge_ch, blacklist_ch)
+        emit:
+        results = DEEPTOOLS_BIGWIGCOMPARE.out.output
+    }
 }

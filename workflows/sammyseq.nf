@@ -37,9 +37,8 @@ include { CAT_FRACTIONS                 } from '../subworkflows/local/cat_fracti
 include { FILTER_BAM_SAMTOOLS           } from '../subworkflows/local/filter_bam_samtools'
 include { BIGWIG_PLOT_DEEPTOOLS         } from '../subworkflows/local/bigwig_plot_deeptools'
 include { DEEPTOOLS_QC                  } from '../subworkflows/local/deeptools_qc'
-include { GENERATE_COMPARISONS_MLE      } from '../subworkflows/local/generate_comparisons_mle'
+include { GENERATE_COMPARISONS          } from '../subworkflows/local/generate_comparisons'
 include { GENERATE_COMPARISONS_SAMPLESHEET    } from '../subworkflows/local/generate_comparisons_samplesheet'
-include { GENERATE_COMPARISONS_BIGWIG   } from '../subworkflows/local/generate_comparisons_bigwig'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -317,14 +316,14 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     //
-    // GENOME BINNING: Run only if comparisonFile or comparison is provided
+    // GENOME BINNING: Run only if comparison_file or comparison is provided
     //
 
-    if (params.comparisonFile && params.comparison) {
-        error "Cannot specify both --comparisonFile and --comparison parameters. Please use only one method."
+    if (params.comparison_file && params.comparison) {
+        error "Cannot specify both --comparison_file and --comparison parameters. Please use only one method."
     }
 
-    if (params.comparisonFile || params.comparison) {
+    if (params.comparison_file || params.comparison) {
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
             params.keep_regions_bed
@@ -336,26 +335,22 @@ if (params.stopAt == 'ALIGNMENT') {
     //
     // Generate comparisons
     //
-    if (params.comparisonFile || params.comparison) {
+    if (params.comparison_file || params.comparison) {
 
         ch_comparison_results = Channel.empty()
 
-        if (params.comparison_maker == 'spp') {
-            GENERATE_COMPARISONS_MLE(
-                FILTER_BAM_SAMTOOLS.out.bam,
-                ch_samplesheet,
-                PREPARE_GENOME.out.chrom_sizes
-            )
-            ch_comparison_results = GENERATE_COMPARISONS_MLE.out.mle_results
+        GENERATE_COMPARISONS(
+            params.comparison_maker == 'spp'
+                ? FILTER_BAM_SAMTOOLS.out.bam
+                : DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+            ch_samplesheet,
+            params.comparison_maker == 'spp'
+                ? PREPARE_GENOME.out.chrom_sizes
+                : null,
+            params.comparison_maker
+        )
 
-        } else if (params.comparison_maker == 'bigwigcompare') {
-            GENERATE_COMPARISONS_BIGWIG(
-                DEEPTOOLS_BAMCOVERAGE.out.bigwig,
-                ch_samplesheet,
-            )
-            ch_comparison_results = GENERATE_COMPARISONS_BIGWIG.out.comparison_results
-
-        }
+        ch_comparison_results = GENERATE_COMPARISONS.out.results
 
         //
         // Generate ratio samplesheet CSV - common for both tools
