@@ -1,5 +1,5 @@
 //
-// Subworkflow to generate pairwise comparisons and 
+// Subworkflow to generate pairwise comparisons and
 // run RTWOSAMPLESMLE analysis or DEEPTOOLS_BIGWIGCOMPARE analysis
 //
 

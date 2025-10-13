@@ -57,7 +57,7 @@
                     },
                     "deeptools/bamcoverage": {
                         "branch": "master",
-                        "git_sha": "f045f9e2d406a8ea87fff4fa1bb5c1071a38f458",
+                        "git_sha": "bef1bd617155a349b40cb7e16e09425e65f0b97c",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/deeptools/bamcoverage/deeptools-bamcoverage.diff"
                     },
