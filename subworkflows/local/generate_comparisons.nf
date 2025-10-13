@@ -6,7 +6,7 @@
 include { RTWOSAMPLESMLE }          from '../../modules/local/rtwosamplesmle/main'
 include { DEEPTOOLS_BIGWIGCOMPARE } from '../../modules/nf-core/deeptools/bigwigcompare'
 
-workflow GENERATE_COMPARISONS_BIGWIG {
+workflow GENERATE_COMPARISONS {
 
     take:
     ch_input            // channel: [meta, bam|bigwig]
