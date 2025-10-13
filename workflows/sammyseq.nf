@@ -37,9 +37,8 @@ include { CAT_FRACTIONS                 } from '../subworkflows/local/cat_fracti
 include { FILTER_BAM_SAMTOOLS           } from '../subworkflows/local/filter_bam_samtools'
 include { BIGWIG_PLOT_DEEPTOOLS         } from '../subworkflows/local/bigwig_plot_deeptools'
 include { DEEPTOOLS_QC                  } from '../subworkflows/local/deeptools_qc'
-include { GENERATE_COMPARISONS_MLE      } from '../subworkflows/local/generate_comparisons_mle'
+include { GENERATE_COMPARISONS          } from '../subworkflows/local/generate_comparisons'
 include { GENERATE_COMPARISONS_SAMPLESHEET    } from '../subworkflows/local/generate_comparisons_samplesheet'
-
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -269,7 +268,10 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_bam_bai_filtered,
         ch_fasta_path,
         ch_fai_path,
-        params.blacklist ? PREPARE_GENOME.out.blacklist : []
+        params.blacklist ? PREPARE_GENOME.out.blacklist : [
+                    [ id:'no_blacklist' ],
+                    []
+                ]
     )
 
     ch_versions = ch_versions.mix(DEEPTOOLS_BAMCOVERAGE.out.versions)
@@ -283,7 +285,10 @@ if (params.stopAt == 'ALIGNMENT') {
     FILTER_BAM_SAMTOOLS.out.bai,
     DEEPTOOLS_BAMCOVERAGE.out.bigwig,
     params.corr_method,
-    params.blacklist ? PREPARE_GENOME.out.blacklist : []
+    params.blacklist ? PREPARE_GENOME.out.blacklist : [
+                    [ id:'no_blacklist' ],
+                    []
+                ]
     )
     ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
     ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
@@ -317,14 +322,14 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     //
-    // GENOME BINNING: Run only if comparisonFile or comparison is provided
+    // GENOME BINNING: Run only if comparison_file or comparison is provided
     //
 
-    if (params.comparisonFile && params.comparison) {
-        error "Cannot specify both --comparisonFile and --comparison parameters. Please use only one method."
+    if (params.comparison_file && params.comparison) {
+        error "Cannot specify both --comparison_file and --comparison parameters. Please use only one method."
     }
 
-    if (params.comparisonFile || params.comparison) {
+    if (params.comparison_file || params.comparison) {
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
             params.keep_regions_bed
@@ -332,35 +337,26 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_versions = ch_versions.mix(GENOME_BINNING.out.versions)
     }
 
+
     //
     // Generate comparisons
     //
-    if (params.comparisonFile || params.comparison) {
+    if (params.comparison_file || params.comparison) {
 
         ch_comparison_results = Channel.empty()
 
-        if (params.comparison_maker == 'spp') {
-            GENERATE_COMPARISONS_MLE(
-                FILTER_BAM_SAMTOOLS.out.bam,
-                ch_samplesheet,
-                PREPARE_GENOME.out.chrom_sizes
-            )
-            ch_comparison_results = GENERATE_COMPARISONS_MLE.out.mle_results
+        GENERATE_COMPARISONS(
+            params.comparison_maker == 'spp'
+                ? FILTER_BAM_SAMTOOLS.out.bam
+                : DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+            ch_samplesheet,
+            params.comparison_maker == 'spp'
+                ? PREPARE_GENOME.out.chrom_sizes
+                : null,
+            params.comparison_maker
+        )
 
-        } else if (params.comparison_maker == 'bigwigcompare') {
-            // TODO: Implement bigwigCompare comparison analysis
-            //
-            // GENERATE_COMPARISONS_BIGWIG(
-            //     ch_bigwig1,
-            //     ch_bigwig2,
-            //     etc...
-            // )
-            // ch_comparison_results = GENERATE_COMPARISONS_BIGWIG.out.comparison_results
-
-            log.warn "bigwigCompare comparison tool is not yet implemented. Please use 'spp' for now."
-            error "bigwigCompare comparison tool is not available yet. Please use 'spp' instead."
-
-        }
+        ch_comparison_results = GENERATE_COMPARISONS.out.results
 
         //
         // Generate ratio samplesheet CSV - common for both tools

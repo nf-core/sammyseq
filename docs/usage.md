@@ -131,7 +131,7 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
 
 The pipeline will automatically create comparisons only between fractions from the same experimentalID (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
 
-Alternatively, it is possible to generate any pairwise comparisons between any fraction by providing a list with the parameter `--comparisonFile` to indicate the full path to a comma-separated file with 2 columns:
+Alternatively, it is possible to generate any pairwise comparisons between any fraction by providing a list with the parameter `--comparison_file` to indicate the full path to a comma-separated file with 2 columns:
 
 `comparisons.csv`:
 

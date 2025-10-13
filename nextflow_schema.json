@@ -5,6 +5,38 @@
     "description": "Analysis pipeline for SAMMY-seq",
     "type": "object",
     "$defs": {
+        "deeptools_bigwigcompare_options": {
+            "title": "deeptools/bigwigcompare options",
+            "type": "object",
+            "description": "Parameters specific to deeptools/bigwigcompare module",
+            "default": "",
+            "fa_icon": "fas fa-chart-bar",
+            "properties": {
+                "bigwigcompare_pseudocount": {
+                    "type": "number",
+                    "description": "A small number to avoid x/0. Only useful together with \u2013operation log2 or \u2013operation ratio.",
+                    "default": 1e-14,
+                    "fa_icon": "fas fa-chart-bar"
+                },
+                "bigwigcompare_operation": {
+                    "type": "string",
+                    "description": "Specifies mathematical operation applied to sample fractions.",
+                    "default": "log2",
+                    "fa_icon": "fas fa-chart-bar"
+                },
+                "bigwigcompare_skip_non_covered_regions": {
+                    "type": "boolean",
+                    "description": "Avoids interpretation of non-covered regions as zeros.",
+                    "default": true,
+                    "fa_icon": "fas fa-chart-bar"
+                },
+                "bigwigcompare_fixed_step": {
+                    "type": "boolean",
+                    "description": "Write out all bins (of size \u2013binSize).",
+                    "fa_icon": "fas fa-chart-bar"
+                }
+            }
+        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -29,7 +61,7 @@
                     "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\" or \"S2SvsS3,S2LvsS3\")",
                     "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3))*$"
                 },
-                "comparisonFile": {
+                "comparison_file": {
                     "type": "string",
                     "fa_icon": "fas fa-file-csv",
                     "description": "Path to comma-separated file containing the sample names for the desired paired comparisons.",
@@ -103,7 +135,7 @@
                 },
                 "comparison_maker": {
                     "type": "string",
-                    "default": "spp",
+                    "default": "bigwigcompare",
                     "enum": ["spp", "bigwigcompare"],
                     "fa_icon": "fas fa-percentage",
                     "description": "Specify the tool to be used to generate comparisons"
@@ -433,6 +465,9 @@
         }
     },
     "allOf": [
+        {
+            "$ref": "#/$defs/deeptools_bigwigcompare_options"
+        },
         {
             "$ref": "#/$defs/input_output_options"
         },
