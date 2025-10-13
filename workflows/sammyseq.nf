@@ -268,12 +268,8 @@ if (params.stopAt == 'ALIGNMENT') {
         ch_bam_bai_filtered,
         ch_fasta_path,
         ch_fai_path,
-        params.blacklist ? PREPARE_GENOME.out.blacklist : [
-                    [ id:'no_blacklist' ],
-                    []
-                ]
+        params.blacklist ? PREPARE_GENOME.out.blacklist : Channel.value(tuple([ id:'no_blacklist' ], []))
     )
-
     ch_versions = ch_versions.mix(DEEPTOOLS_BAMCOVERAGE.out.versions)
 
     if (params.stopAt == 'DEEPTOOLS_BAMCOVERAGE') {
@@ -285,10 +281,7 @@ if (params.stopAt == 'ALIGNMENT') {
     FILTER_BAM_SAMTOOLS.out.bai,
     DEEPTOOLS_BAMCOVERAGE.out.bigwig,
     params.corr_method,
-    params.blacklist ? PREPARE_GENOME.out.blacklist : [
-                    [ id:'no_blacklist' ],
-                    []
-                ]
+    params.blacklist ? PREPARE_GENOME.out.blacklist : Channel.value(tuple([ id:'no_blacklist' ], []))
     )
     ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
     ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
