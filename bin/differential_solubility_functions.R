@@ -1,34 +1,38 @@
 #!/usr/bin/env Rscript
+# differential_solubility_functions.R
 
 #####################################################################
-## DIFFERENTIAL SOLUBILITY ANALYSIS FUNCTIONS
+## HELPER FUNCTIONS
 #####################################################################
+
+fun1 <- function(lst, n){
+    sapply(lst, `[`, n)
+}
 
 #####################################################################
 ## IMPORT AND REBIN BIGWIG FUNCTION
 #####################################################################
 
-import_and_rebin__bw <- function(files, bin_list, names, cores = 1, genome = NULL) {
-    bws <- parallel::mclapply(files, mc.cores = cores, function(file) {
-    
-    bwR <- rtracklayer::import(file, format = "BigWig", as = "RleList")
+import_and_rebin__bw <- function(files, bin_list, names, genome = NULL) {
+    bws <- lapply(files, function(file) {
+        bwR <- rtracklayer::import(file, format = "BigWig", as = "RleList")
 
-    bin_names <- GenomeInfoDb::seqlevels(bin_list)
-    bw_names  <- names(bwR)
-    chr_order <- sapply(paste0("^", bw_names, "$"), function(chr) grep(chr, bin_names))
-    bins_for_bw <- bin_list
-    GenomeInfoDb::seqlevels(bins_for_bw) <- bin_names[as.vector(unlist(chr_order))]
+        bin_names <- GenomeInfoDb::seqlevels(bin_list)
+        bw_names  <- names(bwR)
+        chr_order <- sapply(paste0("^", bw_names, "$"), function(chr) grep(chr, bin_names))
+        bins_for_bw <- bin_list
+        GenomeInfoDb::seqlevels(bins_for_bw) <- bin_names[as.vector(unlist(chr_order))]
 
-    bw <- GenomicRanges::binnedAverage(
-    bins    = bins_for_bw,
-    numvar  = bwR[ GenomeInfoDb::seqlevels(bins_for_bw) ],
-    varname = "score"
-    )
+        bw <- GenomicRanges::binnedAverage(
+        bins    = bins_for_bw,
+        numvar  = bwR[ GenomeInfoDb::seqlevels(bins_for_bw) ],
+        varname = "score"
+        )
 
-    # CAHNGED -> set genome tag only if provided (we will provide the genome parameter later...)
-    if (!is.null(genome)) GenomeInfoDb::genome(bw) <- genome
+        # CHANGED -> set genome tag only if provided (we will provide the genome parameter later...)
+        if (!is.null(genome)) GenomeInfoDb::genome(bw) <- genome
 
-    bw
+        bw
     })
     names(bws) <- names
     bws
@@ -38,22 +42,20 @@ import_and_rebin__bw <- function(files, bin_list, names, cores = 1, genome = NUL
 ## CHECK SIGN FUNCTION
 #####################################################################
 
-
-check_sign<- function(x,meann){
-            if ( sign(x) == sign(meann) ){
-                return("constant_solubility")
-        } else if (sign(x) > sign(meann)) {
-        
-            return("shift_increase")
-        }else if (sign(x) < sign(meann)) {
-        
-            return("shift_decrease")
-        }
+check_sign <- function(x,meann){
+    if ( sign(x) == sign(meann) ){
+        return("constant_solubility")
+    } else if (sign(x) > sign(meann)) {
+        return("shift_increase")
+    }else if (sign(x) < sign(meann)) {
+        return("shift_decrease")
+    }
 }
 
 #####################################################################
 ## CONFIDENCE INTERVAL FUNCTION
 #####################################################################
+##standard error
 
 confidence_interval <- function(vector, nm="prove") {
     # Standard deviation of sample
@@ -68,8 +70,8 @@ confidence_interval <- function(vector, nm="prove") {
     name_mean <- paste0(nm,"_mean")
     name_serr <- paste0(nm,"_serrX2")
     result <- c(nm_confint_low = vec_mean - vec_serr2x,
-                nm_confint_up = vec_mean + vec_serr2x, 
-                name_mean = vec_mean, 
+                nm_confint_up = vec_mean + vec_serr2x,
+                name_mean = vec_mean,
                 name_serr = vec_serr2x
                 )
     names(result) <- c(nm_confint_low,nm_confint_up,name_mean,name_serr)
@@ -79,9 +81,8 @@ confidence_interval <- function(vector, nm="prove") {
 #####################################################################
 ## RANGE CHECK FUNCTION
 #####################################################################
-## La funzione valuta se le medie cadono nell'intervallo di confidenza dell'altro gruppo
 
-is_in_serrx2_range_and_shift <-function(vector,
+is_in_serrx2_range_and_shift <- function(vector,
                                         xgroup_name,
                                         y_name
                                         ){
@@ -92,7 +93,7 @@ is_in_serrx2_range_and_shift <-function(vector,
 
     xgroup_lower_bound_confint<-vector[xgroup_lower_bound_confint_name][1]
     xgroup_upper_bound_confint<-vector[xgroup_upper_bound_confint_name][1]
-    
+
     yname_val<-vector[y_name][1]
     xgroup_mean<-vector[xgroup_mean_name][1]
 
@@ -100,13 +101,13 @@ is_in_serrx2_range_and_shift <-function(vector,
     mean_startsign<- ''
     mean_sign <-''
     shift_solubility<- ''
-    
-    col_is_in_confint_name<-paste0(y_name,"_ov_check")
-    col_whereis_tp_name<- paste0(y_name,"_ov_specs")
+
+    col_is_in_confint_name<-paste0(y_name,"_sign") # cambiato da ov_check a _sign
+    col_whereis_tp_name<- paste0(y_name,"_shift") # cambiato da ov_specs a _shift
     shift_solubility_name<- paste0(y_name, "_sol_shift")
     mean_startsign_name<- paste0(xgroup_name, "_mean_startsign")
     ##########check if both or one mean is in the confint of the other mean
-    if ( between(yname_val, xgroup_lower_bound_confint, xgroup_upper_bound_confint) 
+    if ( between(yname_val, xgroup_lower_bound_confint, xgroup_upper_bound_confint)
         ) {
         confint_check <- sign(yname_val)
         mean_sign <- "nodiff"
@@ -114,17 +115,17 @@ is_in_serrx2_range_and_shift <-function(vector,
         mean_startsign<- sign(xgroup_mean)
         ##########check if confint are not overlapping, the ygroup timepoint confint is lower than xgroup
         }else if (yname_val < xgroup_lower_bound_confint ) {
-        
+
         confint_check <- sign(yname_val)
 
         #mean_sign <- paste0(y_name ,"_lower_than_",xgroup_name)
         mean_sign <- "lower"
         shift_solubility <- check_sign(yname_val,xgroup_mean)
         mean_startsign<- sign(xgroup_mean)
-        
+
         ##########check if confint are not overlapping, the xgroup timepoint confint is lower than ygroup
         }else if (xgroup_upper_bound_confint < yname_val) {
-        
+
         confint_check <-sign(yname_val)
         mean_sign <- "higher"
         shift_solubility <- check_sign(yname_val,xgroup_mean)
@@ -132,76 +133,166 @@ is_in_serrx2_range_and_shift <-function(vector,
         }
 
         else{
-    
+
         confint_check <- sign(yname_val)
         mean_sign <- "no_idea"
         shift_solubility <- check_sign(yname_val,xgroup_mean)
         mean_startsign<- sign(xgroup_mean)
     }
-    
+
     result <- c(confint_check,mean_sign,shift_solubility,mean_startsign)
-    
+
     names(result) <- c(col_is_in_confint_name,col_whereis_tp_name,shift_solubility_name,mean_startsign_name)
     return(result)
-}   
+}
+
+#####################################################################
+## GENE ANNOTATION SETUP FUNCTION
+#####################################################################
+
+setup_gene_annotation <- function(gtf_file, blacklist_bed) {
+    # Create TxDb from GTF
+    txdb <- makeTxDbFromGFF(gtf_file)
+    genes <- genes(txdb)
+    
+    # Function to summarize protein coding genes
+    summarizeProteinCodingGenes <- function(txdb) {
+        stopifnot(is(txdb, "TxDb"))
+        protein_coding_tx <- names(cdsBy(txdb, use.names = TRUE))
+        all_tx <- mcols(transcripts(txdb, columns = c("gene_id", "tx_name")))
+        all_tx$gene_id <- as.character(all_tx$gene_id)
+        all_tx$is_coding <- all_tx$tx_name %in% protein_coding_tx
+        tmp <- splitAsList(all_tx$is_coding, all_tx$gene_id)
+        gene <- names(tmp)
+        n_tx <- lengths(tmp)
+        n_coding <- sum(tmp)
+        n_non_coding <- n_tx - n_coding
+        data.frame(gene, n_tx, n_coding, n_non_coding, stringsAsFactors = FALSE)
+    }
+    
+    # Get protein coding genes
+    geneid_codingdf <- summarizeProteinCodingGenes(txdb)
+    codingenes_grobj <- genes[genes$gene_id %in% geneid_codingdf[geneid_codingdf$n_coding > 0,]$gene]
+    
+    # Remove blacklisted genes if blacklist is provided
+    if (!is.null(blacklist_bed) && file.exists(blacklist_bed)) {
+        blacklist_grn <- import.bed(blacklist_bed)
+        genes_inside_bl <- GenomicRanges::findOverlaps(codingenes_grobj, blacklist_grn, type = "any")
+        to_remove <- codingenes_grobj[genes_inside_bl@from,]
+        final_genes <- codingenes_grobj[!mcols(codingenes_grobj) %in% mcols(to_remove)]
+    } else {
+        final_genes <- codingenes_grobj
+    }
+    
+    # Clean gene IDs
+    mcols(final_genes)$gene_id <- gsub("\\..*", "", mcols(final_genes)$gene_id)
+    
+    return(final_genes)
+}
+
+#####################################################################
+## STATISTICAL TESTING FUNCTION
+#####################################################################
+
+func_ztest_gr_byrow <- function(gr, x, y, correction_method = "BH", cohenthresh = 0.8, padjfilt = 0.05) {
+    ppval <- lapply(seq(nrow(as.data.frame(mcols(gr)))), function(i) {
+        
+        # Cohen's d calculation (commented out - ready to uncomment if needed)
+        # cohend <- cohen.d(
+        #     unlist(as.vector(as.data.frame(mcols(gr))[x][i,])),
+        #     unlist(as.vector(as.data.frame(mcols(gr))[y][i,]))
+        # )
+        # cohen.estimate <- cohend$estimate 
+        # cohend.magnitude <- as.character(cohend$magnitude)
+        
+        # Manual Z-test implementation (replaces z.test function)
+        x_vals <- as.numeric(as.data.frame(mcols(gr))[x][i,])
+        y_vals <- as.numeric(as.data.frame(mcols(gr))[y][i,])
+        
+        # Calculate means and standard deviations
+        mean_x <- mean(x_vals)
+        mean_y <- mean(y_vals) 
+        sd_x <- sd(x_vals)
+        sd_y <- sd(y_vals)
+        n_x <- length(x_vals)
+        n_y <- length(y_vals)
+        
+        # Standard error for difference of means (z-test formula)
+        se_diff <- sqrt((sd_x^2/n_x) + (sd_y^2/n_y))
+        z_stat <- (mean_x - mean_y) / se_diff
+        
+        # Two-tailed p-value
+        ztest_pvalue <- 2 * pnorm(abs(z_stat), lower.tail = FALSE)
+        
+        zzzz <- list(ztest_pvalue)
+        names(zzzz) <- c("ztest") 
+        return(zzzz) 
+    })
+    
+    df_tomerge_mcols <- data.frame(
+        ztest = unlist(fun1(ppval, 1))
+    )
+    
+    # Apply Benjamini-Hochberg correction
+    df_tomerge_mcols[[paste0("ztest_", correction_method, "_correct")]] <- p.adjust(df_tomerge_mcols$ztest, method = correction_method)
+    
+    mcols(gr) <- cbind(mcols(gr), df_tomerge_mcols)
+    
+    # Filter by adjusted p-value (Cohen's d filtering commented out)
+    gr <- gr[mcols(gr)[[paste0("ztest_", correction_method, "_correct")]] <= padjfilt]
+    # gr <- gr[abs(mcols(gr)$cohen.estimate) >= cohenthresh]
+    return(gr)
+}
 
 #####################################################################
 ## MAIN BINS SELECTOR FUNCTION
 #####################################################################
-#(ex list_groups)
-#list_groups<- lapply(1:ncol(pr),Bins_selector(x,allmixeddf_grobj=allmixeddf_S2svsS3_grobj,fr1="S2S", fr2="S3"))
 
-#Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", fraction2 = "S3") {
 Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", fraction2 = "S3", ths = 0.1) {
-    
     cat("Running Bins_selector for combination:", combination, "\n")
-    
+
+    # Get pr from global environment
+    pr <- get("pr", envir = .GlobalEnv)
+
     # Define groups to compare and select their samples
     x <- get(pr[, combination][1])
-    sample_typex <- pr[, combination][1]
-    sample_typey <- pr[, combination][2]
     y <- get(pr[, combination][2])
-    
-    cat("Groups:", paste(x, collapse = ", "), "vs", paste(y, collapse = ", "), "\n")
-    
-    # Define constraints for name uniqueness
-    xgroup <- gsub("_.*", "", x[1], perl = TRUE)
-    ygroup <- gsub("_.*", "", y[1], perl = TRUE)
-    
-    cat("Group names:", xgroup, "vs", ygroup, "\n")
+    xgroup <- pr[, combination][1]
+    ygroup <- pr[, combination][2]
 
-    ##new_selection<-NULL
-    new_selection <- allmixeddf_grobj ## Assigned
+    cat("Groups:", paste(x, collapse = ", "), "vs", paste(y, collapse = ", "), "\n")
+
+    new_selection <- allmixeddf_grobj
     mcols(new_selection) <- mcols(new_selection)[c(x, y)]
 
-    # Calculations   
-    # Confidence intervals and means
-    confint_mean_sd_first <- apply(as.matrix(mcols(new_selection)[c(x)]), 1, confidence_interval, nm = xgroup) 
-    confint_mean_sd_second <- apply(as.matrix(mcols(new_selection)[c(y)]), 1, confidence_interval, nm = ygroup)     
-    delta <- confint_mean_sd_first[1, ] - confint_mean_sd_second[1, ]
-    res <- cbind(t(confint_mean_sd_first), t(confint_mean_sd_second), delta) 
+    # Calculations
+    # 1) Calculate confidence intervals, mean and stderr for each group
+    confint_mean_serr_first <- apply(as.matrix(mcols(new_selection)[c(x)]), 1, confidence_interval, nm = xgroup)
+    confint_mean_serr_second <- apply(as.matrix(mcols(new_selection)[c(y)]), 1, confidence_interval, nm = ygroup)
+    delta <- confint_mean_serr_first[1, ] - confint_mean_serr_second[1, ]
+    res <- cbind(t(confint_mean_serr_first), t(confint_mean_serr_second), delta)
     df_toadd1 <- do.call("cbind", as.data.frame(res))
     mcols(new_selection) <- cbind(mcols(new_selection), df_toadd1)
 
     # Range analysis forward comparison
-    range_analysis <- mclapply(1:length(y), mc.cores = 1, FUN = function(n) {        
+    range_analysis <- lapply(1:length(y), function(n) { 
         y_name <- y[n]
-        z <- apply(as.matrix(mcols(new_selection)[c(paste0(xgroup, "_serrx2_lower"), paste0(xgroup, "_serrx2_upper"), paste0(xgroup, "_mean"), y_name)]), 1, 
-            is_in_serrx2_range_and_shift, # invece di is_in_sdx2_range_and_shift,
+        z <- apply(as.matrix(mcols(new_selection)[c(paste0(xgroup, "_serrx2_lower"), paste0(xgroup, "_serrx2_upper"), paste0(xgroup, "_mean"), y_name)]), 1,
+            is_in_serrx2_range_and_shift,
             xgroup_name = xgroup,
-            y_name = y_name 
+            y_name = y_name
         )
         return(as.data.frame(t(z)))
     })
 
     df_toadd <- do.call("cbind", range_analysis)
     mcols(new_selection) <- cbind(mcols(new_selection), df_toadd)
-    
-    # Range analysis reverse comparison   
-    range_analysis_rev <- mclapply(1:length(x), mc.cores = 1, FUN = function(n) {
+
+    # Range analysis reverse comparison
+    range_analysis_rev <- lapply(1:length(x), function(n) {
         x_name <- x[n]
-        z <- apply(as.matrix(mcols(new_selection)[c(paste0(ygroup, "_serrx2_lower"), paste0(ygroup, "_serrx2_upper"), paste0(ygroup, "_mean"), x_name)]), 1, 
-            is_in_serrx2_range_and_shift, # invece di is_in_sdx2_range_and_shift,
+        z <- apply(as.matrix(mcols(new_selection)[c(paste0(ygroup, "_serrx2_lower"), paste0(ygroup, "_serrx2_upper"), paste0(ygroup, "_mean"), x_name)]), 1,
+            is_in_serrx2_range_and_shift,
             xgroup_name = ygroup,
             y_name = x_name
         )
@@ -210,84 +301,149 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
 
     df_toadd2 <- do.call("cbind", range_analysis_rev)
     mcols(new_selection) <- cbind(mcols(new_selection), df_toadd2)
-    
+
     # Select bins
- #   ths <- 0.1
     prvdf <- as.data.frame(new_selection)
-    
     # Out of range check
     prvdftest <- prvdf[abs(prvdf[paste0(xgroup, "_mean")]) >= ths, ]
-    pprvlow <- prvdftest[paste0(y, "_ov_specs")] == "lower"   # <-- cambiato da _shift a _ov_specs
-    pprvhigh <- prvdftest[paste0(y, "_ov_specs")] == "higher" # <-- cambiato da _shift a _ov_specs
-    
-    # Sum up by group 1
-    prvdftest[, paste0(ygroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(y, "_ov_check")], as.numeric))
-    prvdftest$ovlow <- apply(pprvlow, 1, sum) * -1
-    prvdftest$ovvhigh <- apply(pprvhigh, 1, sum)     
 
-    # Commutative group testing - CAMBIA ANCHE QUI
-    pprvlow_X <- prvdftest[paste0(x, "_ov_specs")] == "lower"   #  <-- cambiato da _shift a _ov_specs
-    pprvhigh_X <- prvdftest[paste0(x, "_ov_specs")] == "higher" #  <-- cambiato da _shift a _ov_specs
+    pprvlow <- prvdftest[paste0(y, "_shift")] == "lower"   # <-- cambiato da _ov_specs a _shift
+    pprvhigh <- prvdftest[paste0(y, "_shift")] == "higher" # <-- cambiato da _ov_specs a _shift
+
+    # Sum up by group 1
+    prvdftest[, paste0(ygroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(y, "_sign")], as.numeric)) # cambiato da _ov_check a _sign
+    prvdftest$ovlow <- apply(pprvlow, 1, sum) * -1
+    prvdftest$ovvhigh <- apply(pprvhigh, 1, sum)
+
+    # Commutative group testing
+    pprvlow_X <- prvdftest[paste0(x, "_shift")] == "lower"   #  <-- cambiato da  ov_specs a _shift
+    pprvhigh_X <- prvdftest[paste0(x, "_shift")] == "higher" #  <-- cambiato da  ov_specs a _shift
 
     # Sum up by group 2
-    ## PRIMA ERA prvdftest[, paste0(xgroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(x, "_sign")], as.numeric))
-    prvdftest[, paste0(xgroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(x, "_ov_check")], as.numeric))
+    prvdftest[, paste0(xgroup, "_sign_SUM")] <- rowSums(sapply(prvdftest[, paste0(x, "_sign")], as.numeric)) ## <-- cambiato da _ov_check a _sign
+
+    # Count characteristics
     prvdftest$ovlow_X <- apply(pprvlow_X, 1, sum) * -1
     prvdftest$ovvhigh_X <- apply(pprvhigh_X, 1, sum)
-    prvdftest_gr <- makeGRangesFromDataFrame(prvdftest, keep.extra.columns = TRUE)
-    
-    # INFORMATIVE over THS BINS SELECTION
-    # Separate bins according to group X start sign
-    a <- paste0(xgroup, "_mean")
-    column <- which(names(prvdftest_gr@elementMetadata@listData) == a)
-    startmeanpos <- prvdftest_gr[prvdftest_gr@elementMetadata[[column]] >= 0]  
-    startmeanneg <- prvdftest_gr[prvdftest_gr@elementMetadata[[column]] < 0]  
-    
-    # Select coherent bins with value out of the IC range of the comparison group for all the values 
-    ovvhighconservedpos <- startmeanpos[startmeanpos$ovvhigh == length(y) & startmeanpos$ovlow_X == -length(x)] 
-    ovlowconservedpos <- startmeanpos[startmeanpos$ovlow == -length(y) & startmeanpos$ovvhigh_X == length(x)]
-    ovvhighconservedneg <- startmeanneg[startmeanneg$ovvhigh == length(y) & startmeanneg$ovlow_X == -length(x)] 
-    ovlowconservedneg <- startmeanneg[startmeanneg$ovlow == -length(y) & startmeanneg$ovvhigh_X == length(x)]
-    
-    # Make a list of bins to save and analyze (GENERALIZED for different comparisons)
 
+    # Add meantosep column
+    prvdftest$meantosep <- prvdftest[,paste0(xgroup, "_mean_startsign")]
+
+    prvdftest_gr <- makeGRangesFromDataFrame(prvdftest, keep.extra.columns = TRUE)
+
+    # Apply statistical testing
+    up_down_to_ztest_gr <- prvdftest_gr
+    up_down_to_ztest_grr <- func_ztest_gr_byrow(up_down_to_ztest_gr,
+                                            x = x,
+                                            y = y,
+                                            correction_method = "BH",
+                                            padjfilt = 0.05)  
+
+    cat("Statistical testing completed. Regions passing threshold:", length(up_down_to_ztest_grr), "\n")
+
+    # Separate bins according to meantosep (like your original code)
+    startmeanpos <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep >= 0]  
+    startmeanneg <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep <= 0]  
+
+    # Select coherent bins based on direction of change (using abs like your code)
+    ovvhighconservedpos <- startmeanpos[abs(startmeanpos$ovvhigh) > abs(startmeanpos$ovlow)]
+    ovlowconservedpos <- startmeanpos[abs(startmeanpos$ovvhigh) < abs(startmeanpos$ovlow)]
+    ovvhighconservedneg <- startmeanneg[abs(startmeanneg$ovvhigh) > abs(startmeanneg$ovlow)]
+    ovlowconservedneg <- startmeanneg[abs(startmeanneg$ovvhigh) < abs(startmeanneg$ovlow)]
+
+    # Add bin type labels
+    ovvhighconservedpos$bintype <- rep(paste0(fraction1, "_up"), length(ovvhighconservedpos))
+    ovlowconservedpos$bintype <- rep(paste0(fraction1, "_down"), length(ovlowconservedpos))
+    ovvhighconservedneg$bintype <- rep(paste0(fraction2, "_up"), length(ovvhighconservedneg))
+    ovlowconservedneg$bintype <- rep(paste0(fraction2, "_down"), length(ovlowconservedneg))
+
+    # Control groups (like your original code)
+    controlstartmeanpos <- prvdftest_gr[prvdftest_gr$meantosep >= 0]
+    controlstartmeanneg <- prvdftest_gr[prvdftest_gr$meantosep <= 0]
+    
+    controlstartmeanpos$bintype <- rep(fraction1, length(controlstartmeanpos))
+    controlstartmeanneg$bintype <- rep(fraction2, length(controlstartmeanneg))
+    
+    controlstartmeanpos <- controlstartmeanpos[!controlstartmeanpos %in% 
+                                            c(ovvhighconservedpos, ovlowconservedpos)]
+    controlstartmeanneg <- controlstartmeanneg[!controlstartmeanneg %in% 
+                                            c(ovvhighconservedneg, ovlowconservedneg)]
+    
+    # All groups to return (like your original code)
+    all_gr_toreturn <- c(ovvhighconservedpos,
+                        ovlowconservedpos,
+                        ovvhighconservedneg,
+                        ovlowconservedneg,
+                        controlstartmeanpos,
+                        controlstartmeanneg)
+
+    # Make a list of bins to save and analyze
     list_ofbins_to_save_and_analyse <- setNames(
         list(
+            ovvhighconservedpos,
+            ovlowconservedpos,
+            ovvhighconservedneg,
+            ovlowconservedneg
+        ),
+        c(
+            paste0(fraction1, "_up"),
+            paste0(fraction1, "_down"),
+            paste0(fraction2, "_up"),
+            paste0(fraction2, "_down")
+        )
+    )
+
+    # Gene analysis - calculate but don't write files
+    list_of_vector_geneNumber <- list()
+    list_of_genes_vec <- list()
+
+    final_genes_obj <- tryCatch(get("final_genes", envir = .GlobalEnv), error = function(e) NULL)
+
+    if (!is.null(final_genes_obj)) {
+        for (i in names(list_ofbins_to_save_and_analyse)) {
+            gr_touse <- list_ofbins_to_save_and_analyse[[i]]
+            if (length(gr_touse) != 0) {
+                cat(paste0(ygroup, "_vs_", xgroup, "_", i, " has ", length(gr_touse), " regions"), "\n")
+                
+                # Calculate overlapping genes
+                genes_gr <- final_genes_obj[findOverlaps(gr_touse, promoters(final_genes_obj, upstream = 2500, downstream = 500))@to]
+                
+                list_of_vector_geneNumber[[i]] <- length(mcols(genes_gr)$gene_id)
+                list_of_genes_vec[[paste0(ygroup, "_vs_", xgroup, "_", i)]] <- unique(mcols(genes_gr)$gene_id)
+            } else {
+                list_of_vector_geneNumber[[i]] <- 0
+                list_of_genes_vec[[paste0(ygroup, "_vs_", xgroup, "_", i)]] <- character(0)
+            }
+        }
+    } else {
+        for (i in names(list_ofbins_to_save_and_analyse)) {
+            list_of_vector_geneNumber[[i]] <- 0
+            list_of_genes_vec[[paste0(ygroup, "_vs_", xgroup, "_", i)]] <- character(0)
+        }
+    }
+
+    # Numeric coding for the groups
+    mcols(ovvhighconservedpos)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(2, length(ovvhighconservedpos))
+    mcols(ovlowconservedpos)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(1, length(ovlowconservedpos))
+    mcols(ovvhighconservedneg)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(-1, length(ovvhighconservedneg))
+    mcols(ovlowconservedneg)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(-2, length(ovlowconservedneg))
+
+    # Prepare results list
+    x <- list()
+    x[[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]] <- c(
         ovvhighconservedpos,
         ovlowconservedpos,
         ovvhighconservedneg,
         ovlowconservedneg
-        ),
-        c(
-        paste0(fraction1, "_up"),
-        paste0(fraction1, "_down"),
-        paste0(fraction2, "_up"),
-        paste0(fraction2, "_down")
-        )
     )
-
-    cat("Found bins keys: ", paste(names(list_ofbins_to_save_and_analyse), collapse = ", "), "\n")
-
-    
-    # Numeric coding for the groups
-    mcols(ovvhighconservedpos)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(2, length(ovvhighconservedpos))
-    mcols(ovlowconservedpos)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(1, length(ovlowconservedpos))
-    mcols(ovvhighconservedneg)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(-1, length(ovvhighconservedneg))    
-    mcols(ovlowconservedneg)[[paste0(ygroup, "_vs_", xgroup)]] <- rep(-2, length(ovlowconservedneg))
-    
-    # Prepare results list
-    x <- list()
-    x[[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]] <- c(
-        ovvhighconservedpos,                                                   
-        ovlowconservedpos,
-        ovvhighconservedneg,
-        ovlowconservedneg
-    )    
     x[[names(list_ofbins_to_save_and_analyse[1])]] <- list_ofbins_to_save_and_analyse[[1]]
     x[[names(list_ofbins_to_save_and_analyse[2])]] <- list_ofbins_to_save_and_analyse[[2]]
     x[[names(list_ofbins_to_save_and_analyse[3])]] <- list_ofbins_to_save_and_analyse[[3]]
     x[[names(list_ofbins_to_save_and_analyse[4])]] <- list_ofbins_to_save_and_analyse[[4]]
-    x[[paste0(ygroup, "_allgr_", xgroup)]] <- prvdftest_gr  
+    x[[paste0(ygroup, "_genes_", xgroup)]] <- list_of_vector_geneNumber
+    x[["genes"]] <- list_of_genes_vec
+    x[[paste0(ygroup, "_gr_", xgroup)]] <- prvdftest_gr
+    x[[paste0(ygroup, "_allgr_", xgroup)]] <- all_gr_toreturn
 
     names(x) <- c(
         paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins"),
@@ -295,11 +451,12 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
         paste0(ygroup, "_", names(list_ofbins_to_save_and_analyse[2]), "_", xgroup),
         paste0(ygroup, "_", names(list_ofbins_to_save_and_analyse[3]), "_", xgroup),
         paste0(ygroup, "_", names(list_ofbins_to_save_and_analyse[4]), "_", xgroup),
+        paste0(ygroup, "_genes_", xgroup),
+        "genes",
+        paste0(ygroup, "_gr_", xgroup),
         paste0(ygroup, "_allgr_", xgroup)
     )
-    
+
     cat("Results:", paste0(names(x[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]), "_", length(x[[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]]), "_bins"), "\n")
     return(x)
 }
-
-cat("Differential analysis functions loaded successfully!\n")

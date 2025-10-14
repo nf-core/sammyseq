@@ -62,9 +62,11 @@ save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffi
                     paste0(g2, "_serrx2_lower"), paste0(g2, "_serrx2_upper"),
                     paste0(g2, "_mean"), paste0(g2, "_serrX2"),
                     "delta",
-                    "cohen.estimate",
-                    "cohen.magnitude"
-                    )}
+                    # "cohen.estimate",           # ← Cohen's d estimate OFF
+                    # "cohen.magnitude",          # ← Cohen's d magnitude OFF  
+                    "ztest",                      # ← Z-TEST ON
+                    "ztest_BH_correct"            # ← BENJAMINI-HOCHBERG ON
+                )}
             essential_cols <- c(base_cols, essential_stats_cols)
             available_cols <- colnames(df)
             cols_to_keep <- intersect(essential_cols, available_cols)
@@ -79,7 +81,7 @@ save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffi
 
 sink(summary_file)
 
-# Setup gene annotations if GTF is provided
+# Setup gene annotations (messages go to summary)
 if (gtf_file != "" && file.exists(gtf_file)) {
     tryCatch({
         cat("Setting up gene annotations from:", gtf_file, "\n")
@@ -116,10 +118,8 @@ for (current_ratio in selected_ratios) {
     }
 
     gr1 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
-    # gr2 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
     gr1_names <- names(gr1@elementMetadata)
     S4Vectors::mcols(gr1) <- preprocessCore::normalize.quantiles(as.matrix(S4Vectors::mcols(gr1)))
-    # names(gr1@elementMetadata) <- names(gr2@elementMetadata)
     names(gr1@elementMetadata) <- gr1_names
     allmixeddf_grobj <- GenomicRanges::sort(gr1)
     unique_groups <- unique(Sample_groups)
@@ -162,7 +162,6 @@ for (current_ratio in selected_ratios) {
             ths = ths
         )
     }
-    # names(list_groups) <- apply(pr, 2, function(x) paste(x[1], "vs", x[2], sep = "_"))
 
     for (i in seq_along(list_groups)) {
         g1 <- pr[1, i]; g2 <- pr[2, i]
@@ -224,7 +223,7 @@ for (current_ratio in selected_ratios) {
         }
     }
 
-    # Save complete analysis results as R object
+    # Save complete analysis results as RDS
     comparison_names <- gsub(",", "_", compare_groups)
     output_complete_rds <- paste0(current_ratio, "_", comparison_names, "_complete_analysis.rds")
     saveRDS(list_groups, file = output_complete_rds)
