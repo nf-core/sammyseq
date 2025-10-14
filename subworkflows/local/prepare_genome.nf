@@ -101,10 +101,10 @@ workflow PREPARE_GENOME {
     ch_blacklist = Channel.empty()
     if (params.blacklist) {
         if (params.blacklist.endsWith('.gz')) {
-            ch_blacklist = GUNZIP_BLACKLIST ( [ [:], params.blacklist ] ).gunzip.map{ it[1] }
+            ch_blacklist = GUNZIP_BLACKLIST ( [ [:], params.blacklist ] ).gunzip.map{ meta, file -> tuple([id: 'blacklist'], file) }
             ch_versions  = ch_versions.mix(GUNZIP_BLACKLIST.out.versions)
         } else {
-            ch_blacklist = Channel.value(file(params.blacklist))
+            ch_blacklist = Channel.value(tuple([id: 'blacklist'], file(params.blacklist)))
         }
     }
 
@@ -158,7 +158,7 @@ workflow PREPARE_GENOME {
 
     GENOME_BLACKLIST_REGIONS (
         ch_chrom_sizes,
-        ch_blacklist.ifEmpty([])
+        ch_blacklist.ifEmpty(tuple([id: 'no_blacklist'], []))
     )
     ch_genome_filtered_bed = GENOME_BLACKLIST_REGIONS.out.bed
     ch_versions = ch_versions.mix(GENOME_BLACKLIST_REGIONS.out.versions)

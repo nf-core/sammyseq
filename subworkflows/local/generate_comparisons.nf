@@ -15,7 +15,7 @@ workflow GENERATE_COMPARISONS {
     module_name         // string:  'spp' o 'bigwigcompare'
 
     main:
-
+    ch_comparison_results = Channel.empty()
     ch_versions = Channel.empty()
 
     // Initialize comparison channels
@@ -126,20 +126,24 @@ workflow GENERATE_COMPARISONS {
         .set { comparisons_merge_ch }
 
     // parameter check to run comparison analysis
-    if (method == 'spp') {
+    if (module_name == 'spp') {
         RTWOSAMPLESMLE(
             comparisons_merge_ch.map { meta, f1, f2 -> [meta - [id: meta.id], f1, f2, meta.id] },
             chrom_sizes
         )
         emit:
-        results = RTWOSAMPLESMLE.out.results
-    } else if (method == 'bigwigcompare') {
+        ch_comparison_results = RTWOSAMPLESMLE.out.results
+    } else if (module_name == 'bigwigcompare') {
         def blacklist_ch = params.blacklist
             ? Channel.value([[:], file(params.blacklist)])
             : Channel.value([[:], []])
 
         DEEPTOOLS_BIGWIGCOMPARE(comparisons_merge_ch, blacklist_ch)
         emit:
-        results = DEEPTOOLS_BIGWIGCOMPARE.out.output
+        ch_comparison_results = DEEPTOOLS_BIGWIGCOMPARE.out.output
     }
+
+    emit:
+    results = ch_comparison_results
+    versions = ch_versions
 }

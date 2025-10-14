@@ -11,7 +11,7 @@ process GENOME_BLACKLIST_REGIONS {
 
     input:
     path sizes
-    path blacklist
+    tuple val(meta2), path(blacklist)
 
     output:
     path '*.bed'       , emit: bed
