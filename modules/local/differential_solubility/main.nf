@@ -7,15 +7,14 @@ process DIFFERENTIAL_SOLUBILITY {
     maxRetries 0
 
     input:
-    input:
     tuple val(meta), path(samplesheet)
     path(genome_bins)
+    path(gtf)
     val(binsize)
     val(comparison)
     val(compare_groups)
     val(solubility_threshold)
     val(validation_passed)
-    path(gtf)
 
     output:
     tuple val(meta), path("*_all_bins_complete.csv"), emit: all_bins
