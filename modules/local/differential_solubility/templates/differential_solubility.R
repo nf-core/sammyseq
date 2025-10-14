@@ -8,6 +8,7 @@ library(preprocessCore)
 library(effsize)        
 library(dplyr)
 library(GenomicFeatures)
+library(BSDA)
 
 source("${projectDir}/bin/differential_solubility_functions.R")
 
@@ -85,7 +86,7 @@ sink(summary_file)
 if (gtf_file != "" && file.exists(gtf_file)) {
     tryCatch({
         cat("Setting up gene annotations from:", gtf_file, "\n")
-        final_genes <- setup_gene_annotation(gtf_file, NULL)
+        final_genes <- setup_gene_annotation(gtf_file)
         assign("final_genes", final_genes, envir = .GlobalEnv)
         cat("Gene annotations ready:", length(final_genes), "genes\n")
     }, error = function(e) {

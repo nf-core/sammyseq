@@ -150,7 +150,7 @@ is_in_serrx2_range_and_shift <- function(vector,
 ## GENE ANNOTATION SETUP FUNCTION
 #####################################################################
 
-setup_gene_annotation <- function(gtf_file, blacklist_bed) {
+setup_gene_annotation <- function(gtf_file) {
     # Create TxDb from GTF
     txdb <- makeTxDbFromGFF(gtf_file)
     genes <- genes(txdb)
@@ -172,17 +172,7 @@ setup_gene_annotation <- function(gtf_file, blacklist_bed) {
     
     # Get protein coding genes
     geneid_codingdf <- summarizeProteinCodingGenes(txdb)
-    codingenes_grobj <- genes[genes$gene_id %in% geneid_codingdf[geneid_codingdf$n_coding > 0,]$gene]
-    
-    # Remove blacklisted genes if blacklist is provided
-    if (!is.null(blacklist_bed) && file.exists(blacklist_bed)) {
-        blacklist_grn <- import.bed(blacklist_bed)
-        genes_inside_bl <- GenomicRanges::findOverlaps(codingenes_grobj, blacklist_grn, type = "any")
-        to_remove <- codingenes_grobj[genes_inside_bl@from,]
-        final_genes <- codingenes_grobj[!mcols(codingenes_grobj) %in% mcols(to_remove)]
-    } else {
-        final_genes <- codingenes_grobj
-    }
+    final_genes <- genes[genes$gene_id %in% geneid_codingdf[geneid_codingdf$n_coding > 0,]$gene]
     
     # Clean gene IDs
     mcols(final_genes)$gene_id <- gsub("\\..*", "", mcols(final_genes)$gene_id)
@@ -194,7 +184,9 @@ setup_gene_annotation <- function(gtf_file, blacklist_bed) {
 ## STATISTICAL TESTING FUNCTION
 #####################################################################
 
-func_ztest_gr_byrow <- function(gr, x, y, correction_method = "BH", cohenthresh = 0.8, padjfilt = 0.05) {
+func_ztest_gr_byrow <- function(gr, x, y, correction_method = "BH",
+                                            # cohenthresh = 0.8,
+                                            padjfilt = 0.05) {
     ppval <- lapply(seq(nrow(as.data.frame(mcols(gr)))), function(i) {
         
         # Cohen's d calculation (commented out - ready to uncomment if needed)
@@ -205,24 +197,15 @@ func_ztest_gr_byrow <- function(gr, x, y, correction_method = "BH", cohenthresh 
         # cohen.estimate <- cohend$estimate 
         # cohend.magnitude <- as.character(cohend$magnitude)
         
-        # Manual Z-test implementation (replaces z.test function)
-        x_vals <- as.numeric(as.data.frame(mcols(gr))[x][i,])
-        y_vals <- as.numeric(as.data.frame(mcols(gr))[y][i,])
+        # BSDA Z-test implementation
+        ztest <- z.test(x = as.data.frame(mcols(gr))[x][i,],
+                        y = as.data.frame(mcols(gr))[y][i,],
+                        sigma.x = sd(as.data.frame(mcols(gr))[x][i,]),
+                        sigma.y = sd(as.data.frame(mcols(gr))[y][i,]),
+                        alternative = 'two.sided',
+                        conf.level = 0.99)
         
-        # Calculate means and standard deviations
-        mean_x <- mean(x_vals)
-        mean_y <- mean(y_vals) 
-        sd_x <- sd(x_vals)
-        sd_y <- sd(y_vals)
-        n_x <- length(x_vals)
-        n_y <- length(y_vals)
-        
-        # Standard error for difference of means (z-test formula)
-        se_diff <- sqrt((sd_x^2/n_x) + (sd_y^2/n_y))
-        z_stat <- (mean_x - mean_y) / se_diff
-        
-        # Two-tailed p-value
-        ztest_pvalue <- 2 * pnorm(abs(z_stat), lower.tail = FALSE)
+        ztest_pvalue <- ztest$p.value
         
         zzzz <- list(ztest_pvalue)
         names(zzzz) <- c("ztest") 
@@ -266,7 +249,6 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     mcols(new_selection) <- mcols(new_selection)[c(x, y)]
 
     # Calculations
-    # 1) Calculate confidence intervals, mean and stderr for each group
     confint_mean_serr_first <- apply(as.matrix(mcols(new_selection)[c(x)]), 1, confidence_interval, nm = xgroup)
     confint_mean_serr_second <- apply(as.matrix(mcols(new_selection)[c(y)]), 1, confidence_interval, nm = ygroup)
     delta <- confint_mean_serr_first[1, ] - confint_mean_serr_second[1, ]
@@ -337,6 +319,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
                                             x = x,
                                             y = y,
                                             correction_method = "BH",
+                                            # cohenthresh = 3,
                                             padjfilt = 0.05)  
 
     cat("Statistical testing completed. Regions passing threshold:", length(up_down_to_ztest_grr), "\n")
@@ -365,9 +348,9 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     controlstartmeanneg$bintype <- rep(fraction2, length(controlstartmeanneg))
     
     controlstartmeanpos <- controlstartmeanpos[!controlstartmeanpos %in% 
-                                            c(ovvhighconservedpos, ovlowconservedpos)]
+                                             c(ovvhighconservedpos, ovlowconservedpos)]
     controlstartmeanneg <- controlstartmeanneg[!controlstartmeanneg %in% 
-                                            c(ovvhighconservedneg, ovlowconservedneg)]
+                                             c(ovvhighconservedneg, ovlowconservedneg)]
     
     # All groups to return (like your original code)
     all_gr_toreturn <- c(ovvhighconservedpos,
