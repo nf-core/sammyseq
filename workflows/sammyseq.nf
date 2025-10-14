@@ -386,12 +386,12 @@ if (params.stopAt == 'ALIGNMENT') {
         DIFFERENTIAL_SOLUBILITY (
             ch_differential_samplesheet,
             ch_genome_bins,
+            PREPARE_GENOME.out.gtf,
             params.binsize,
             params.comparison,
             params.compare_groups,
             params.solubility_threshold,
-            VALIDATE_GROUPS.out.validation,
-            params.gtf
+            VALIDATE_GROUPS.out.validation
         )
     }
 
