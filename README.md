@@ -22,9 +22,11 @@
 
 **nf-core/sammyseq** is a bioinformatics pipeline for the analysis of Sequential Analysis of MacroMolecules accessibilitY sequencing (SAMMY-seq) data, a cheap and effective methodology to analyze chromatin state as described in:
 
-> Lucini F, Petrini C, Salviato E, Pal K, Rosti V, Gorini F, Santarelli P, Quadri R, Lembo G, Graziano G, Di Patrizio Soldateschi E, Tagliaferri I, Pinatel E, Sebestyén E, Rotta L, Gentile F, Vaira V, Lanzuolo C, Ferrari F. Biochemical properties of chromatin domains define genome compartmentalization. Nucleic Acids Research, Volume 52, Issue 12, 8 July 2024, Page e54 [doi](https://doi.org/10.1093/nar/gkae454) [pubmed](https://pubmed.ncbi.nlm.nih.gov/38808669/)
+> Wang, B., Kronenberg-Tenga, R., Rosti, V., Di Patrizio Soldateschi, E., Luo, Q., Iannacchero, U.M., Pinet, L., Eibauer, M., Boujemaa-Paterski, R., Schuler, B., Lanzuolo, C., Medalia, O., 2025. The molecular basis of lamin-specific chromatin interactions. Nature Structural & Molecular Biology. [doi](https://doi.org/10.1038/s41594-025-01622-5) [pubmed](https://pubmed.ncbi.nlm.nih.gov/40750945/)
 
-> Sebestyén, E., Marullo, F., Lucini, F. et al. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nat Commun 11, 6274 (2020) [doi](https://doi.org/10.1038/s41467-020-20048-9) [pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
+> Lucini, F., Petrini, C., Salviato, E., Pal, K., Rosti, V., Gorini, F., Santarelli, P., Quadri, R., Lembo, G., Graziano, G., Di Patrizio Soldateschi, E., Tagliaferri, I., Pinatel, E., Sebestyén, E., Rotta, L., Gentile, F., Vaira, V., Lanzuolo, C., Ferrari, F., 2024. Biochemical properties of chromatin domains define genome compartmentalization. Nucleic Acids Research 52, e54–e54. [doi](https://doi.org/10.1093/nar/gkae454) [pubmed](https://pubmed.ncbi.nlm.nih.gov/38808669/)
+
+> Sebestyén, E., Marullo, F., Lucini, F., Petrini, C., Bianchi, A., Valsoni, S., Olivieri, I., Antonelli, L., Gregoretti, F., Oliva, G., Ferrari, F., Lanzuolo, C., 2020. SAMMY-seq reveals early alteration of heterochromatin and deregulation of bivalent genes in Hutchinson-Gilford Progeria Syndrome. Nature Communications 11, 6274. [doi](https://doi.org/10.1038/s41467-020-20048-9) [pubmed](https://pubmed.ncbi.nlm.nih.gov/33293552/)
 
 > [!WARNING]
 > Please note that this pipeline is under active development and has not been released yet.
@@ -36,9 +38,10 @@ Here is an outline of the analysis steps:
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 4. Mark duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
 5. Filter reads and generate alignment statistics ([`samtools`](http://www.htslib.org/))
-6. Create single track profiles in bigwig format ([`deeptools`](https://deeptools.readthedocs.io/en/develop/))
-7. (Optionally) Generate pairwise comparison tracks in bigwig format if provided a list of the desired sample pairs ([`spp`])
-8. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
+6. Create single track profiles in bigwig format ([`deeptools bamCoverage`]([https://deeptools.readthedocs.io/en/develop/](https://deeptools.readthedocs.io/en/develop/content/tools/bamCoverage.html)))
+7. (Optional) Generate pairwise comparison tracks in bigWig format ([`[deepTools bigwigCompare`](https://deeptools.readthedocs.io/en/develop/content/tools/bigwigCompare.html)) or ([`[spp]`](https://github.com/hms-dbmi/spp).
+8. (Optional) Identify differentially enriched solubility regions using R-based statistical analysis.
+9. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <p align="center">
     <img title="sammyseq scheme" src="docs/images/nf-core-sammyseq_tubemap.png" width=100%>
