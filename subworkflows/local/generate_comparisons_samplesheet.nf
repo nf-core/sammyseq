@@ -4,7 +4,7 @@
 
 workflow GENERATE_COMPARISONS_SAMPLESHEET {
     take:
-        mle_results     // channel: [mandatory] csv_meta, mle_file.bw
+        mle_results     // channel: [mandatory] csv_meta, mle_file.bigWig
         outdir          // string: output directory path
 
     main:
