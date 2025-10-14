@@ -38,8 +38,8 @@ Here is an outline of the analysis steps:
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 4. Mark duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
 5. Filter reads and generate alignment statistics ([`samtools`](http://www.htslib.org/))
-6. Create single track profiles in bigwig format ([`deeptools bamCoverage`](<[https://deeptools.readthedocs.io/en/develop/](https://deeptools.readthedocs.io/en/develop/content/tools/bamCoverage.html)>))
-7. (Optional) Generate pairwise comparison tracks in bigWig format ([`[deepTools bigwigCompare`](https://deeptools.readthedocs.io/en/develop/content/tools/bigwigCompare.html)) or ([`[spp]`](https://github.com/hms-dbmi/spp).
+6. Create single track profiles in bigwig format ([`deeptools bamCoverage`]([https://deeptools.readthedocs.io/en/develop/content/tools/bamCoverage.html))
+7. (Optional) Generate pairwise comparison tracks in bigWig format ([`deeptools bigwigCompare`](https://deeptools.readthedocs.io/en/develop/content/tools/bigwigCompare.html)) or ([`spp`])(https://github.com/hms-dbmi/spp).
 8. (Optional) Identify differentially enriched solubility regions using R-based statistical analysis.
 9. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
