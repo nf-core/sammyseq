@@ -189,7 +189,7 @@ func_ztest_gr_byrow <- function(gr, x, y, correction_method = "BH",
                                             padjfilt = 0.05) {
     ppval <- lapply(seq(nrow(as.data.frame(mcols(gr)))), function(i) {
         
-        # Cohen's d calculation (commented out - ready to uncomment if needed)
+        # Cohen's d calculation
         # cohend <- cohen.d(
         #     unlist(as.vector(as.data.frame(mcols(gr))[x][i,])),
         #     unlist(as.vector(as.data.frame(mcols(gr))[y][i,]))
@@ -221,9 +221,9 @@ func_ztest_gr_byrow <- function(gr, x, y, correction_method = "BH",
     
     mcols(gr) <- cbind(mcols(gr), df_tomerge_mcols)
     
-    # Filter by adjusted p-value (Cohen's d filtering commented out)
+    # Filter by adjusted p-value 
     gr <- gr[mcols(gr)[[paste0("ztest_", correction_method, "_correct")]] <= padjfilt]
-    # gr <- gr[abs(mcols(gr)$cohen.estimate) >= cohenthresh]
+    # gr <- gr[abs(mcols(gr)$cohen.estimate) >= cohenthresh] # ← Cohen's d filtering OFF
     return(gr)
 }
 
@@ -319,7 +319,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
                                             x = x,
                                             y = y,
                                             correction_method = "BH",
-                                            # cohenthresh = 3,
+                                            # cohenthresh = 3, # <-- Cohen's d filtering OFF
                                             padjfilt = 0.05)  
 
     cat("Statistical testing completed. Regions passing threshold:", length(up_down_to_ztest_grr), "\n")
@@ -376,7 +376,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
         )
     )
 
-    # Gene analysis - calculate but don't write files
+    # Gene analysis (if gtf provided)
     list_of_vector_geneNumber <- list()
     list_of_genes_vec <- list()
 

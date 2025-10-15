@@ -82,7 +82,7 @@ save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffi
 
 sink(summary_file)
 
-# Setup gene annotations (messages go to summary)
+# Setup gene annotation
 if (gtf_file != "" && file.exists(gtf_file)) {
     tryCatch({
         cat("Setting up gene annotations from:", gtf_file, "\n")
@@ -201,16 +201,19 @@ for (current_ratio in selected_ratios) {
         save_bins_data(all_bins_data, current_ratio, comparison_name, "all_bins_complete", g1, g2)
         save_bins_data(selected_bins_data, current_ratio, comparison_name, "selected_bins_filtered", g1, g2)
 
-        # Write gene files if available
+        # Write gene files if provided
         if ("genes" %in% names(res)) {
             gene_results <- res[["genes"]]
             if (length(gene_results) > 0) {
+                
+                dir.create("genes", showWarnings = FALSE)
+                
                 for (gene_category in names(gene_results)) {
                     gene_list <- gene_results[[gene_category]]
                     if (length(gene_list) > 0) {
                         cat("Writing", length(gene_list), "genes for", gene_category, "\n")
                         
-                        output_file <- paste0(current_ratio, "_", gene_category, "_genes.txt")
+                        output_file <- paste0("genes/", current_ratio, "_", gene_category, "_genes.txt")
                         write.table(gene_list, output_file,
                                     quote = FALSE, sep = "\t", 
                                     row.names = FALSE, col.names = FALSE)
@@ -224,9 +227,9 @@ for (current_ratio in selected_ratios) {
         }
     }
 
-    # Save complete analysis results as RDS
-    comparison_names <- gsub(",", "_", compare_groups)
-    output_complete_rds <- paste0(current_ratio, "_", comparison_names, "_complete_analysis.rds")
+    # Save complete analysis results as RDS (in organized folder with simple name)
+    dir.create("rdata", showWarnings = FALSE)
+    output_complete_rds <- paste0("rdata/", current_ratio, "_all_gr.rds")
     saveRDS(list_groups, file = output_complete_rds)
     cat("Saved complete analysis R object:", output_complete_rds, "\n")
 }
