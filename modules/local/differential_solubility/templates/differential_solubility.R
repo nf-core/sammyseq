@@ -201,6 +201,36 @@ for (current_ratio in selected_ratios) {
         save_bins_data(all_bins_data, current_ratio, comparison_name, "all_bins_complete", g1, g2)
         save_bins_data(selected_bins_data, current_ratio, comparison_name, "selected_bins_filtered", g1, g2)
 
+        ## Select only relevant GRanges for BED export
+        selected_bins_only <- list(
+            S2S_up = res[[paste0(g2, "_", fr1, "_up_", g1)]],
+            S2S_down = res[[paste0(g2, "_", fr1, "_down_", g1)]],
+            S3_up = res[[paste0(g2, "_", fr2, "_up_", g1)]],
+            S3_down = res[[paste0(g2, "_", fr2, "_down_", g1)]]
+        )
+        
+        # Create regions directory
+        dir.create("regions", showWarnings = FALSE)
+        
+        # Generate BED files for each category
+        base_name <- paste0(g2, "vs", g1, "_", current_ratio)
+        bed_categories <- c("S2S_up", "S2S_down", "S3_up", "S3_down")
+        for (bed_cat in bed_categories) {
+            gr_touse <- selected_bins_only[[bed_cat]]
+            if (!is.null(gr_touse) && length(gr_touse) > 0) {
+                bed_filename <- paste0("regions/", base_name, "_", bed_cat, "_regions.bed")
+                write.table(as.data.frame(gr_touse)[,c(1,2,3)],
+                            bed_filename,
+                            quote = FALSE,
+                            sep = "\t",
+                            row.names = FALSE,
+                            col.names = FALSE
+                           )
+                cat("Saved BED file:", bed_filename, "with", length(gr_touse), "regions\n")
+            } else {
+                cat("No regions found for", bed_cat, "in", comparison_name, "\n")
+            }
+        }
         # Write gene files if provided
         if ("genes" %in% names(res)) {
             gene_results <- res[["genes"]]

@@ -20,6 +20,7 @@ process DIFFERENTIAL_SOLUBILITY {
     tuple val(meta), path("*_all_bins_complete.csv"), emit: all_bins
     tuple val(meta), path("*_selected_bins_filtered.csv"), emit: selected_bins
     tuple val(meta), path("rdata/*.rds"), emit: selected_bins_rds
+    tuple val(meta), path("regions/*.bed"), emit: bed_regions
     tuple val(meta), path("analysis_summary.txt"), emit: report
     tuple val(meta), path("genes/*_genes.txt"), optional: true, emit: gene_lists
 
