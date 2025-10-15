@@ -184,46 +184,49 @@ setup_gene_annotation <- function(gtf_file) {
 ## STATISTICAL TESTING FUNCTION
 #####################################################################
 
-func_ztest_gr_byrow <- function(gr, x, y, correction_method = "BH",
-                                            # cohenthresh = 0.8,
-                                            padjfilt = 0.05) {
+func_ztest_gr_byrow <- function(gr,
+                                x,
+                                y,
+                                # correction_method = "BH",
+                                cohenthresh = 0.8)
+                                {
     ppval <- lapply(seq(nrow(as.data.frame(mcols(gr)))), function(i) {
         
         # Cohen's d calculation
-        # cohend <- cohen.d(
-        #     unlist(as.vector(as.data.frame(mcols(gr))[x][i,])),
-        #     unlist(as.vector(as.data.frame(mcols(gr))[y][i,]))
-        # )
-        # cohen.estimate <- cohend$estimate 
-        # cohend.magnitude <- as.character(cohend$magnitude)
+        cohend <- cohen.d(
+            unlist(as.vector(as.data.frame(mcols(gr))[x][i,])),
+            unlist(as.vector(as.data.frame(mcols(gr))[y][i,]))
+        )
+        cohen.estimate <- cohend$estimate 
+        cohend.magnitude <- as.character(cohend$magnitude)
         
-        # BSDA Z-test implementation
-        ztest <- z.test(x = as.data.frame(mcols(gr))[x][i,],
-                        y = as.data.frame(mcols(gr))[y][i,],
-                        sigma.x = sd(as.data.frame(mcols(gr))[x][i,]),
-                        sigma.y = sd(as.data.frame(mcols(gr))[y][i,]),
-                        alternative = 'two.sided',
-                        conf.level = 0.99)
+        # BSDA Z-test implementation 
+        # ztest <- z.test(x = as.data.frame(mcols(gr))[x][i,],
+        #                 y = as.data.frame(mcols(gr))[y][i,],
+        #                 sigma.x = sd(as.data.frame(mcols(gr))[x][i,]),
+        #                 sigma.y = sd(as.data.frame(mcols(gr))[y][i,]),
+        #                 alternative = 'two.sided',
+        #                 conf.level = 0.99)
         
-        ztest_pvalue <- ztest$p.value
+        # ztest_pvalue <- ztest$p.value
         
-        zzzz <- list(ztest_pvalue)
-        names(zzzz) <- c("ztest") 
+        zzzz <- list(cohen.estimate, cohend.magnitude)
+        names(zzzz) <- c("cohen.estimate", "cohen.magnitude") 
         return(zzzz) 
     })
     
     df_tomerge_mcols <- data.frame(
-        ztest = unlist(fun1(ppval, 1))
+        cohen.estimate = unlist(fun1(ppval, 1)),
+        cohen.magnitude = unlist(fun1(ppval, 2))
     )
     
-    # Apply Benjamini-Hochberg correction
-    df_tomerge_mcols[[paste0("ztest_", correction_method, "_correct")]] <- p.adjust(df_tomerge_mcols$ztest, method = correction_method)
+    # Apply Benjamini-Hochberg correction 
+    # df_tomerge_mcols[[paste0("ztest_", correction_method, "_correct")]] <- p.adjust(df_tomerge_mcols$ztest, method = correction_method)
     
     mcols(gr) <- cbind(mcols(gr), df_tomerge_mcols)
     
-    # Filter by adjusted p-value 
-    gr <- gr[mcols(gr)[[paste0("ztest_", correction_method, "_correct")]] <= padjfilt]
-    # gr <- gr[abs(mcols(gr)$cohen.estimate) >= cohenthresh] # ← Cohen's d filtering OFF
+    # Filter by Cohen's d
+    gr <- gr[abs(mcols(gr)$cohen.estimate) >= cohenthresh]
     return(gr)
 }
 
@@ -318,9 +321,9 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     up_down_to_ztest_grr <- func_ztest_gr_byrow(up_down_to_ztest_gr,
                                             x = x,
                                             y = y,
-                                            correction_method = "BH",
-                                            # cohenthresh = 3, # <-- Cohen's d filtering OFF
-                                            padjfilt = 0.05)  
+                                            # correction_method = "BH",
+                                            cohenthresh = 3 # <-- Cohen's d filtering OFF
+                                            )  
 
     cat("Statistical testing completed. Regions passing threshold:", length(up_down_to_ztest_grr), "\n")
 
@@ -348,9 +351,9 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     controlstartmeanneg$bintype <- rep(fraction2, length(controlstartmeanneg))
     
     controlstartmeanpos <- controlstartmeanpos[!controlstartmeanpos %in% 
-                                             c(ovvhighconservedpos, ovlowconservedpos)]
+                                            c(ovvhighconservedpos, ovlowconservedpos)]
     controlstartmeanneg <- controlstartmeanneg[!controlstartmeanneg %in% 
-                                             c(ovvhighconservedneg, ovlowconservedneg)]
+                                            c(ovvhighconservedneg, ovlowconservedneg)]
     
     # All groups to return (like your original code)
     all_gr_toreturn <- c(ovvhighconservedpos,

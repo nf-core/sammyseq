@@ -63,10 +63,10 @@ save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffi
                     paste0(g2, "_serrx2_lower"), paste0(g2, "_serrx2_upper"),
                     paste0(g2, "_mean"), paste0(g2, "_serrX2"),
                     "delta",
-                    # "cohen.estimate",           # ← Cohen's d estimate OFF
-                    # "cohen.magnitude",          # ← Cohen's d magnitude OFF  
-                    "ztest",                      # ← Z-TEST ON
-                    "ztest_BH_correct"            # ← BENJAMINI-HOCHBERG ON
+                    "cohen.estimate",           # ← Cohen's d estimate OFF
+                    "cohen.magnitude"#,          # ← Cohen's d magnitude OFF  
+                    #"ztest",                      # ← Z-TEST ON
+                    #"ztest_BH_correct"            # ← BENJAMINI-HOCHBERG ON
                 )}
             essential_cols <- c(base_cols, essential_stats_cols)
             available_cols <- colnames(df)
@@ -205,7 +205,7 @@ for (current_ratio in selected_ratios) {
         if ("genes" %in% names(res)) {
             gene_results <- res[["genes"]]
             if (length(gene_results) > 0) {
-                
+
                 dir.create("genes", showWarnings = FALSE)
                 
                 for (gene_category in names(gene_results)) {
