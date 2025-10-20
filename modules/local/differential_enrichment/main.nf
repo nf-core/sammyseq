@@ -1,4 +1,5 @@
-process DIFFERENTIAL_SOLUBILITY {
+process DIFFERENTIAL_ENRICHMENT {
+    tag "${contrast_data[0]}vs${contrast_data[1]}"
     container 'docker.io/ciuki97/differential-solubility-analysis:v0.0.1'
     conda "${moduleDir}/environment.yml"
 
@@ -6,15 +7,17 @@ process DIFFERENTIAL_SOLUBILITY {
     errorStrategy 'terminate'
     maxRetries 0
 
-    input:
-    tuple val(meta), path(samplesheet)
-    path(genome_bins)
-    path(gtf)
-    val(binsize)
-    val(comparison)
-    val(compare_groups)
-    val(solubility_threshold)
-    val(validation_passed)
+input:
+tuple val(meta), path(samplesheet)
+each contrast_data              // ← [test_group, ref_group]
+path(genome_bins)
+path(gtf)
+val(binsize)
+val(comparison)
+val(solubility_threshold)
+val(validation_passed)
+
+
 
     output:
     tuple val(meta), path("*_all_bins_complete.csv"), emit: all_bins
@@ -27,6 +30,10 @@ process DIFFERENTIAL_SOLUBILITY {
     when:
     task.ext.when == null || task.ext.when
 
-    script:
-    template 'differential_solubility.R'
+script:
+test_group = contrast_data[0]
+ref_group = contrast_data[1]
+contrast_name = "${contrast_data[0]}vs${contrast_data[1]}"
+
+template 'differential_enrichment.R'
 }

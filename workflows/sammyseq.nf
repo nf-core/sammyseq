@@ -40,7 +40,7 @@ include { DEEPTOOLS_QC                        } from '../subworkflows/local/deep
 include { GENERATE_COMPARISONS                } from '../subworkflows/local/generate_comparisons'
 include { GENERATE_COMPARISONS_SAMPLESHEET    } from '../subworkflows/local/generate_comparisons_samplesheet'
 include { VALIDATE_GROUPS                     } from '../modules/local/validate_groups'
-include { DIFFERENTIAL_SOLUBILITY             } from '../modules/local/differential_solubility/main'
+include { DIFFERENTIAL_ENRICHMENT             } from '../modules/local/differential_enrichment/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -366,34 +366,44 @@ if (params.stopAt == 'ALIGNMENT') {
         )
     }
 
-    //
-    // DIFFERENTIAL SOLUBILITY ANALYSIS
-    //
-    if (params.differential_solubility) {
+//
+// DIFFERENTIAL SOLUBILITY ANALYSIS - PARALLELIZED
+//
+if (params.differential_solubility) {
 
-        if (!params.compare_groups) {
-            error "ERROR: --differential_solubility requires --compare_groups"
+    if (!params.compare_groups) {
+        error "ERROR: --differential_solubility requires --compare_groups"
+    }
+
+    VALIDATE_GROUPS(
+        ch_comparison_results.collect(),
+        params.compare_groups
+    )
+
+    ch_differential_samplesheet = GENERATE_COMPARISONS_SAMPLESHEET.out.samplesheet
+        .map { file -> [[ id:'differential_analysis' ], file] }
+
+    // *** PARALLELIZZAZIONE: Converti compare_groups in channel ***
+    ch_contrasts = Channel
+        .from(params.compare_groups.split(','))
+        .map { contrast ->
+            def parts = contrast.split('vs')
+            def test_group = parts[0].trim()
+            def ref_group = parts[1].trim()
+            [test_group, ref_group]  // ← Array per each
         }
 
-        VALIDATE_GROUPS(
-            ch_comparison_results.collect(),
-            params.compare_groups
-        )
-
-        ch_differential_samplesheet = GENERATE_COMPARISONS_SAMPLESHEET.out.samplesheet
-            .map { file -> [[ id:'differential_analysis' ], file] }
-
-        DIFFERENTIAL_SOLUBILITY (
-            ch_differential_samplesheet,
-            ch_genome_bins,
-            PREPARE_GENOME.out.gtf,
-            params.binsize,
-            params.comparison,
-            params.compare_groups,
-            params.solubility_threshold,
-            VALIDATE_GROUPS.out.validation
-        )
-    }
+    DIFFERENTIAL_ENRICHMENT (
+        ch_differential_samplesheet,
+        ch_contrasts,               // ← EACH: Un task per ogni contrasto
+        ch_genome_bins,
+        PREPARE_GENOME.out.gtf,
+        params.binsize,
+        params.comparison,
+        params.solubility_threshold,
+        VALIDATE_GROUPS.out.validation
+    )
+}
 
     //
     // Collate and save software versions

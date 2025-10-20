@@ -17,6 +17,7 @@
 
 process RTWOSAMPLESMLE {
     //tag "$meta.id"
+    tag "$meta.experimentalID $meta.ratio"
     label 'process_medium'
 
     // TODO nf-core: List required Conda package(s).
