@@ -31,7 +31,7 @@ opt <- list(
 )
 
 ################################################
-## MAIN ANALYSIS - SINGOLO CONTRASTO          ##
+## MAIN ANALYSIS                              ##
 ################################################
 
 cat("Processing group comparison:", opt\$test_group, "vs", opt\$ref_group, "\\n")
@@ -147,20 +147,19 @@ for (current_ratio in selected_ratios) {
     allmixeddf_grobj <- GenomicRanges::sort(gr1)
     unique_groups <- unique(Sample_groups)
     
-    # Setup per singolo contrasto
+    
     pr <- matrix(nrow = 2, ncol = 1)
     colnames(pr) <- compare_groups
     rownames(pr) <- c('ref_group', 'test_group')
 
-pr[1, 1] <- opt\$ref_group    # ← CON opt\$
-pr[2, 1] <- opt\$test_group   # ← CON opt\$
+    pr[1, 1] <- opt\$ref_group
+    pr[2, 1] <- opt\$test_group
 
     assign("pr", pr, envir = .GlobalEnv)
     g1 <- pr[1, 1]; g2 <- pr[2, 1]
     assign(g1, Sample_names[Sample_groups == g1], envir = .GlobalEnv)
     assign(g2, Sample_names[Sample_groups == g2], envir = .GlobalEnv)
 
-    # Esegui analisi per questo singolo contrasto
     result <- Bins_selector(
         combination = compare_groups,
         allmixeddf_grobj = allmixeddf_grobj,
@@ -169,7 +168,6 @@ pr[2, 1] <- opt\$test_group   # ← CON opt\$
         ths = ths
     )
 
-    # Processo risultati
     comparison_name <- compare_groups
     all_bins_data <- list()
     selected_bins_data <- list()
@@ -205,19 +203,24 @@ pr[2, 1] <- opt\$test_group   # ← CON opt\$
     save_bins_data(selected_bins_data, current_ratio, comparison_name, "selected_bins_filtered", g1, g2)
 
     ## Select only relevant GRanges for BED export
-    selected_bins_only <- list(
-        S2S_up = result[[paste0(g2, "_", fr1, "_up_", g1)]],
-        S2S_down = result[[paste0(g2, "_", fr1, "_down_", g1)]],
-        S3_up = result[[paste0(g2, "_", fr2, "_up_", g1)]],
-        S3_down = result[[paste0(g2, "_", fr2, "_down_", g1)]]
-    )
-    
+    fr1_up_name <- paste0(fr1, "_up")
+    fr1_down_name <- paste0(fr1, "_down") 
+    fr2_up_name <- paste0(fr2, "_up")
+    fr2_down_name <- paste0(fr2, "_down")
+
+    selected_bins_only <- list()
+    selected_bins_only[[fr1_up_name]] <- result[[paste0(g2, "_", fr1, "_up_", g1)]]
+    selected_bins_only[[fr1_down_name]] <- result[[paste0(g2, "_", fr1, "_down_", g1)]]
+    selected_bins_only[[fr2_up_name]] <- result[[paste0(g2, "_", fr2, "_up_", g1)]]
+    selected_bins_only[[fr2_down_name]] <- result[[paste0(g2, "_", fr2, "_down_", g1)]]
+
     # Create regions directory
     dir.create("regions", showWarnings = FALSE)
-    
+
     # Generate BED files for each category
     base_name <- paste0(g2, "vs", g1, "_", current_ratio)
-    bed_categories <- c("S2S_up", "S2S_down", "S3_up", "S3_down")
+    bed_categories <- c(fr1_up_name, fr1_down_name, fr2_up_name, fr2_down_name)
+    
     for (bed_cat in bed_categories) {
         gr_touse <- selected_bins_only[[bed_cat]]
         if (!is.null(gr_touse) && length(gr_touse) > 0) {
@@ -228,7 +231,7 @@ pr[2, 1] <- opt\$test_group   # ← CON opt\$
                         sep = "\\t",
                         row.names = FALSE,
                         col.names = FALSE
-                       )
+                        )
             cat("Saved BED file:", bed_filename, "with", length(gr_touse), "regions\\n")
         } else {
             cat("No regions found for", bed_cat, "in", comparison_name, "\\n")
