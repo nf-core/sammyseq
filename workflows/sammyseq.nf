@@ -363,6 +363,10 @@ if (params.stopAt == 'ALIGNMENT') {
 
         if (params.differential_solubility) {
 
+            if (!params.compare_groups) {
+                error "ERROR: --differential_solubility requires --compare_groups"
+            }
+
             DIFFERENTIAL_SOLUBILITY_ANALYSIS (
                 ch_comparison_results,
                 params.outdir,
