@@ -38,9 +38,8 @@ include { FILTER_BAM_SAMTOOLS                 } from '../subworkflows/local/filt
 include { BIGWIG_PLOT_DEEPTOOLS               } from '../subworkflows/local/bigwig_plot_deeptools'
 include { DEEPTOOLS_QC                        } from '../subworkflows/local/deeptools_qc'
 include { GENERATE_COMPARISONS                } from '../subworkflows/local/generate_comparisons'
-include { GENERATE_COMPARISONS_SAMPLESHEET    } from '../subworkflows/local/generate_comparisons_samplesheet'
-include { VALIDATE_GROUPS                     } from '../modules/local/validate_groups'
-include { DIFFERENTIAL_ENRICHMENT             } from '../modules/local/differential_enrichment/main'
+include { DIFFERENTIAL_SOLUBILITY_ANALYSIS    } from '../subworkflows/local/differential_solubility_analysis'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -340,6 +339,7 @@ if (params.stopAt == 'ALIGNMENT') {
     //
     // Generate comparisons
     //
+
     if (params.comparison_file || params.comparison) {
 
         ch_comparison_results = Channel.empty()
@@ -357,51 +357,25 @@ if (params.stopAt == 'ALIGNMENT') {
 
         ch_comparison_results = GENERATE_COMPARISONS.out.results
 
-        //
-        // Generate ratio samplesheet CSV - common for both tools
-        //
-        GENERATE_COMPARISONS_SAMPLESHEET(
-            ch_comparison_results,
-            params.outdir
-        )
-    }
-
     //
     // DIFFERENTIAL SOLUBILITY ANALYSIS
     //
-    if (params.differential_solubility) {
     
-        if (!params.compare_groups) {
-            error "ERROR: --differential_solubility requires --compare_groups"
+        if (params.differential_solubility) {
+        
+            DIFFERENTIAL_SOLUBILITY_ANALYSIS (
+                ch_comparison_results,       
+                params.outdir,               
+                ch_genome_bins,              
+                PREPARE_GENOME.out.gtf.ifEmpty([]),     
+                params.binsize,              
+                params.comparison,           
+                params.solubility_threshold, 
+                params.compare_groups        
+            )
+
+            ch_versions = ch_versions.mix(DIFFERENTIAL_SOLUBILITY_ANALYSIS.out.versions)
         }
-    
-        VALIDATE_GROUPS(
-            ch_comparison_results.collect(),
-            params.compare_groups
-        )
-    
-        ch_differential_samplesheet = GENERATE_COMPARISONS_SAMPLESHEET.out.samplesheet
-            .map { file -> [[ id:'differential_analysis' ], file] }
-    
-        ch_contrasts = Channel
-            .from(params.compare_groups.split(','))
-            .map { contrast ->
-                def parts = contrast.split('vs')
-                def test_group = parts[0].trim()
-                def ref_group = parts[1].trim()
-                [test_group, ref_group] 
-            }
-    
-        DIFFERENTIAL_ENRICHMENT (
-            ch_differential_samplesheet,
-            ch_contrasts,               
-            ch_genome_bins,
-            PREPARE_GENOME.out.gtf,
-            params.binsize,
-            params.comparison,
-            params.solubility_threshold,
-            VALIDATE_GROUPS.out.validation
-        )
     }
 
     //

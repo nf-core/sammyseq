@@ -11,3 +11,7 @@ dependencies:
   - bioconductor-genomicranges=1.46.1
   - bioconductor-preprocesscore=1.56.0
   - bioconductor-rtracklayer=1.54.0
+  - r-effsize=0.8.1
+  - r-dplyr=1.1.2
+  - bioconductor-genomicfeatures=1.46.1
+  - r-bsda=1.2.1

@@ -1,14 +1,16 @@
 #!/usr/bin/env Rscript
 
-library(data.table)
-library(rtracklayer)
-library(GenomicRanges)
-library(GenomeInfoDb)
-library(preprocessCore)
-library(effsize)        
-library(dplyr)
-library(GenomicFeatures)
-library(BSDA)
+suppressMessages({
+    library(data.table)
+    library(rtracklayer)
+    library(GenomicRanges)
+    library(GenomeInfoDb)
+    library(preprocessCore)
+    library(effsize)        
+    library(dplyr)
+    library(GenomicFeatures)
+    library(BSDA)
+})
 
 source("${projectDir}/bin/differential_solubility_functions.R")
 
@@ -19,19 +21,19 @@ source("${projectDir}/bin/differential_solubility_functions.R")
 ################################################
 
 opt <- list(
-  test_group = "${test_group}",
-  ref_group = "${ref_group}", 
-  contrast_name = "${contrast_name}",
-  samplesheet = "${samplesheet}",
-  genome_bins = "${genome_bins}",
-  binsize = "${binsize}",
-  comparison = "${comparison}",
-  solubility_threshold = "${solubility_threshold}",
-  gtf = "${gtf}"
+    test_group = "${test_group}",
+    ref_group = "${ref_group}", 
+    contrast_name = "${contrast_name}",
+    samplesheet = "${samplesheet}",
+    genome_bins = "${genome_bins}",
+    binsize = "${binsize}",
+    comparison = "${comparison}",
+    solubility_threshold = "${solubility_threshold}",
+    gtf = "${gtf}"
 )
 
 ################################################
-## MAIN ANALYSIS                              ##
+## PARAMETERS                                 ##
 ################################################
 
 cat("Processing group comparison:", opt\$test_group, "vs", opt\$ref_group, "\\n")
@@ -45,7 +47,7 @@ threshold <- opt\$solubility_threshold
 gtf_file <- opt\$gtf
 
 # Define name for the text report
-summary_file <- 'analysis_summary.txt'
+summary_file <- paste0(opt\$contrast_name, '_analysis_summary.txt')
 
 # Define threshold for binselector
 ths <- as.numeric(threshold)
@@ -59,7 +61,21 @@ file_col  <- which(colnames(comp_db) == 'file')
 id_col    <- which(colnames(comp_db) == 'experimental_id')
 group_col <- which(colnames(comp_db) == 'sample_group')
 
-# Function to add metadata columns to a dataframe
+################################################
+## FUNCTIONS                                  ##
+################################################
+
+# Check if specified groups exist in the data
+available_groups <- unique(comp_db[['sample_group']])
+specified_groups <- c(opt\$test_group, opt\$ref_group)
+missing_groups <- setdiff(specified_groups, available_groups)
+
+if (length(missing_groups) > 0) {
+    stop("ERROR: Groups [", paste(missing_groups, collapse = ", "), "] not found in data!\\n",
+        "Available groups: [", paste(available_groups, collapse = ", "), "]\\n")
+}
+
+# setup gene annotation from GTF
 add_metadata <- function(df, comparison_name, current_ratio, fraction, direction) {
     df[['comparison']] <- comparison_name
     df[['ratio']] <- current_ratio
@@ -68,7 +84,7 @@ add_metadata <- function(df, comparison_name, current_ratio, fraction, direction
     return(df)
 }
 
-# Function to save bins data into one CSV with a readable column order
+# save bins data to CSV in a structured way
 save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffix, g1 = NULL, g2 = NULL) {
     if (length(data_list)) {
         df <- do.call(rbind, data_list)
@@ -102,8 +118,6 @@ save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffi
     }
 }
 
-sink(summary_file)
-
 # Setup gene annotation
 if (gtf_file != "" && file.exists(gtf_file)) {
     tryCatch({
@@ -117,6 +131,12 @@ if (gtf_file != "" && file.exists(gtf_file)) {
 } else {
     cat("No GTF file provided. Gene analysis will be skipped\\n")
 }
+
+################################################
+## MAIN ANALYSIS                              ##
+################################################
+
+sink(summary_file)
 
 for (current_ratio in selected_ratios) {
     ratio_data    <- comp_db[comp_db[, ratio_col] == current_ratio, ]
@@ -263,10 +283,10 @@ for (current_ratio in selected_ratios) {
         cat("Gene analysis was not performed for", comparison_name, "(final_genes not available)\\n")
     }
 
-    # Save complete analysis results as RDS (in organized folder with simple name)
+    # Save complete analysis results as RDS
     dir.create("rdata", showWarnings = FALSE)
     output_complete_rds <- paste0("rdata/", current_ratio, "_", compare_groups, "_analysis.rds")
-    saveRDS(result, file = output_complete_rds)  # ← Salva singolo risultato invece di list_groups
+    saveRDS(result, file = output_complete_rds)
     cat("Saved complete analysis R object:", output_complete_rds, "\\n")
 }
 
@@ -280,7 +300,7 @@ sink()
 
 r.version <- strsplit(version[['version.string']], ' ')[[1]][3]
 writeLines(
-  c(
+    c(
     '"${task.process}":',
     paste('    r-base:', r.version),
     paste('    r-data.table:', as.character(packageVersion('data.table'))),
@@ -292,5 +312,5 @@ writeLines(
     paste('    r-dplyr:', as.character(packageVersion('dplyr'))),
     paste('    bioconductor-genomicfeatures:', as.character(packageVersion('GenomicFeatures'))),
     paste('    r-bsda:', as.character(packageVersion('BSDA')))
-  ),
+    ),
 'versions.yml')
