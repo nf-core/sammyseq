@@ -1,19 +1,19 @@
 include { DIFFERENTIAL_ENRICHMENT } from '../../modules/local/differential_enrichment/main'
 
 workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {
-    
+
     take:
-    mle_results_channel      
-    outdir                   
-    genome_bins              
-    gtf                      
-    binsize                  
-    comparison               
-    solubility_threshold     
-    compare_groups           
-    
+    mle_results_channel
+    outdir
+    genome_bins
+    gtf
+    binsize
+    comparison
+    solubility_threshold
+    compare_groups
+
     main:
-    
+
     //
     // Generate correct CSV samplesheet for differential analysis
     //
@@ -23,7 +23,7 @@ workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {
             ["mle_comparisons.csv", "experimental_id,sample_group,ratio,file\n${csv_meta.experimentalID},${csv_meta.sample_group},${csv_meta.ratio},${mle_file}\n"]
         }
         .map { file -> [[ id:'differential_analysis' ], file] }
-    
+
     //
     // Parse contrasts for parallel processing
     //
@@ -41,21 +41,21 @@ workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {
     //
 
     DIFFERENTIAL_ENRICHMENT (
-        ch_samplesheet,        
-        ch_contrasts,          
-        genome_bins,           
-        gtf,                   
-        binsize,               
-        comparison,            
+        ch_samplesheet,
+        ch_contrasts,
+        genome_bins,
+        gtf,
+        binsize,
+        comparison,
         solubility_threshold
     )
-    
+
     emit:
-    all_bins          = DIFFERENTIAL_ENRICHMENT.out.all_bins          
-    selected_bins     = DIFFERENTIAL_ENRICHMENT.out.selected_bins      
-    selected_bins_rds = DIFFERENTIAL_ENRICHMENT.out.selected_bins_rds 
-    bed_regions       = DIFFERENTIAL_ENRICHMENT.out.bed_regions       
-    gene_lists        = DIFFERENTIAL_ENRICHMENT.out.gene_lists        
-    report            = DIFFERENTIAL_ENRICHMENT.out.report            
-    versions          = DIFFERENTIAL_ENRICHMENT.out.versions          
+    all_bins          = DIFFERENTIAL_ENRICHMENT.out.all_bins
+    selected_bins     = DIFFERENTIAL_ENRICHMENT.out.selected_bins
+    selected_bins_rds = DIFFERENTIAL_ENRICHMENT.out.selected_bins_rds
+    bed_regions       = DIFFERENTIAL_ENRICHMENT.out.bed_regions
+    gene_lists        = DIFFERENTIAL_ENRICHMENT.out.gene_lists
+    report            = DIFFERENTIAL_ENRICHMENT.out.report
+    versions          = DIFFERENTIAL_ENRICHMENT.out.versions
 }

@@ -6,7 +6,7 @@ suppressMessages({
     library(GenomicRanges)
     library(GenomeInfoDb)
     library(preprocessCore)
-    library(effsize)        
+    library(effsize)
     library(dplyr)
     library(GenomicFeatures)
     library(BSDA)
@@ -22,7 +22,7 @@ source("${projectDir}/bin/differential_solubility_functions.R")
 
 opt <- list(
     test_group = "${test_group}",
-    ref_group = "${ref_group}", 
+    ref_group = "${ref_group}",
     contrast_name = "${contrast_name}",
     samplesheet = "${samplesheet}",
     genome_bins = "${genome_bins}",
@@ -46,7 +46,7 @@ comparison_param <- opt\$comparison
 threshold <- opt\$solubility_threshold
 gtf_file <- opt\$gtf
 
-# Define name for the text report
+# Define the summary file variable for sink
 summary_file <- paste0(opt\$contrast_name, '_analysis_summary.txt')
 
 # Define threshold for binselector
@@ -166,8 +166,8 @@ for (current_ratio in selected_ratios) {
     names(gr1@elementMetadata) <- gr1_names
     allmixeddf_grobj <- GenomicRanges::sort(gr1)
     unique_groups <- unique(Sample_groups)
-    
-    
+
+
     pr <- matrix(nrow = 2, ncol = 1)
     colnames(pr) <- compare_groups
     rownames(pr) <- c('ref_group', 'test_group')
@@ -224,7 +224,7 @@ for (current_ratio in selected_ratios) {
 
     ## Select only relevant GRanges for BED export
     fr1_up_name <- paste0(fr1, "_up")
-    fr1_down_name <- paste0(fr1, "_down") 
+    fr1_down_name <- paste0(fr1, "_down")
     fr2_up_name <- paste0(fr2, "_up")
     fr2_down_name <- paste0(fr2, "_down")
 
@@ -240,7 +240,7 @@ for (current_ratio in selected_ratios) {
     # Generate BED files for each category
     base_name <- paste0(g2, "vs", g1, "_", current_ratio)
     bed_categories <- c(fr1_up_name, fr1_down_name, fr2_up_name, fr2_down_name)
-    
+
     for (bed_cat in bed_categories) {
         gr_touse <- selected_bins_only[[bed_cat]]
         if (!is.null(gr_touse) && length(gr_touse) > 0) {
@@ -257,22 +257,22 @@ for (current_ratio in selected_ratios) {
             cat("No regions found for", bed_cat, "in", comparison_name, "\\n")
         }
     }
-    
+
     # Write gene files if provided
     if ("genes" %in% names(result)) {
         gene_results <- result[["genes"]]
         if (length(gene_results) > 0) {
 
             dir.create("genes", showWarnings = FALSE)
-            
+
             for (gene_category in names(gene_results)) {
                 gene_list <- gene_results[[gene_category]]
                 if (length(gene_list) > 0) {
                     cat("Writing", length(gene_list), "genes for", gene_category, "\\n")
-                    
+
                     output_file <- paste0("genes/", current_ratio, "_", gene_category, "_genes.txt")
                     write.table(gene_list, output_file,
-                                quote = FALSE, sep = "\\t", 
+                                quote = FALSE, sep = "\\t",
                                 row.names = FALSE, col.names = FALSE)
                 }
             }

@@ -360,18 +360,18 @@ if (params.stopAt == 'ALIGNMENT') {
     //
     // DIFFERENTIAL SOLUBILITY ANALYSIS
     //
-    
+
         if (params.differential_solubility) {
-        
+
             DIFFERENTIAL_SOLUBILITY_ANALYSIS (
-                ch_comparison_results,       
-                params.outdir,               
-                ch_genome_bins,              
-                PREPARE_GENOME.out.gtf.ifEmpty([]),     
-                params.binsize,              
-                params.comparison,           
-                params.solubility_threshold, 
-                params.compare_groups        
+                ch_comparison_results,
+                params.outdir,
+                ch_genome_bins,
+                PREPARE_GENOME.out.gtf.ifEmpty([]),
+                params.binsize,
+                params.comparison,
+                params.solubility_threshold,
+                params.compare_groups
             )
 
             ch_versions = ch_versions.mix(DIFFERENTIAL_SOLUBILITY_ANALYSIS.out.versions)

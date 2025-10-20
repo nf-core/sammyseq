@@ -154,7 +154,7 @@ setup_gene_annotation <- function(gtf_file) {
     # Create TxDb from GTF
     txdb <- makeTxDbFromGFF(gtf_file)
     genes <- genes(txdb)
-    
+
     # Function to summarize protein coding genes
     summarizeProteinCodingGenes <- function(txdb) {
         stopifnot(is(txdb, "TxDb"))
@@ -169,14 +169,14 @@ setup_gene_annotation <- function(gtf_file) {
         n_non_coding <- n_tx - n_coding
         data.frame(gene, n_tx, n_coding, n_non_coding, stringsAsFactors = FALSE)
     }
-    
+
     # Get protein coding genes
     geneid_codingdf <- summarizeProteinCodingGenes(txdb)
     final_genes <- genes[genes$gene_id %in% geneid_codingdf[geneid_codingdf$n_coding > 0,]$gene]
-    
+
     # Clean gene IDs
     mcols(final_genes)$gene_id <- gsub("\\..*", "", mcols(final_genes)$gene_id)
-    
+
     return(final_genes)
 }
 
@@ -191,40 +191,40 @@ func_ztest_gr_byrow <- function(gr,
                                 cohenthresh = 0.8)
                                 {
     ppval <- lapply(seq(nrow(as.data.frame(mcols(gr)))), function(i) {
-        
+
         # Cohen's d calculation
         cohend <- cohen.d(
             unlist(as.vector(as.data.frame(mcols(gr))[x][i,])),
             unlist(as.vector(as.data.frame(mcols(gr))[y][i,]))
         )
-        cohen.estimate <- cohend$estimate 
+        cohen.estimate <- cohend$estimate
         cohend.magnitude <- as.character(cohend$magnitude)
-        
-        # BSDA Z-test implementation 
+
+        # BSDA Z-test implementation
         # ztest <- z.test(x = as.data.frame(mcols(gr))[x][i,],
         #                 y = as.data.frame(mcols(gr))[y][i,],
         #                 sigma.x = sd(as.data.frame(mcols(gr))[x][i,]),
         #                 sigma.y = sd(as.data.frame(mcols(gr))[y][i,]),
         #                 alternative = 'two.sided',
         #                 conf.level = 0.99)
-        
+
         # ztest_pvalue <- ztest$p.value
-        
+
         zzzz <- list(cohen.estimate, cohend.magnitude)
-        names(zzzz) <- c("cohen.estimate", "cohen.magnitude") 
-        return(zzzz) 
+        names(zzzz) <- c("cohen.estimate", "cohen.magnitude")
+        return(zzzz)
     })
-    
+
     df_tomerge_mcols <- data.frame(
         cohen.estimate = unlist(fun1(ppval, 1)),
         cohen.magnitude = unlist(fun1(ppval, 2))
     )
-    
-    # Apply Benjamini-Hochberg correction 
+
+    # Apply Benjamini-Hochberg correction
     # df_tomerge_mcols[[paste0("ztest_", correction_method, "_correct")]] <- p.adjust(df_tomerge_mcols$ztest, method = correction_method)
-    
+
     mcols(gr) <- cbind(mcols(gr), df_tomerge_mcols)
-    
+
     # Filter by Cohen's d
     gr <- gr[abs(mcols(gr)$cohen.estimate) >= cohenthresh]
     return(gr)
@@ -260,7 +260,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     mcols(new_selection) <- cbind(mcols(new_selection), df_toadd1)
 
     # Range analysis forward comparison
-    range_analysis <- lapply(1:length(y), function(n) { 
+    range_analysis <- lapply(1:length(y), function(n) {
         y_name <- y[n]
         z <- apply(as.matrix(mcols(new_selection)[c(paste0(xgroup, "_serrx2_lower"), paste0(xgroup, "_serrx2_upper"), paste0(xgroup, "_mean"), y_name)]), 1,
             is_in_serrx2_range_and_shift,
@@ -323,13 +323,13 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
                                             y = y,
                                             # correction_method = "BH",
                                             cohenthresh = 3 # <-- Cohen's d filtering OFF
-                                            )  
+                                            )
 
     cat("Statistical testing completed. Regions passing threshold:", length(up_down_to_ztest_grr), "\n")
 
     # Separate bins according to meantosep (like your original code)
-    startmeanpos <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep >= 0]  
-    startmeanneg <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep <= 0]  
+    startmeanpos <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep >= 0]
+    startmeanneg <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep <= 0]
 
     # Select coherent bins based on direction of change (using abs like your code)
     ovvhighconservedpos <- startmeanpos[abs(startmeanpos$ovvhigh) > abs(startmeanpos$ovlow)]
@@ -346,15 +346,15 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     # Control groups (like your original code)
     controlstartmeanpos <- prvdftest_gr[prvdftest_gr$meantosep >= 0]
     controlstartmeanneg <- prvdftest_gr[prvdftest_gr$meantosep <= 0]
-    
+
     controlstartmeanpos$bintype <- rep(fraction1, length(controlstartmeanpos))
     controlstartmeanneg$bintype <- rep(fraction2, length(controlstartmeanneg))
-    
-    controlstartmeanpos <- controlstartmeanpos[!controlstartmeanpos %in% 
+
+    controlstartmeanpos <- controlstartmeanpos[!controlstartmeanpos %in%
                                             c(ovvhighconservedpos, ovlowconservedpos)]
-    controlstartmeanneg <- controlstartmeanneg[!controlstartmeanneg %in% 
+    controlstartmeanneg <- controlstartmeanneg[!controlstartmeanneg %in%
                                             c(ovvhighconservedneg, ovlowconservedneg)]
-    
+
     # All groups to return (like your original code)
     all_gr_toreturn <- c(ovvhighconservedpos,
                         ovlowconservedpos,
@@ -390,10 +390,10 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
             gr_touse <- list_ofbins_to_save_and_analyse[[i]]
             if (length(gr_touse) != 0) {
                 cat(paste0(ygroup, "_vs_", xgroup, "_", i, " has ", length(gr_touse), " regions"), "\n")
-                
+
                 # Calculate overlapping genes
                 genes_gr <- final_genes_obj[findOverlaps(gr_touse, promoters(final_genes_obj, upstream = 2500, downstream = 500))@to]
-                
+
                 list_of_vector_geneNumber[[i]] <- length(mcols(genes_gr)$gene_id)
                 list_of_genes_vec[[paste0(ygroup, "_vs_", xgroup, "_", i)]] <- unique(mcols(genes_gr)$gene_id)
             } else {
