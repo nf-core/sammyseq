@@ -75,7 +75,7 @@ if (length(missing_groups) > 0) {
         "Available groups: [", paste(available_groups, collapse = ", "), "]\\n")
 }
 
-# setup gene annotation from GTF
+# metadata addition function
 add_metadata <- function(df, comparison_name, current_ratio, fraction, direction) {
     df[['comparison']] <- comparison_name
     df[['ratio']] <- current_ratio

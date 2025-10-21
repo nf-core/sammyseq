@@ -36,9 +36,9 @@ Here is an outline of the analysis steps:
 3. Align on a reference genome ([`BWA`](https://bio-bwa.sourceforge.net/) or [`Bowtie 2`](https://bowtie-bio.sourceforge.net/bowtie2))
 4. Mark duplicate reads ([`picard Markduplicates`](http://broadinstitute.github.io/picard))
 5. Filter reads and generate alignment statistics ([`samtools`](http://www.htslib.org/))
-6. Create single track profiles in bigwig format ([`deeptools bamCoverage`]([https://deeptools.readthedocs.io/en/latest/content/tools/bamCoverage.html))
+6. Create single track profiles in bigwig format ([`deeptools bamCoverage`](https://deeptools.readthedocs.io/en/latest/))
 7. (Optional) Generate pairwise comparison tracks in bigWig format ([`deeptools bigwigCompare`](https://deeptools.readthedocs.io/en/develop/content/tools/bigwigCompare.html)) or ([`spp`](https://github.com/hms-dbmi/spp)).
-8. (Optional) Identify differentially enriched solubility regions as desribed in ([Wang et al., 2024](https://doi.org/10.1038/s41594-025-01622-5)).
+8. (Optional) Identify differentially enriched solubility regions as desribed in [Wang et al., 2024 ](https://doi.org/10.1038/s41594-025-01622-5).
 9. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <p align="center">
@@ -101,7 +101,7 @@ For more details about the output files and reports, please refer to the
 The SAMMY-seq data analysis procedure was originally developed by the laboratory of Francesco Ferrari (IFOM-ETS, Milan; IGM-CNR, Pavia) in collaboration with the laboratory of Chiara Lanzuolo (INGM, Milan; ITB-CNR, Segrate).
 The orginal pipeline backbone was mainly the result of work by Cristiano Petrini (IFOM) and Endre Sebestyén (IFOM), with significant contributions by Ilario Tagliaferri (IFOM), Giovanni Lembo (IFOM) and Emanuele Di Patrizio Soldateschi (INGM). The project also benefited from the collaboration and input by Eva Maria Pinatel (ITB-CNR). The product of this effort resulted in a first pipeline implemented in bash and adapted to work on Sun Grid Engine (SGE) scheduler.
 
-The nf-core pipeline (nf-core/sammyseq) is being implemented by [Lucio Di Filippo](https://github.com/lucidif) (ISASI-CNR, Pozzuoli; IBBTEC, Santander), [Ugo Maria Iannacchero](https://github.com/ugoiannacchero) (ITB-CNR), [Nadia Sanseverino](https://github.com/nadiaxaidan) and [Margherita Mutarelli](https://github.com/daisymut) (ISASI-CNR).
+The nf-core pipeline (nf-core/sammyseq) is being implemented by [Lucio Di Filippo](https://github.com/lucidif) (ISASI-CNR, Pozzuoli; IBBTEC, Santander), [Ugo Maria Iannacchero](https://github.com/ugoiannacchero) (ITB-CNR), [Nadia Sanseverino](https://github.com/nadiaxaidan) (ISASI-CNR) and [Margherita Mutarelli](https://github.com/daisymut) (ISASI-CNR).
 
 <!-- We thank the following people for their extensive assistance in the development of this pipeline: -->
 

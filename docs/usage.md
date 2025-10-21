@@ -98,9 +98,21 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 
 ### Pairwise comparisons
 
-It is possible to generate one or more pairwise comparisons between fractions from the same experimental replicate by providing the `--comparison` parameter. The difference between each fraction read density profile, smoothed by the Gaussian kernel, is calculated and saved in bigwig format, as described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
+The pipeline offers two different methods for generating these comparisons, selected with the `--comparison_maker` parameter.
 
-You can specify a single comparison or multiple comparisons separated by commas:
+The `spp` method (default) smooths fraction read density profiles using a Gaussian kernel, calculates differences between fractions, and outputs results in bigwig format, following the approach described in Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat Biotech [doi](https://doi.org/10.1038/nbt.1508).
+
+```bash
+--comparison_maker spp
+```
+
+The `bigwigcompare` method partitions the genome into bins of equal size, counts reads per bin, and calculates the log2 ratio between samples. This method is required for paired-end data as `spp` does not support this data type.
+
+```
+--comparison_maker bigwigcompare
+```
+
+It is possible to generate one or more pairwise comparisons between fractions from the same experimental replicate by providing the `--comparison` parameter. You can specify a single comparison or multiple comparisons separated by commas:
 
 **Single comparison:**
 
@@ -129,7 +141,7 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
     S2vsS4   - Compare S2 fraction vs S4 fraction
     S4vsS3   - Compare S4 fraction vs S3 fraction
 
-The pipeline will automatically create comparisons only between fractions from the same experimentalID (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
+The pipeline will automatically create comparisons only between fractions from the same `experimentalID` (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
 
 Alternatively, it is possible to generate any pairwise comparisons between any fraction by providing a list with the parameter `--comparison_file` to indicate the full path to a comma-separated file with 2 columns:
 
@@ -142,6 +154,25 @@ CTRL004_S2,CTRL004_S4
 ```
 
 It can contain any combination of sample identifiers, they have to correspond to identifiers present in the `sample` column in the input file.
+
+### Differential Solubility Analysis
+
+For advanced analysis comparing solubility patterns between experimental conditions, `--differential_solubility` enable differential solubility analysis. This analysis uses the generated comparison data to identify genomic regions with significantly different accessibility patterns: 
+
+The `--compare_groups` parameter specifies which sample groups (defined in the `sample_group` column of the samplesheet) to compare for differential analysis. In the format "GroupBvsGroupA", GroupA serves as the reference group against which GroupB is compared.
+
+**Single group comparison:**
+
+```
+--compare_groups "GroupBvsGroupA"
+```
+
+**Multiple group comparisons:**
+
+```
+--compare_groups "GroupBvsGroupA,GroupCvsGroupA"
+```
+
 
 ### Combine fractions
 
