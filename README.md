@@ -38,7 +38,7 @@ Here is an outline of the analysis steps:
 5. Filter reads and generate alignment statistics ([`samtools`](http://www.htslib.org/))
 6. Create single track profiles in bigwig format ([`deeptools bamCoverage`](https://deeptools.readthedocs.io/en/latest/))
 7. (Optional) Generate pairwise comparison tracks in bigWig format ([`spp`](https://github.com/hms-dbmi/spp)) or ([`deeptools bigwigCompare`](https://deeptools.readthedocs.io/en/develop/content/tools/bigwigCompare.html)).
-8. (Optional) Identify differentially enriched solubility regions as desribed in [Wang et al., 2024 ](https://doi.org/10.1038/s41594-025-01622-5).
+8. (Optional) Identify differentially enriched solubility regions as described in [Wang et al., 2024 ](https://doi.org/10.1038/s41594-025-01622-5).
 9. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <p align="center">
