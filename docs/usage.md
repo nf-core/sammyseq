@@ -173,6 +173,8 @@ The `--compare_groups` parameter specifies which sample groups (defined in the `
 --compare_groups "GroupBvsGroupA,GroupCvsGroupA"
 ```
 
+The `--gtf` parameter (optional): When provided, generates gene lists by identifying protein-coding genes whose promoter regions overlap with significantly different bins
+
 ### Combine fractions
 
 Optionally, the fractions extracted from the same `experimentalID` can be combined together for later use by setting the parameter `--combine_fractions`.
@@ -197,7 +199,7 @@ Path to BED file containing TSS regions provided using the optional parameter `-
 
 ### GTF file
 
-Path to GTF file containing genes coordinates provided using the optional parameter `--gtf`.
+Path to GTF file containing genes coordinates provided using the optional parameter `--gtf`. When used with `--differential_solubility`, it enables gene-level annotation of results.
 
 ## Updating the pipeline
 

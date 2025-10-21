@@ -205,6 +205,8 @@ The genome is partitioned into bins of equal size (default: `--binsize 50000`) w
 
 The analysis identifies bins with significantly different solubility patterns using a configurable threshold (`--solubility_threshold`, default: 0.1) and calculates Cohen's d to determine the biological significance of observed differences.
 
+When a GTF file is provided using `--gtf`, the pipeline processes protein-coding gene annotations and performs coordinate-based overlap analysis between significantly different bins and gene promoter regions (2,500 bp upstream to 500 bp downstream of transcription start sites), generating lists of genes whose regulatory elements intersect with differential accessibility patterns.
+
 <details markdown="1">
 <summary>Output files</summary>
 
