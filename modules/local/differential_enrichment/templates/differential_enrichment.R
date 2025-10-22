@@ -283,11 +283,14 @@ for (current_ratio in selected_ratios) {
         cat("Gene analysis was not performed for", comparison_name, "(final_genes not available)\\n")
     }
 
+    # Add quantile normalized bins to result for saving
+    result[["quantile_normalized_bins"]] <- allmixeddf_grobj
+
     # Save complete analysis results as RDS
     dir.create("rdata", showWarnings = FALSE)
     output_complete_rds <- paste0("rdata/", current_ratio, "_", compare_groups, "_analysis.rds")
     saveRDS(result, file = output_complete_rds)
-    cat("Saved complete analysis R object:", output_complete_rds, "\\n")
+    cat("Saved complete analysis R object with normalized data:", output_complete_rds, "\\n")
 }
 
 sink()
