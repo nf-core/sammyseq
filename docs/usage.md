@@ -157,7 +157,7 @@ It can contain any combination of sample identifiers, they have to correspond to
 
 ### Differential Solubility Analysis
 
-The Differential Solubility Analysis has been developed to investigate differences in solubility patterns between experimental conditions and is enabled by setting the `--differential_solubility` parameter. This analysis uses the comparison tracks requested by the `--comparison` parameter (e.g., S2SvsS3, at least one comparison *has* to be selected) to identify genomic regions with significantly different accessibility patterns:
+The Differential Solubility Analysis has been developed to investigate differences in solubility patterns between experimental conditions and is enabled by setting the `--differential_solubility` parameter. This analysis uses the comparison tracks requested by the `--comparison` parameter (e.g., S2SvsS3, at least one comparison _has_ to be selected) to identify genomic regions with significantly different accessibility patterns:
 
 The `--compare_groups` parameter specifies which sample groups (defined in the `sample_group` column of the samplesheet) to compare for differential analysis. In the format "GroupBvsGroupA", GroupA serves as the reference group against which GroupB is compared.
 

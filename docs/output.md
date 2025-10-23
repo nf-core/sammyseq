@@ -194,7 +194,7 @@ Alternatively, `--comparison_maker bigwigcompare` uses [deepTools](https://deept
 
 ### Differential Solubility Analysis
 
-When the `--differential_solubility` parameter is enabled, the pipeline performs a differential solubility analysis between two sample groups. For each sample associated to the specified groups, the comparison tracks requested with the `--comparison` parameter (e.g., S2SvsS3, at least one comparison *has* to be selected) are used to identify genomic regions with significantly different solubility patterns between the groups. So the relevant parameters are:
+When the `--differential_solubility` parameter is enabled, the pipeline performs a differential solubility analysis between two sample groups. For each sample associated to the specified groups, the comparison tracks requested with the `--comparison` parameter (e.g., S2SvsS3, at least one comparison _has_ to be selected) are used to identify genomic regions with significantly different solubility patterns between the groups. So the relevant parameters are:
 
 - `--compare_groups`: specifies which sample groups to compare (format: "GroupAvsGroupB" or "GroupAvsGroupB,GroupAvsGroupC") and they must be present in the `sample_group` column of the input samplesheet
 - `--comparison`: the ratios used for analysis (e.g., "S2SvsS3")
