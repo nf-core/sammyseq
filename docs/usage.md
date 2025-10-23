@@ -106,7 +106,7 @@ The `spp` method (default) smooths fraction read density profiles using a Gaussi
 --comparison_maker spp
 ```
 
-The `bigwigcompare` method partitions the genome into bins of equal size, counts reads per bin, and calculates the log2 ratio between samples. This method is required for paired-end data as `spp` does not support this data type.
+The `bigwigcompare` method partitions the genome into bins of equal size defined by the `--bw_resolution` parameter (defaults to 1bp), counts reads per bin, and calculates the log2 ratio between samples (other operations can be selected by changing the `--bigwigcompare_operation` parameter, please see [the software documentation](https://deeptools.readthedocs.io/en/latest/content/tools/bigwigCompare.html)). This method is required for paired-end data as `spp` does not support this data type.
 
 ```
 --comparison_maker bigwigcompare
@@ -157,7 +157,7 @@ It can contain any combination of sample identifiers, they have to correspond to
 
 ### Differential Solubility Analysis
 
-For advanced analysis comparing solubility patterns between experimental conditions, `--differential_solubility` enable differential solubility analysis. This analysis uses the generated comparison data to identify genomic regions with significantly different accessibility patterns:
+The Differential Solubility Analysis has been developed to investigate differences in solubility patterns between experimental conditions and is enabled by setting the `--differential_solubility` parameter. This analysis uses the comparison tracks requested by the `--comparison` parameter (e.g., S2SvsS3, at least one comparison *has* to be selected) to identify genomic regions with significantly different accessibility patterns:
 
 The `--compare_groups` parameter specifies which sample groups (defined in the `sample_group` column of the samplesheet) to compare for differential analysis. In the format "GroupBvsGroupA", GroupA serves as the reference group against which GroupB is compared.
 
