@@ -35,7 +35,7 @@ include { PREPARE_GENOME                      } from '../subworkflows/local/prep
 include { GENOME_BINNING                      } from '../subworkflows/local/genome_binning'
 include { CAT_FRACTIONS                       } from '../subworkflows/local/cat_fractions'
 include { FILTER_BAM_SAMTOOLS                 } from '../subworkflows/local/filter_bam_samtools'
-include { BIGWIG_PLOT_DEEPTOOLS               } from '../subworkflows/local/bigwig_plot_deeptools'
+include { BIGWIG_PLOT_DEEPTOOLS               } from '../subworkflows/local/bigwig_plot_deeptools/main'
 include { DEEPTOOLS_QC                        } from '../subworkflows/local/deeptools_qc'
 include { GENERATE_COMPARISONS                } from '../subworkflows/local/generate_comparisons'
 include { DIFFERENTIAL_SOLUBILITY_ANALYSIS    } from '../subworkflows/local/differential_solubility_analysis'
