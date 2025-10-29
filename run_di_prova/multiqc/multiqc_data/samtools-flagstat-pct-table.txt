@@ -1,4 +1,0 @@
-Sample	Total Reads	Total Passed QC	Mapped	Duplicates	Paired in Sequencing	Properly Paired	Self and mate mapped	Singletons	Mate mapped to diff chr	Diff chr (mapQ >= 5)
-CTRL004_S2	100.0	100.0	100.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0
-CTRL004_S3	100.0	100.0	100.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0
-CTRL004_S4	100.0	100.0	100.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0

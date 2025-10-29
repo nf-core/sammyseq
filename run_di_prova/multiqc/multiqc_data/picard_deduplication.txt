@@ -1,4 +1,0 @@
-Sample	Unique Unpaired	Duplicate Unpaired	Unmapped
-CTRL004_S2	309790.0	5524.0	41.0
-CTRL004_S3	242248.0	3924.0	41.0
-CTRL004_S4	195160.0	3569.0	28.0
