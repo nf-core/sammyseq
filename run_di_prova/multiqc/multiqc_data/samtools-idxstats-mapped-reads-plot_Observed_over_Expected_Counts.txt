@@ -1,0 +1,4 @@
+Sample	0
+CTRL004_S2	('chr22', 1.0)
+CTRL004_S3	('chr22', 1.0)
+CTRL004_S4	('chr22', 1.0)

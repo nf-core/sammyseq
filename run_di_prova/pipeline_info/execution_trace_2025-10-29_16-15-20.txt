@@ -1,0 +1,3 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+9	12/08efab	813584	NFCORE_SAMMYSEQ:SAMMYSEQ:FASTQC (CTRL004_S4)	FAILED	127	2025-10-29 16:15:58.279	454ms	409ms	-	-	-	-	-
+8	a9/395d01	813656	NFCORE_SAMMYSEQ:SAMMYSEQ:TRIMGALORE (CTRL004_S4)	FAILED	127	2025-10-29 16:15:58.782	344ms	267ms	-	-	-	-	-

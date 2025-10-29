@@ -11,7 +11,7 @@ include {
 include {
     UNTAR as UNTAR_BWA_INDEX
     UNTAR as UNTAR_BOWTIE2_INDEX
-    } from '../../modules/nf-core/untar/main'
+    } from '../../../modules/nf-core/untar/main'
 
 
 include { UNTARFILES               } from '../../../modules/nf-core/untarfiles/main'

@@ -1,0 +1,4 @@
+Sample	Total sequences	Mapped &amp; paired	Properly paired	Duplicated	QC Failed	Reads MQ0	Mapped bases (CIGAR)	Bases Trimmed	Duplicated bases	Diff chromosomes	Other orientation	Inward pairs	Outward pairs
+CTRL004_S2	0.308994	0.0	0.0	0.0	0.0	0.0	15.266808999999999	0.0	0.0	0.0	0.0	0.0	0.0
+CTRL004_S3	0.241756	0.0	0.0	0.0	0.0	0.0	11.944898	0.0	0.0	0.0	0.0	0.0	0.0
+CTRL004_S4	0.194745	0.0	0.0	0.0	0.0	0.0	9.622118	0.0	0.0	0.0	0.0	0.0	0.0

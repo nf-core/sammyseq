@@ -1,0 +1,38 @@
+BWAMEM1_MEM:
+  bwa: 0.7.18-r1243-dirty
+  samtools: 1.21
+BWA_INDEX:
+  bwa: 0.7.18-r1243-dirty
+DEEPTOOLS_BAMCOVERAGE:
+  deeptools: 3.5.5
+DEEPTOOLS_MULTIBIGWIGSUMMARY:
+  deeptools: 3.5.6
+DEEPTOOLS_PLOTCORRELATION:
+  deeptools: 3.5.5
+DEEPTOOLS_PLOTPCA:
+  deeptools: 3.5.5
+FASTQC:
+  fastqc: 0.12.1
+GENOME_BLACKLIST_REGIONS:
+  bedtools: 2.30.0
+PICARD_MARKDUPLICATES:
+  picard: 3.3.0
+SAMTOOLS_FAIDX_CHROM_SIZES:
+  samtools: 1.21
+SAMTOOLS_FAIDX_FAI:
+  samtools: 1.21
+SAMTOOLS_FLAGSTAT:
+  samtools: 1.21
+SAMTOOLS_IDXSTATS:
+  samtools: 1.21
+SAMTOOLS_INDEX:
+  samtools: 1.21
+SAMTOOLS_STATS:
+  samtools: 1.21
+TRIMGALORE:
+  trimgalore: 0.6.10
+  cutadapt: 4.9
+  pigz: 2.8
+Workflow:
+    nf-core/sammyseq: v1.0dev
+    Nextflow: 25.10.0

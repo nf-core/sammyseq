@@ -1,0 +1,7 @@
+Sample	fastqc-percent_duplicates	fastqc-percent_gc	fastqc-avg_sequence_length	fastqc-median_sequence_length	fastqc-percent_fails	fastqc-total_sequences	picard_mark_duplicates-PERCENT_DUPLICATION	samtools_stats-error_rate	samtools_stats-non_primary_alignments	samtools_stats-reads_mapped	samtools_stats-reads_mapped_percent	samtools_stats-reads_properly_paired_percent	samtools_stats-reads_MQ0_percent	samtools_stats-raw_total_sequences	samtools_stats-insert_size_average	samtools_flagstat-flagstat_total	samtools_flagstat-mapped_passed	samtools_flagstat-mapped_passed_pct
+CTRL004_S2	0.9948533010982601	47.0	50.0	50	0.0	0.316449	1.7519	0.15686319999999998	0.0	0.308994	100.0	0.0	0.0	0.308994	0.0	0.308994	0.308994	100.0
+CTRL004_S2_trim	0.9568131373360558	47.0	49.40935136592095	50	9.090909090909092	0.315355												
+CTRL004_S3	0.9878953462496298	47.0	50.0	50	0.0	0.247105	1.5939999999999999	0.1561085	0.0	0.241756	100.0	0.0	0.0	0.241756	0.0	0.241756	0.241756	100.0
+CTRL004_S3_trim	0.9491198339646161	47.0	49.407423653503265	50	9.090909090909092	0.246213												
+CTRL004_S4	2.1972834591429375	46.0	50.0	50	0.0	0.19946899999999998	1.7958999999999998	0.160183	0.0	0.194745	100.0	0.0	0.0	0.194745	0.0	0.194745	0.194745	100.0
+CTRL004_S4_trim	2.0945432566037425	46.0	49.407150439984505	50	9.090909090909092	0.198757												
