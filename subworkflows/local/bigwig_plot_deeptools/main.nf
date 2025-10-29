@@ -1,11 +1,7 @@
-//
-// Create coverage matrices, plot coverage profiles and heatmap with deepTools
-//
-
-include { DEEPTOOLS_PLOTPROFILE } from '../../modules/nf-core/deeptools/plotprofile/main'
+include { DEEPTOOLS_PLOTPROFILE } from '../../../modules/nf-core/deeptools/plotprofile/main'
 //include { DEEPTOOLS_PLOTHEATMAP } from '../../modules/nf-core/deeptools/plotheatmap/main'
 //include { DEEPTOOLS_COMPUTEMATRIX as DEEPTOOLS_COMPUTEMATRIX_SCALE_REGIONS   } from '../../modules/nf-core/deeptools/computematrix/main'
-include { DEEPTOOLS_COMPUTEMATRIX as DEEPTOOLS_COMPUTEMATRIX_REFERENCE_POINT } from '../../modules/nf-core/deeptools/computematrix/main'
+include { DEEPTOOLS_COMPUTEMATRIX as DEEPTOOLS_COMPUTEMATRIX_REFERENCE_POINT } from '../../../modules/nf-core/deeptools/computematrix/main'
 
 workflow BIGWIG_PLOT_DEEPTOOLS {
     take:

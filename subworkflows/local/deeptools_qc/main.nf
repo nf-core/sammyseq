@@ -1,12 +1,8 @@
-/*
- * Perform full suite of deep tools analysis on bam/bigwig files
- */
-
-include { DEEPTOOLS_MULTIBIGWIGSUMMARY } from '../../modules/nf-core/deeptools/multibigwigsummary/main'
-include { DEEPTOOLS_PLOTCORRELATION } from '../../modules/nf-core/deeptools/plotcorrelation/main'
-include { DEEPTOOLS_PLOTPCA         } from '../../modules/nf-core/deeptools/plotpca/main'
-include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_GLOBAL } from '../../modules/nf-core/deeptools/plotfingerprint/main'
-include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_REGION } from '../../modules/nf-core/deeptools/plotfingerprint/main'
+include { DEEPTOOLS_MULTIBIGWIGSUMMARY } from '../../../modules/nf-core/deeptools/multibigwigsummary/main'
+include { DEEPTOOLS_PLOTCORRELATION } from '../../../modules/nf-core/deeptools/plotcorrelation/main'
+include { DEEPTOOLS_PLOTPCA         } from '../../../modules/nf-core/deeptools/plotpca/main'
+include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_GLOBAL } from '../../../modules/nf-core/deeptools/plotfingerprint/main'
+include { DEEPTOOLS_PLOTFINGERPRINT as DEEPTOOLS_PLOTFINGERPRINT_REGION } from '../../../modules/nf-core/deeptools/plotfingerprint/main'
 
 workflow DEEPTOOLS_QC {
     take:

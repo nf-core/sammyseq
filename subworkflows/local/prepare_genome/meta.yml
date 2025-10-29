@@ -1,0 +1,147 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: prepare_genome
+description: Uncompress and prepare reference genome files
+keywords:
+  - gunzip
+  - compression
+  - decompression
+components:
+  - gunzip
+  - untar
+  - untarfiles
+  - gffread
+  - samtools/faidx'
+  - bwa/index'
+  - bowtie2/build'
+  - bedtools/makewindows'
+  - genome_blacklist_regions'
+input:
+  - fasta:
+      type: file
+      description: |
+        Input genome fasta file
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fasta,fa}"
+  - aligner:
+      type: string
+      description: |
+        Aligner name string input
+      pattern: "{bowtie2,bwamem,bwamem}"
+  - gtf:
+      type: file
+      description: |
+        GTF annotation file, can be inputted as compressed
+        Structure: [ val(meta), path(gtf) ]
+      pattern: "*.{gtf,gtf.gz}"
+  - tss_bed:
+      type: file
+      description: |
+        transcription start sites BED file, can be inputted as compressed
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*.{bed,bed.gz}"
+  - blacklist:
+      type: file
+      description: |
+        optional BED/GTF file containing regions to exclude, can be inputted as compressed
+        Structure: [ val(meta), path(blacklist) ]
+      pattern: "*.{bed,gtf}"
+  - gene_bed:
+      type: file
+      description: |
+        BED annotation file
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*.{bed}"
+  - bwa_index:
+      type: file
+      description: |
+        BWA index file
+        Structure: [ val(meta), path(bai) ]
+      pattern: "*.{bai}"
+  - bowtie2_index:
+      type: file
+      description: |
+        Bowtie2 genome index file
+        Structure: [ val(meta), path(bt2) ]
+      pattern: "*.{bt2}"
+  - chrom_sizes:
+      type: file
+      description: |
+        File containing chromosome lengths
+        Structure: [ val(meta), path(chrom_sizes) ]
+      pattern: "*.{sizes}"
+  - fai:
+      type: file
+      description: |
+        FASTA index file
+        Structure: [ val(meta), path(fai) ]
+      pattern: "*.{fai}"
+  - binsize:
+      type: string
+      description: |
+        binsize parameter string
+output:
+  - fasta:
+      type: file
+      description: |
+        FASTA genome file
+        Structure: [ val(meta), path(fasta) ]
+      pattern: "*.{fasta,fa}"
+  - fai:
+      type: file
+      description: |
+        FASTA index file
+        Structure: [ val(meta), path(fai) ]
+      pattern: "*.{fai}"
+  - gtf:
+      type: file
+      description: |
+        description: GTF file resulting from the conversion of the GFF input file if '-T' argument is present
+        Structure: [ val(meta), path(gtf) ]
+      pattern: "*.{gtf}"
+  - tss_bed:
+      type: file
+      description: |
+        BED annotation file, can be inputted as compressed
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*.{bed,bed.gz}"
+  - chrom_sizes:
+      type: file
+      description: |
+        File containing chromosome lengths
+        Structure: [ val(meta), path(chrom_sizes) ]
+      pattern: "*.{sizes}"
+  - filtered_bed:
+      type: file
+      description: |
+        BED annotations file with excluded blacklist portions
+        Structure: [ val(meta), path(filtered_bed) ]
+      pattern: "*.{.include_regions.bed}"
+  - bwa_index:
+      type: file
+      description: |
+        BWA index file
+        Structure: [ val(meta), path(bai) ]
+      pattern: "*.{bai}"
+  - bowtie2_index:
+      type: file
+      description: |
+        Bowtie2 genome index file
+        Structure: [ val(meta), path(bt2) ]
+      pattern: "*.{bt2}"
+  - blacklist:
+      type: file
+      description: |
+        optional BED/GTF file containing regions to exclude, can be inputted as compressed
+        Structure: [ val(meta), path(blacklist) ]
+      pattern: "*.{bed,gtf}"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ugoiannacchero"
+  - "@nadiaxaidan"
+maintainers:
+  - "@daisymut"

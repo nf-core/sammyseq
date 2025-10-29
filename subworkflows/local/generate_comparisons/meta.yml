@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "generate_comparisons"
+description: Subworkflow to generate pairwise comparisons and run comparison analysis
+keywords:
+  - comparisons
+  - bam
+  - spp
+  - bigwig
+components:
+  - rtwosamplesmle
+  - deeptools/deeptools_bigwigcompare
+input:
+  - ch_input:
+      type: file
+      description: |
+        the input channel containing bam or bigWig input file
+        Structure: [ val(meta), path(bam || bigwig) ]
+      pattern: "*.{bam,bigWig}"
+  - ch_samplesheet:
+      type: file
+      description: |
+        the channel containing samplesheet data for comparison string approach
+        Structure: [ val(meta), path(fastqs) ]
+      pattern: "*.{csv}"
+  - chrom_sizes:
+      type: file
+      description: |
+        File containing chromosome lengths (only for MLE)
+        Structure: [ val(meta), path(chrom_sizes) ]
+      pattern: "*.{sizes}"
+  - module_name:
+      type: string
+      description: |
+        string input for choosing comparison module
+      pattern: "{spp,bigwigcompare}"
+output:
+  - results:
+      type: file
+      description: |
+        bigWig file with comparison results, its name reflects the chosen module
+        Structure: [ val(meta), (bigwig) ]
+      pattern: "*.{_mle.bigWig,bigWig}"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ugoiannacchero"
+  - "@nadiaxaidan"
+maintainers:
+  - "@daisymut"

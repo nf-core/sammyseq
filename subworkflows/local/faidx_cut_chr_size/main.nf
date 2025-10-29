@@ -1,5 +1,5 @@
 // Import SAMTOOLS_FAIDX module
-include { SAMTOOLS_FAIDX } from '../modules/nf-core/samtools/faidx'
+include { SAMTOOLS_FAIDX } from '../../modules/nf-core/samtools/faidx'
 
 // Definition of the CUT_SIZES_GENOME process
 process CUT_SIZES_GENOME {

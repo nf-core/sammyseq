@@ -1,18 +1,13 @@
-//
-// Subworkflow to generate pairwise comparisons and
-// run RTWOSAMPLESMLE analysis or DEEPTOOLS_BIGWIGCOMPARE analysis
-//
-
-include { RTWOSAMPLESMLE }          from '../../modules/local/rtwosamplesmle/main'
-include { DEEPTOOLS_BIGWIGCOMPARE } from '../../modules/nf-core/deeptools/bigwigcompare'
+include { RTWOSAMPLESMLE }          from '../../../modules/local/rtwosamplesmle/main'
+include { DEEPTOOLS_BIGWIGCOMPARE } from '../../../modules/nf-core/deeptools/bigwigcompare'
 
 workflow GENERATE_COMPARISONS {
 
     take:
-    ch_input            // channel: [meta, bam|bigwig]
+    ch_input            // channel: [meta, bam || bigwig]
     ch_samplesheet      // channel: samplesheet data for comparison string approach
     chrom_sizes         // path:    chromosome sizes file (only for MLE)
-    module_name         // string:  'spp' o 'bigwigcompare'
+    module_name         // string:  'spp' or 'bigwigcompare'
 
     main:
     ch_comparison_results = Channel.empty()
