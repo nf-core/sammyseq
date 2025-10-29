@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: bigwig_plot_deeptools
+description: Create coverage matrices, plot coverage profiles and heatmap with deepTools
+keywords:
+  - genome
+  - plot
+  - profile
+  - matrix
+components:
+  - deeptools/plotprofile
+  - deeptools/computermatrix
+input:
+  - ch_tss_bed:
+      description: |
+        BED file containing genomic regions
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*.{bed}"
+  - ch_bigwig:
+      description: |
+        bigwig file containing genomic scores
+        Structure: [ val(meta), path(bigwig) ]
+      pattern: "*.{bigWig,bw,bigwig}"
+output:
+  - reference_point_matrix:
+      description: |
+        gzipped matrix file needed by the plotHeatmap and plotProfile
+        deeptools utilities
+        Structure: [ val(meta), path(matrix) ]
+      pattern: "*.{computeMatrix.mat.gz}"
+  - reference_point_table:
+      description: |
+        Tabular file containing the scores of the generated matrix
+        Structure: [ val(meta), path(table) ]
+      pattern: "*.{computeMatrix.vals.mat.tab}"
+  - plotprofile_pdf:
+      description: |
+        Output figure containing resulting plot
+        Structure: [ val(meta), path(pdf) ]
+      pattern: "*.{plotProfile.pdf}"
+  - plotprofile_table:
+      description: |
+        Groovy Map containing sample information
+        Structure: [ val(meta), path(table) ]
+      pattern: "*.tab"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ugoiannacchero"
+  - "@nadiaxaidan"
+maintainers:
+  - "@daisymut"
