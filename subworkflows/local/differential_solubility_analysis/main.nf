@@ -1,4 +1,4 @@
-include { DIFFERENTIAL_ENRICHMENT } from '../../modules/local/differential_enrichment/main'
+include { DIFFERENTIAL_ENRICHMENT } from '../../../modules/local/differential_enrichment/main'
 
 workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {
 

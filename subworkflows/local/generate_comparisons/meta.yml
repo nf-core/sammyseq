@@ -2,10 +2,11 @@
 name: "generate_comparisons"
 description: Subworkflow to generate pairwise comparisons and run comparison analysis
 keywords:
-  - comparisons
+  - comparison
   - bam
   - spp
   - bigwig
+  - fraction
 components:
   - rtwosamplesmle
   - deeptools/deeptools_bigwigcompare
@@ -32,6 +33,7 @@ input:
       type: string
       description: |
         string input for choosing comparison module
+        Structure: [ val(string) ]
       pattern: "{spp,bigwigcompare}"
 output:
   - results:

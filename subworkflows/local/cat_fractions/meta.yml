@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: cat_fractions
-description:
+description: Combine fractions by experimentalID
 keywords:
   - cat
   - fastq

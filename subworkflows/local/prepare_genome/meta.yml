@@ -26,6 +26,7 @@ input:
       type: string
       description: |
         Aligner name string input
+        Structure: [ val(string) ]
       pattern: "{bowtie2,bwamem,bwamem}"
   - gtf:
       type: file
@@ -76,9 +77,10 @@ input:
         Structure: [ val(meta), path(fai) ]
       pattern: "*.{fai}"
   - binsize:
-      type: string
+      type: integer
       description: |
-        binsize parameter string
+        binsize parameter integer number
+        Structure: [ val(integer) ]
 output:
   - fasta:
       type: file
