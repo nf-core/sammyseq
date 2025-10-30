@@ -10,47 +10,47 @@ keywords:
 components:
   - differential_enrichment
 input:
-  - mle_results_channel: 
+  - mle_results_channel:
       type:
       description: |
         the channel containing the spp comparison bigWig output
         Structure: [ val(meta), path(bigWig) ]
       pattern: "*.{_mle.bigWig}"
-  - outdir: 
+  - outdir:
       type: string
       description: |
         user-specified output directory string
         Structure: [ val(string) ]
-  - genome_bins: 
+  - genome_bins:
       type: file
       description: |
         BED annotation file
         Structure: [ path(genome_bins) ]
       pattern: "*.{bed}"
-  - gtf: 
+  - gtf:
       type: file
       description: |
         GTF annotation file
         Structure: [ path(gtf) ]
       pattern: "*.{gtf}"
-  - binsize: 
+  - binsize:
       type: integer
       description: |
         binsize parameter integer number
         Structure: [ val(integer) ]
-  - comparison: 
+  - comparison:
       type: string
       description: |
-        specifies which chromatin fractions to compare, can be multiple 
+        specifies which chromatin fractions to compare, can be multiple
         Structure: [ val(string) ]
       pattern: "{S2SvsS3,S2SvsS4}"
-  - solubility_threshold: 
+  - solubility_threshold:
       type: number
       description: |
         Minimum signal threshold for bin selection in differential solubility analysis
         Structure: [ val(meta) ]
       pattern: "{0.1}"
-  - compare_groups: 
+  - compare_groups:
       type: string
       description: |
         specifies which sample groups to compare, can be multiple
@@ -66,7 +66,7 @@ output:
   - selected_bins:
       type: file
       description: |
-        table containing bins with significantly different solubility patterns 
+        table containing bins with significantly different solubility patterns
         Structure: [ val(meta), path(csv) ]
       pattern: "*.{csv}"
   - selected_bins_rds:
