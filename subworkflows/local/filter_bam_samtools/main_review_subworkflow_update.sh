@@ -8,11 +8,11 @@ cd /Users/daisy/home/sviluppo/hackathon-oct-2025/sammyseq
 
 git checkout rustem_fixes
 git checkout add_compartments
-git checkout subworkflow_update 
+git checkout subworkflow_update
 
 
 cd /Users/daisy/home/sviluppo/hackathon-oct-2025
-nextflow run sammyseq -profile test --outdir test_before_commit 
+nextflow run sammyseq -profile test --outdir test_before_commit
 rsync -av sammyseq mmutarelli@nvidia.hpc.isasi.:sviluppo/
 
 cd /Users/daisy/home/sviluppo/hackathon-oct-2025/sammyseq
