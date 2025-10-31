@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "differential_solubility_analysis"
+description: Identify differentially enriched solubility regions
+keywords:
+  - solubility
+  - bigwig
+  - group
+  - differential
+  - fractions
+components:
+  - differential_enrichment
+input:
+  - mle_results_channel:
+      type:
+      description: |
+        the channel containing the spp comparison bigWig output
+        Structure: [ val(meta), path(bigWig) ]
+      pattern: "*.{_mle.bigWig}"
+  - outdir:
+      type: string
+      description: |
+        user-specified output directory string
+        Structure: [ val(string) ]
+  - genome_bins:
+      type: file
+      description: |
+        BED annotation file
+        Structure: [ path(genome_bins) ]
+      pattern: "*.{bed}"
+  - gtf:
+      type: file
+      description: |
+        GTF annotation file
+        Structure: [ path(gtf) ]
+      pattern: "*.{gtf}"
+  - binsize:
+      type: integer
+      description: |
+        binsize parameter integer number
+        Structure: [ val(integer) ]
+  - comparison:
+      type: string
+      description: |
+        specifies which chromatin fractions to compare, can be multiple
+        Structure: [ val(string) ]
+      pattern: "{S2SvsS3,S2SvsS4}"
+  - solubility_threshold:
+      type: number
+      description: |
+        Minimum signal threshold for bin selection in differential solubility analysis
+        Structure: [ val(meta) ]
+      pattern: "{0.1}"
+  - compare_groups:
+      type: string
+      description: |
+        specifies which sample groups to compare, can be multiple
+        Structure: [ val(string) ]
+      pattern: "{GroupBvsGroupA,GroupCvsGroupA}"
+output:
+  - all_bins:
+      type: file
+      description: |
+        table containing all bins
+        Structure: [ val(meta), path(csv) ]
+      pattern: "*.{csv}"
+  - selected_bins:
+      type: file
+      description: |
+        table containing bins with significantly different solubility patterns
+        Structure: [ val(meta), path(csv) ]
+      pattern: "*.{csv}"
+  - selected_bins_rds:
+      type: file
+      description: |
+        file containing analysis result in rds format
+        Structure: [ val(meta), path(rds) ]
+      pattern: "*.{rds}"
+  - bed_regions:
+      type: file
+      description: |
+        BED file containing the selected bins coordinates
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*.{bed}"
+  - gene_lists:
+      type: file
+      description: |
+        list of genes whose promoters fall within the selected bins
+        Structure: [ val(meta), path(txt) ]
+      pattern: "*.{.txt}"
+  - report:
+      type: file
+      description: |
+        summary containing the total number of selected regions
+        Structure: [ val(meta), path(txt) ]
+      pattern: "*.{.txt}"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ugoiannacchero"
+  - "@nadiaxaidan"
+maintainers:
+  - "@daisymut"

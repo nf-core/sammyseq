@@ -10,22 +10,20 @@ include {
     GUNZIP as GUNZIP_GENE_BED
     GUNZIP as GUNZIP_CHROM_SIZES
     GUNZIP as GUNZIP_FAI
-    GUNZIP as GUNZIP_BLACKLIST } from '../../modules/nf-core/gunzip/main'
+    GUNZIP as GUNZIP_BLACKLIST
+    } from '../../../modules/nf-core/gunzip/main'
 
 include {
     UNTAR as UNTAR_BWA_INDEX
     UNTAR as UNTAR_BOWTIE2_INDEX
-    } from '../../modules/nf-core/untar/main'
+    } from '../../../modules/nf-core/untar/main'
 
 
-include { UNTARFILES               } from '../../modules/nf-core/untarfiles/main'
-include { GFFREAD                  } from '../../modules/nf-core/gffread/main'
-include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_CHROM_SIZES } from '../../modules/nf-core/samtools/faidx/main'
-include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_FAI         } from '../../modules/nf-core/samtools/faidx/main'
-include { BWA_INDEX                } from '../../modules/nf-core/bwa/index/main'
-include { BOWTIE2_BUILD            } from '../../modules/nf-core/bowtie2/build/main'
-include { BEDTOOLS_MAKEWINDOWS     } from '../../modules/nf-core/bedtools/makewindows/main'
-include { GENOME_BLACKLIST_REGIONS } from '../../modules/local/genome_blacklist_regions'
+include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_CHROM_SIZES } from '../../../modules/nf-core/samtools/faidx/main'
+include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_FAI         } from '../../../modules/nf-core/samtools/faidx/main'
+include { BWA_INDEX                                    } from '../../../modules/nf-core/bwa/index/main'
+include { BOWTIE2_BUILD                                } from '../../../modules/nf-core/bowtie2/build/main'
+include { GENOME_BLACKLIST_REGIONS                     } from '../../../modules/local/genome_blacklist_regions'
 
 workflow PREPARE_GENOME {
 
@@ -46,7 +44,6 @@ workflow PREPARE_GENOME {
     binsize            //    binsize: genome binning
 
     main:
-
     ch_versions = Channel.empty()
 
     //

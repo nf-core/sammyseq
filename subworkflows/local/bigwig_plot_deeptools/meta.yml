@@ -2,17 +2,18 @@
 name: bigwig_plot_deeptools
 description: Create coverage matrices, plot coverage profiles and heatmap with deepTools
 keywords:
+  - deeptools
   - genome
   - plot
   - profile
   - matrix
 components:
+  - deeptools/computematrix
   - deeptools/plotprofile
-  - deeptools/computermatrix
 input:
   - ch_tss_bed:
       description: |
-        BED file containing genomic regions
+        BED file containing genomic regions flanking TSS of genes
         Structure: [ val(meta), path(bed) ]
       pattern: "*.{bed}"
   - ch_bigwig:

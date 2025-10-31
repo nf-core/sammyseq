@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: filter_bam_samtools
+description: Filter co-ordinate sorted BAM, index and run samtools stats, flagstat and idxstats
+keywords:
+  - samtools
+  - view
+  - index
+  - statistics
+  - bam
+components:
+  - samtools/view
+  - samtools/index
+  - bam_stats_samtools
+input:
+  - fasta:
+    type: file
+    description: |
+      Reference genome fasta file
+      Structure: [ path(fasta) ]
+    pattern: "*.{fasta,fa}"
+  - bam_bai:
+      description: |
+        input channel containing the BAM and its index
+        Structure: [ val(meta), path(bam), path(bai) ]
+output:
+  - bam:
+      type: file
+      description: |
+        filtered/converted BAM file
+        Structure: [ val(meta), path(bam) ]
+      pattern: "*.{bam}"
+  - bai:
+      type: file
+      description: |
+        BAM index file
+        Structure: [ val(meta), path(bai) ]
+      pattern: "*.{bai}"
+  - stats:
+      type: file
+      description: |
+        File containing samtools stats output
+        Structure: [ val(meta), path(stats) ]
+      pattern: "*.{stats}"
+  - flagstat:
+      type: file
+      description: |
+        File containing samtools flagstat output
+        Structure: [ val(meta), path(flagstat) ]
+      pattern: "*.{flagstat}"
+  - idxstats:
+      type: file
+      description: |
+        File containing samtools idxstats output
+        Structure: [ val(meta), path(idxstats) ]
+      pattern: "*.{idxstats}"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ugoiannacchero"
+  - "@nadiaxaidan"
+maintainers:
+  - "@daisymut"
