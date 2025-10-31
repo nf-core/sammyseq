@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: deeptools_qc
-description: Perform full suite of deep tools analysis on bam/bigwig files
+description: Perform correlation analysis on single tracks bigwig files and optional fingerprint analysis on bam files
 keywords:
   - deeptools
   - bam
@@ -56,7 +56,7 @@ output:
   - pca_data:
       type: file
       description: |
-        Tab file containing data used to generate the PCA plot
+        Tab-separated file containing data used to generate the PCA plot
         Structure: [ val(meta), path(pca_data) ]
       pattern: "*.{plotPCA.tab}"
   - fingerprint_matrix_global:

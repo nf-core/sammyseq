@@ -1,3 +1,7 @@
+//
+// Filter co-ordinate sorted BAM, index and run samtools stats, flagstat and idxstats
+//
+
 include { SAMTOOLS_VIEW      } from '../../../modules/nf-core/samtools/view/main'
 include { SAMTOOLS_INDEX     } from '../../../modules/nf-core/samtools/index/main'
 include { BAM_STATS_SAMTOOLS } from '../../nf-core/bam_stats_samtools/main'
@@ -8,7 +12,6 @@ workflow FILTER_BAM_SAMTOOLS {
     fasta   // path   : fasta
 
     main:
-
     ch_versions = Channel.empty()
 
     //
@@ -20,7 +23,6 @@ workflow FILTER_BAM_SAMTOOLS {
         [],
         bam_bai.map { it[2].getName().tokenize('.')[-1] }
     )
-
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
 
     //

@@ -1,3 +1,7 @@
+//
+// Identify differentially enriched solubility regions
+//
+
 include { DIFFERENTIAL_ENRICHMENT } from '../../../modules/local/differential_enrichment/main'
 
 workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {

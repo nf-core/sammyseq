@@ -2,7 +2,7 @@
 // Create coverage matrices, plot coverage profiles on genes TSS with deepTools
 //
 
-include { DEEPTOOLS_PLOTPROFILE } from '../../../modules/nf-core/deeptools/plotprofile/main'
+include { DEEPTOOLS_PLOTPROFILE                                              } from '../../../modules/nf-core/deeptools/plotprofile/main'
 include { DEEPTOOLS_COMPUTEMATRIX as DEEPTOOLS_COMPUTEMATRIX_REFERENCE_POINT } from '../../../modules/nf-core/deeptools/computematrix/main'
 
 workflow BIGWIG_PLOT_DEEPTOOLS {

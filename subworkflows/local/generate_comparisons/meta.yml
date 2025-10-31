@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: "generate_comparisons"
-description: Subworkflow to generate pairwise comparisons and run comparison analysis
+description: Subworkflow to generate pairwise comparisons between fractions
 keywords:
   - comparison
   - bam

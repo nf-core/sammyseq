@@ -1,5 +1,9 @@
-include { RTWOSAMPLESMLE }          from '../../../modules/local/rtwosamplesmle/main'
-include { DEEPTOOLS_BIGWIGCOMPARE } from '../../../modules/nf-core/deeptools/bigwigcompare'
+//
+// Subworkflow to generate pairwise comparisons between fractions
+//
+
+include { RTWOSAMPLESMLE          } from '../../../modules/local/rtwosamplesmle/main'
+include { DEEPTOOLS_BIGWIGCOMPARE } from '../../../modules/nf-core/deeptools/bigwigcompare/main'
 
 workflow GENERATE_COMPARISONS {
 

@@ -2,6 +2,7 @@
 name: filter_bam_samtools
 description: Filter co-ordinate sorted BAM, index and run samtools stats, flagstat and idxstats
 keywords:
+  - samtools
   - view
   - index
   - statistics

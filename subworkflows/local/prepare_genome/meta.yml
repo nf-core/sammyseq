@@ -2,6 +2,9 @@
 name: prepare_genome
 description: Uncompress and prepare reference genome files
 keywords:
+  - genome
+  - references
+  - aligner indexing
   - gunzip
   - compression
   - decompression
@@ -13,7 +16,6 @@ components:
   - samtools/faidx
   - bwa/index
   - bowtie2/build
-  - bedtools/makewindows
   - genome/blacklist/regions
 input:
   - fasta:
@@ -143,6 +145,7 @@ output:
         Structure: [ path(versions.yml) ]
       pattern: "versions.yml"
 authors:
+  - "@lucidif"
   - "@ugoiannacchero"
   - "@nadiaxaidan"
 maintainers:
