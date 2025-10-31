@@ -2,8 +2,11 @@
 name: deeptools_qc
 description: Perform full suite of deep tools analysis on bam/bigwig files
 keywords:
+  - deeptools
+  - bam
+  - bigwig
   - PCA
-  - corrrelation
+  - correlation
   - fingerprint
   - cumulative coverage
 ##  - plot

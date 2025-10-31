@@ -9,7 +9,7 @@ keywords:
 components:
   - samtools/faidx
 input:
-  fasta_file:
+  - fasta_file:
     type: path
     description: |
       Input FASTA file
@@ -27,6 +27,7 @@ output:
         Structure: [ path(versions.yml) ]
       pattern: "versions.yml"
 authors:
+  - "@lucidif"
   - "@nadiaxaidan"
 maintainers:
   - "@daisymut"

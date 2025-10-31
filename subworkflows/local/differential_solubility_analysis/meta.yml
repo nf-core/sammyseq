@@ -3,7 +3,7 @@ name: "differential_solubility_analysis"
 description: Identify differentially enriched solubility regions
 keywords:
   - solubility
-  - sample
+  - bigwig
   - group
   - differential
   - fractions

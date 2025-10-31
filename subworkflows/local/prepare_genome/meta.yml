@@ -10,11 +10,11 @@ components:
   - untar
   - untarfiles
   - gffread
-  - samtools/faidx'
-  - bwa/index'
-  - bowtie2/build'
-  - bedtools/makewindows'
-  - genome_blacklist_regions'
+  - samtools/faidx
+  - bwa/index
+  - bowtie2/build
+  - bedtools/makewindows
+  - genome/blacklist/regions
 input:
   - fasta:
       type: file
@@ -31,19 +31,19 @@ input:
   - gtf:
       type: file
       description: |
-        GTF annotation file, can be inputted as compressed
+        gene annotation GTF file, can be gzip-compressed
         Structure: [ val(meta), path(gtf) ]
       pattern: "*.{gtf,gtf.gz}"
   - tss_bed:
       type: file
       description: |
-        transcription start sites BED file, can be inputted as compressed
+        transcription start sites BED file, can be gzip-compressed
         Structure: [ val(meta), path(bed) ]
       pattern: "*.{bed,bed.gz}"
   - blacklist:
       type: file
       description: |
-        optional BED/GTF file containing regions to exclude, can be inputted as compressed
+        optional BED/GTF file containing regions to exclude, can be gzip-compressed
         Structure: [ val(meta), path(blacklist) ]
       pattern: "*.{bed,gtf}"
   - gene_bed:
@@ -103,7 +103,7 @@ output:
   - tss_bed:
       type: file
       description: |
-        BED annotation file, can be inputted as compressed
+        transcription start sites BED file
         Structure: [ val(meta), path(bed) ]
       pattern: "*.{bed,bed.gz}"
   - chrom_sizes:
@@ -133,7 +133,7 @@ output:
   - blacklist:
       type: file
       description: |
-        optional BED/GTF file containing regions to exclude, can be inputted as compressed
+        optional BED/GTF file containing regions to exclude
         Structure: [ val(meta), path(blacklist) ]
       pattern: "*.{bed,gtf}"
   - versions:

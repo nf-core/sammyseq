@@ -18,10 +18,9 @@ input:
       Structure: [ path(fasta) ]
     pattern: "*.{fasta,fa}"
   - bam_bai:
-    type: channel
-    description: |
-      input channel containing the BAM/CRAM and its index
-      Structure: [ val(meta), path(bam), path(bai) ]
+      description: |
+        input channel containing the BAM and its index
+        Structure: [ val(meta), path(bam), path(bai) ]
 output:
   - bam:
       type: file
