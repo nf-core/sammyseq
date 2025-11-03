@@ -8,10 +8,10 @@ keywords:
   - differential
   - fractions
 components:
-  - differential_enrichment
+  - differential/enrichment
 input:
   - mle_results_channel:
-      type:
+      type: file
       description: |
         the channel containing the spp comparison bigWig output
         Structure: [ val(meta), path(bigWig) ]

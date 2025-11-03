@@ -13,11 +13,11 @@ components:
   - bam_stats_samtools
 input:
   - fasta:
-    type: file
-    description: |
-      Reference genome fasta file
-      Structure: [ path(fasta) ]
-    pattern: "*.{fasta,fa}"
+      type: file
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+      pattern: "*.{fasta,fa}"
   - bam_bai:
       description: |
         input channel containing the BAM and its index

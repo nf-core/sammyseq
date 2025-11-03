@@ -23,7 +23,7 @@ include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_CHROM_SIZES } from '../../../modules/
 include { SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_FAI         } from '../../../modules/nf-core/samtools/faidx/main'
 include { BWA_INDEX                                    } from '../../../modules/nf-core/bwa/index/main'
 include { BOWTIE2_BUILD                                } from '../../../modules/nf-core/bowtie2/build/main'
-include { GENOME_BLACKLIST_REGIONS                     } from '../../../modules/local/genome_blacklist_regions'
+include { GENOME_BLACKLIST_REGIONS                     } from '../../../modules/local/genomeblacklistregions/main'
 
 workflow PREPARE_GENOME {
 
