@@ -20,9 +20,6 @@ process GENOME_BLACKLIST_REGIONS {
     path "versions.yml", emit: versions
 
     script:
-    def args = task.ext.args ?: ''
-    
-    script:
     def file_out = "${sizes.simpleName}.include_regions.bed"
     if (blacklist) {
         """
