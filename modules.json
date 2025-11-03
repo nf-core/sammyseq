@@ -138,7 +138,7 @@
                     },
                     "samtools/faidx": {
                         "branch": "master",
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
+                        "git_sha": "c8be52dba1166c678e74cda9c3a3c221635c8bb1",
                         "installed_by": ["modules"]
                     },
                     "samtools/flagstat": {
@@ -175,11 +175,6 @@
                         "branch": "master",
                         "git_sha": "9a2df1234c202637503b0a3626ad5d118fa6a7ef",
                         "installed_by": ["fastq_align_dna"]
-                    },
-                    "strobealign": {
-                        "branch": "master",
-                        "git_sha": "c698799db60819ff8769000e429defad1cb432af",
-                        "installed_by": ["modules"]
                     },
                     "trimgalore": {
                         "branch": "master",
