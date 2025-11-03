@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
 name: genome_binning
 description: Genome binning subworkflow with keep_regions handling
-keywords: 
+keywords:
   - bed
   - intersect
   - makewindows

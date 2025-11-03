@@ -30,7 +30,7 @@ output:
         type: file
         description: BED file containing the windows
         pattern: "*.bed"
-        ontologies: 
+        ontologies:
           - edam: http://edamontology.org/format_3003 # BED
   versions:
     - versions.yml:
