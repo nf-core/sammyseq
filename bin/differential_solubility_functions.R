@@ -289,8 +289,21 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
 
     # Select bins
     prvdf <- as.data.frame(new_selection)
-    # Out of range check
-    prvdftest <- prvdf[abs(prvdf[paste0(xgroup, "_mean")]) >= ths, ]
+    prvdf_gr <- makeGRangesFromDataFrame(prvdf, keep.extra.columns = TRUE)
+
+    cat("Calculating Cohen's d for ALL bins before filtering...\n")
+
+    # Calculate Cohen's d for all bins
+    all_bins_with_cohens <- func_ztest_gr_byrow(prvdf_gr,
+                                               x = x,
+                                               y = y,
+                                               cohenthresh = 0  # No filtering by Cohen's d here
+                                               )
+    cat("Cohen's d calculated for", length(all_bins_with_cohens), "bins\n")
+
+    prvdf_with_cohens <- as.data.frame(all_bins_with_cohens)
+    prvdftest <- prvdf_with_cohens[abs(prvdf_with_cohens[paste0(xgroup, "_mean")]) >= ths, ]
+    cat("After threshold filtering:", nrow(prvdftest), "bins remain\n")
 
     pprvlow <- prvdftest[paste0(y, "_shift")] == "lower"   # <-- cambiato da _ov_specs a _shift
     pprvhigh <- prvdftest[paste0(y, "_shift")] == "higher" # <-- cambiato da _ov_specs a _shift
@@ -317,21 +330,15 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     prvdftest_gr <- makeGRangesFromDataFrame(prvdftest, keep.extra.columns = TRUE)
 
     # Apply statistical testing
-    up_down_to_ztest_gr <- prvdftest_gr
-    up_down_to_ztest_grr <- func_ztest_gr_byrow(up_down_to_ztest_gr,
-                                            x = x,
-                                            y = y,
-                                            # correction_method = "BH",
-                                            cohenthresh = 3 # <-- Cohen's d filtering OFF
-                                            )
+    up_down_to_ztest_grr <- prvdftest_gr[abs(mcols(prvdftest_gr)$cohen.estimate) >= 3]
 
     cat("Statistical testing completed. Regions passing threshold:", length(up_down_to_ztest_grr), "\n")
 
-    # Separate bins according to meantosep (like your original code)
+    # Separate bins according to meantosep
     startmeanpos <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep >= 0]
     startmeanneg <- up_down_to_ztest_grr[up_down_to_ztest_grr$meantosep <= 0]
 
-    # Select coherent bins based on direction of change (using abs like your code)
+    # Select coherent bins based on direction of change
     ovvhighconservedpos <- startmeanpos[abs(startmeanpos$ovvhigh) > abs(startmeanpos$ovlow)]
     ovlowconservedpos <- startmeanpos[abs(startmeanpos$ovvhigh) < abs(startmeanpos$ovlow)]
     ovvhighconservedneg <- startmeanneg[abs(startmeanneg$ovvhigh) > abs(startmeanneg$ovlow)]
@@ -343,7 +350,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     ovvhighconservedneg$bintype <- rep(paste0(fraction2, "_up"), length(ovvhighconservedneg))
     ovlowconservedneg$bintype <- rep(paste0(fraction2, "_down"), length(ovlowconservedneg))
 
-    # Control groups (like your original code)
+    # Control groups
     controlstartmeanpos <- prvdftest_gr[prvdftest_gr$meantosep >= 0]
     controlstartmeanneg <- prvdftest_gr[prvdftest_gr$meantosep <= 0]
 
@@ -355,7 +362,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     controlstartmeanneg <- controlstartmeanneg[!controlstartmeanneg %in%
                                             c(ovvhighconservedneg, ovlowconservedneg)]
 
-    # All groups to return (like your original code)
+    # All groups to return 
     all_gr_toreturn <- c(ovvhighconservedpos,
                         ovlowconservedpos,
                         ovvhighconservedneg,
@@ -429,7 +436,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     x[[paste0(ygroup, "_genes_", xgroup)]] <- list_of_vector_geneNumber
     x[["genes"]] <- list_of_genes_vec
     x[[paste0(ygroup, "_gr_", xgroup)]] <- prvdftest_gr
-    x[[paste0(ygroup, "_allgr_", xgroup)]] <- all_gr_toreturn
+    x[[paste0(ygroup, "_allgr_", xgroup)]] <- all_bins_with_cohens  # IMPORTANTE: Tutti i bin con Cohen's d
 
     names(x) <- c(
         paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins"),
@@ -444,5 +451,6 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     )
 
     cat("Results:", paste0(names(x[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]), "_", length(x[[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]]), "_bins"), "\n")
+    cat("All bins with Cohen's d:", length(all_bins_with_cohens), "\n")
     return(x)
 }
