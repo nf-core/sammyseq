@@ -360,7 +360,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     controlstartmeanneg <- controlstartmeanneg[!controlstartmeanneg %in%
                                             c(ovvhighconservedneg, ovlowconservedneg)]
 
-    # All groups to return 
+    # All groups to return
     all_gr_toreturn <- c(ovvhighconservedpos,
                         ovlowconservedpos,
                         ovvhighconservedneg,
