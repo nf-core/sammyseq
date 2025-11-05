@@ -291,8 +291,6 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     prvdf <- as.data.frame(new_selection)
     prvdf_gr <- makeGRangesFromDataFrame(prvdf, keep.extra.columns = TRUE)
 
-    cat("Calculating Cohen's d for ALL bins before filtering...\n")
-
     # Calculate Cohen's d for all bins
     all_bins_with_cohens <- func_ztest_gr_byrow(prvdf_gr,
                                                x = x,
@@ -436,7 +434,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     x[[paste0(ygroup, "_genes_", xgroup)]] <- list_of_vector_geneNumber
     x[["genes"]] <- list_of_genes_vec
     x[[paste0(ygroup, "_gr_", xgroup)]] <- prvdftest_gr
-    x[[paste0(ygroup, "_allgr_", xgroup)]] <- all_bins_with_cohens  # IMPORTANTE: Tutti i bin con Cohen's d
+    x[[paste0(ygroup, "_allgr_", xgroup)]] <- all_bins_with_cohens
 
     names(x) <- c(
         paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins"),
@@ -451,6 +449,5 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     )
 
     cat("Results:", paste0(names(x[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]), "_", length(x[[paste0(ygroup, "_vs_", xgroup, "_all_shifting_bins")]]), "_bins"), "\n")
-    cat("All bins with Cohen's d:", length(all_bins_with_cohens), "\n")
     return(x)
 }
