@@ -1,8 +1,10 @@
-/*
- * Prepare genome intervals for filtering by removing regions in blacklist file
- */
+//
+// Prepare genome intervals for filtering by removing regions in blacklist file
+//
+
 process GENOME_BLACKLIST_REGIONS {
     tag "$sizes"
+    label 'process_low'
 
     conda "bioconda::bedtools=2.30.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?

@@ -14,13 +14,13 @@ process DIFFERENTIAL_ENRICHMENT {
     val(solubility_threshold)
 
     output:
-    tuple val(meta), path("*_all_bins_complete.csv"), emit: all_bins
-    tuple val(meta), path("*_selected_bins_filtered.csv"), emit: selected_bins
-    tuple val(meta), path("rdata/*.rds"), emit: selected_bins_rds
-    tuple val(meta), path("regions/*.bed"), emit: bed_regions
-    tuple val(meta), path("*_analysis_summary.txt"), emit: report
+    tuple val(meta), path("*_all_bins_complete.csv")          , emit: all_bins
+    tuple val(meta), path("*_selected_bins_filtered.csv")     , emit: selected_bins
+    tuple val(meta), path("rdata/*.rds")                      , emit: selected_bins_rds
+    tuple val(meta), path("regions/*.bed")                    , emit: bed_regions
+    tuple val(meta), path("*_analysis_summary.txt")           , emit: report
     tuple val(meta), path("genes/*_genes.txt"), optional: true, emit: gene_lists
-    path "versions.yml", emit: versions
+    path "versions.yml"                                       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when

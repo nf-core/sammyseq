@@ -9,9 +9,9 @@ components:
   - cat/fastq
 input:
   - starting_files:
-    type: file
-    description: |
-      List of input FastQ files to be concatenated.
+      type: file
+      description: |
+        List of input FastQ files to be concatenated.
 output:
   - merged_reads:
       type: file

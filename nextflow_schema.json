@@ -5,38 +5,6 @@
     "description": "Analysis pipeline for SAMMY-seq",
     "type": "object",
     "$defs": {
-        "deeptools_bigwigcompare_options": {
-            "title": "deeptools/bigwigcompare options",
-            "type": "object",
-            "description": "Parameters specific to deeptools/bigwigcompare module",
-            "default": "",
-            "fa_icon": "fas fa-chart-bar",
-            "properties": {
-                "bigwigcompare_pseudocount": {
-                    "type": "number",
-                    "description": "A small number to avoid x/0. Only useful together with \u2013operation log2 or \u2013operation ratio.",
-                    "default": 1e-14,
-                    "fa_icon": "fas fa-chart-bar"
-                },
-                "bigwigcompare_operation": {
-                    "type": "string",
-                    "description": "Specifies mathematical operation applied to sample fractions.",
-                    "default": "log2",
-                    "fa_icon": "fas fa-chart-bar"
-                },
-                "bigwigcompare_skip_non_covered_regions": {
-                    "type": "boolean",
-                    "description": "Avoids interpretation of non-covered regions as zeros.",
-                    "default": true,
-                    "fa_icon": "fas fa-chart-bar"
-                },
-                "bigwigcompare_fixed_step": {
-                    "type": "boolean",
-                    "description": "Write out all bins (of size \u2013binSize).",
-                    "fa_icon": "fas fa-chart-bar"
-                }
-            }
-        },
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -54,20 +22,6 @@
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
                     "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 5 columns, and a header row. See [usage docs](https://nf-co.re/sammyseq/usage#samplesheet-input).",
                     "fa_icon": "fas fa-file-csv"
-                },
-                "comparison": {
-                    "type": "string",
-                    "fa_icon": "fas fa-percentage",
-                    "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\" or \"S2SvsS3,S2LvsS3\")",
-                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3))*$"
-                },
-                "comparison_file": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file-csv",
-                    "description": "Path to comma-separated file containing the sample names for the desired paired comparisons.",
-                    "help_text": "You will need to create a comparisons file with information about the desired comparisons in your experiment before running the pipeline. It has to be a comma-separated file with 2 columns: one for the first sample to compare and the second one to sample against which to do it. The sample names must match the sample names present in the first column of the samplesheet (`--input` parameter).",
-                    "format": "file-path",
-                    "mimetype": "text/csv"
                 },
                 "outdir": {
                     "type": "string",
@@ -89,11 +43,123 @@
                 }
             }
         },
+        "pre_processing": {
+            "title": "Pre-processing",
+            "type": "object",
+            "description": "Define options relevant to read cleaning, alignment and filtering.",
+            "default": "",
+            "properties": {
+                "trimmer": {
+                    "type": "string",
+                    "default": "trimgalore",
+                    "fa_icon": "fas fa-cut",
+                    "enum": ["trimgalore", "trimmomatic"],
+                    "description": "Specify the program to use for read trimming"
+                },
+                "aligner": {
+                    "type": "string",
+                    "default": "bwamem",
+                    "fa_icon": "fas fa-puzzle-piece",
+                    "description": "Specify aligner to be used to map reads to reference genome.",
+                    "enum": ["bwamem", "bwaaln", "bowtie2"]
+                },
+                "platform": {
+                    "type": "string",
+                    "default": "ILLUMINA",
+                    "description": "\"Sequencing platform identifier for BAM read group header",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "q_score": {
+                    "type": "integer",
+                    "default": 1,
+                    "description": "skip alignments with MAPQ smaller than 'value' (1 default)",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "flag": {
+                    "type": "integer",
+                    "default": 1540,
+                    "description": "If set filter reads based on specific flags. Flags represent various properties of a read, such as whether it's mapped, paired, or properly aligned (default 1540)",
+                    "fa_icon": "fas fa-align-justify"
+                }
+            }
+        },
+        "analysis_workflow": {
+            "title": "Analysis workflow",
+            "type": "object",
+            "description": "Define options specific for the SAMMY-seq data",
+            "default": "",
+            "properties": {
+                "combine_fractions": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-copy",
+                    "description": "If set to true, combine all fractions from the same sample into a single fastq.",
+                    "hidden": true
+                },
+                "comparison": {
+                    "type": "string",
+                    "fa_icon": "fas fa-percentage",
+                    "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\" or \"S2SvsS3,S2LvsS3\")",
+                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3))*$"
+                },
+                "comparison_file": {
+                    "type": "string",
+                    "fa_icon": "fas fa-file-csv",
+                    "description": "Path to comma-separated file containing the sample names for the desired paired comparisons.",
+                    "help_text": "You will need to create a comparisons file with information about the desired comparisons in your experiment before running the pipeline. It has to be a comma-separated file with 2 columns: one for the first sample to compare and the second one to sample against which to do it. The sample names must match the sample names present in the first column of the samplesheet (`--input` parameter).",
+                    "format": "file-path",
+                    "mimetype": "text/csv"
+                },
+                "comparison_maker": {
+                    "type": "string",
+                    "default": "spp",
+                    "enum": ["spp", "bigwigcompare"],
+                    "fa_icon": "fas fa-percentage",
+                    "description": "Specify the tool to be used to generate comparisons"
+                },
+                "differential_solubility": {
+                    "type": "boolean",
+                    "description": "When set to true, this parameter activates the differential solubility analysis workflow",
+                    "fa_icon": "far fa-chart-bar"
+                },
+                "solubility_threshold": {
+                    "type": "number",
+                    "default": 0.1,
+                    "description": "Minimum signal threshold for bin selection in differential solubility analysis.",
+                    "fa_icon": "fas fa-percentage"
+                },
+                "compare_groups": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_]+vs[A-Za-z0-9_]+(,[A-Za-z0-9_]+vs[A-Za-z0-9_]+)*$",
+                    "fa_icon": "fas fa-balance-scale",
+                    "description": "Define comparison order for sample groups in differential solubility analysis using sample_group names from input samplesheet (format: 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'). Default: all groups in samplesheet order.",
+                    "errorMessage": "Must follow format 'GroupAvsGroupB' or 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'. Group names must match sample_group column in input samplesheet."
+                },
+                "stopAt": {
+                    "type": "string",
+                    "description": "Specify after which step the pipeline should stop.",
+                    "fa_icon": "fas fa-ban",
+                    "enum": [
+                        "BEGIN",
+                        "PREPARE_GENOME",
+                        "INPUT_CHECK",
+                        "CAT_FASTQ_lane",
+                        "CAT_FRACTIONS",
+                        "TRIMMOMATIC",
+                        "FASTQ_ALIGN_BWAALN",
+                        "SAMTOOLS_FAIDX",
+                        "BAM_MARKDUPLICATES_PICARD",
+                        "DEEPTOOLS_BAMCOVERAGE",
+                        "RTWOSAMPLESMLE"
+                    ],
+                    "hidden": true
+                }
+            }
+        },
         "reference_genome_options": {
             "title": "Reference genome options",
             "type": "object",
             "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
+            "description": "Reference genome related files.",
             "properties": {
                 "genome": {
                     "type": "string",
@@ -111,6 +177,11 @@
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"
                 },
+                "fai": {
+                    "type": "string",
+                    "description": "Optionally provide FASTA index (.fai) file as input",
+                    "fa_icon": "fas fa-align-justify"
+                },
                 "igenomes_ignore": {
                     "type": "boolean",
                     "description": "Do not load the iGenomes reference config.",
@@ -125,46 +196,6 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes"
-                },
-                "aligner": {
-                    "type": "string",
-                    "default": "bwamem",
-                    "fa_icon": "fas fa-puzzle-piece",
-                    "description": "Specify aligner to be used to map reads to reference genome.",
-                    "enum": ["bwamem", "bwaaln", "bowtie2"]
-                },
-                "differential_solubility": {
-                    "type": "boolean",
-                    "description": "When set to true, this parameter activates the differential solubility analysis workflow",
-                    "fa_icon": "far fa-chart-bar"
-                },
-                "comparison_maker": {
-                    "type": "string",
-                    "default": "spp",
-                    "enum": ["spp", "bigwigcompare"],
-                    "fa_icon": "fas fa-percentage",
-                    "description": "Specify the tool to be used to generate comparisons"
-                },
-                "compare_groups": {
-                    "type": "string",
-                    "default": null,
-                    "pattern": "^[A-Za-z0-9_]+vs[A-Za-z0-9_]+(,[A-Za-z0-9_]+vs[A-Za-z0-9_]+)*$",
-                    "fa_icon": "fas fa-balance-scale",
-                    "description": "Define comparison order for sample groups in differential solubility analysis using sample_group names from input samplesheet (format: 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'). Default: all groups in samplesheet order.",
-                    "errorMessage": "Must follow format 'GroupAvsGroupB' or 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'. Group names must match sample_group column in input samplesheet."
-                },
-                "solubility_threshold": {
-                    "type": "number",
-                    "default": 0.1,
-                    "description": "Minimum signal threshold for bin selection in differential solubility analysis.",
-                    "fa_icon": "fas fa-percentage"
-                },
-                "trimmer": {
-                    "type": "string",
-                    "default": "trimgalore",
-                    "fa_icon": "fas fa-cut",
-                    "enum": ["trimgalore", "trimmomatic"],
-                    "description": "Specify the program to use for read trimming"
                 },
                 "bwa_index": {
                     "type": "string",
@@ -194,6 +225,126 @@
                     "description": "A BED or GTF file containing regions that should be excluded from all analyses.",
                     "help_text": "Currently this works by rejecting genomic chunks that happen to overlap an entry. Consequently, for BAM files, if a read partially overlaps a blacklisted region or a fragment spans over it, then the read/fragment might still be considered. Please note that you should adjust the effective genome size, if relevant.",
                     "format": "file-path"
+                },
+                "chrom_sizes": {
+                    "type": "string",
+                    "description": "Optionally provide chromosome sizes file as input",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "gtf": {
+                    "type": "string",
+                    "fa_icon": "fas fa-align-justify",
+                    "description": "Path to GTF annotation file."
+                },
+                "gene_bed": {
+                    "type": "string",
+                    "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified.",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "tss_bed": {
+                    "type": "string",
+                    "fa_icon": "fas fa-align-justify",
+                    "description": "Path to BED file containing TSS regions"
+                },
+                "keep_regions_bed": {
+                    "type": "string",
+                    "description": "A list of regions that will be kept in the output after filtering the alignment with samtools using -L option in addition to the flag and quality threshold filters",
+                    "fa_icon": "fas fa-align-justify"
+                }
+            }
+        },
+        "deeptools_options": {
+            "title": "Deeptools options",
+            "type": "object",
+            "description": "Parameters specific to deeptools modules.",
+            "default": "",
+            "fa_icon": "fas fa-chart-bar",
+            "properties": {
+                "binsize": {
+                    "type": "integer",
+                    "description": "Deeptools multiBamSummary bam bin size (Default 50000).",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "corr_method": {
+                    "type": "string",
+                    "default": "spearman",
+                    "enum": ["pearson", "spearman"],
+                    "description": "Deeptools Correlation Plot statistical calculation method",
+                    "fa_icon": "fas fa-bars"
+                },
+                "fragment_size": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Fragment size parameter for single-end data. When set to a positive value, it enables the --extendReads option in DeepTools, extending reads to the specified length. This parameter is only used for single-end data processing and does not affect paired-end data analysis.",
+                    "fa_icon": "fas fa-align-justify",
+                    "hidden": true
+                },
+                "extendReads": {
+                    "type": "integer",
+                    "description": "Defines how much the reads should be extended",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "bw_resolution": {
+                    "type": "integer",
+                    "description": "bw_resolution (expressed in base pairs) for genome coverage calculation (default 1).",
+                    "default": 1,
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "normalizeUsing": {
+                    "type": "string",
+                    "description": "Method selecte to perform the normalizazion",
+                    "default": "RPKM",
+                    "enum": ["RPKM", "CPM", "BPM", "RPGC"],
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "effectiveGenomeSize": {
+                    "type": "integer",
+                    "description": "Estimated genome size to performing the normalization",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "ignoreForNormalization": {
+                    "type": "string",
+                    "description": "A list of space-delimited chromosome names containing those chromosomes that should be excluded for computing the normalization",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "plotfingerprint": {
+                    "type": "boolean",
+                    "description": "Enable deepTools plotFingerprint analysis for quality control assessment",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "region": {
+                    "type": "string",
+                    "description": "Region of the genome to limit the operation to - this is useful when testing parameters to reduce the computing time. The format is chr:start:end, for example \u2013region chr10 or \u2013region chr10:456700:891000.",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "numberOfSamples": {
+                    "type": "integer",
+                    "default": 500000,
+                    "description": "The number of bins that are sampled from the genome, for which the overlapping number of reads is computed. (Default: 500000)",
+                    "fa_icon": "fas fa-align-justify"
+                },
+                "bigwigcompare_pseudocount": {
+                    "type": "number",
+                    "description": "A small number to avoid x/0. Only useful together with \u2013operation log2 or \u2013operation ratio.",
+                    "default": 1e-14,
+                    "fa_icon": "fas fa-chart-bar"
+                },
+                "bigwigcompare_operation": {
+                    "type": "string",
+                    "description": "Specifies mathematical operation applied to sample fractions.",
+                    "default": "log2",
+                    "fa_icon": "fas fa-chart-bar"
+                },
+                "bigwigcompare_skip_non_covered_regions": {
+                    "type": "boolean",
+                    "description": "Avoids interpretation of non-covered regions as zeros.",
+                    "default": true,
+                    "fa_icon": "fas fa-chart-bar"
+                },
+                "bigwigcompare_fixed_step": {
+                    "type": "boolean",
+                    "description": "Write out all bins (of size \u2013binSize).",
+                    "fa_icon": "fas fa-chart-bar"
                 }
             }
         },
@@ -339,30 +490,6 @@
                     "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
                     "hidden": true
                 },
-                "stopAt": {
-                    "type": "string",
-                    "description": "Specify after which step the pipeline should stop.",
-                    "fa_icon": "fas fa-ban",
-                    "enum": [
-                        "BEGIN",
-                        "PREPARE_GENOME",
-                        "INPUT_CHECK",
-                        "CAT_FASTQ_lane",
-                        "CAT_FRACTIONS",
-                        "TRIMMOMATIC",
-                        "FASTQ_ALIGN_BWAALN",
-                        "SAMTOOLS_FAIDX",
-                        "BAM_MARKDUPLICATES_PICARD",
-                        "DEEPTOOLS_BAMCOVERAGE",
-                        "RTWOSAMPLESMLE"
-                    ],
-                    "hidden": true
-                },
-                "combine_fractions": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-copy",
-                    "hidden": true
-                },
                 "trace_report_suffix": {
                     "type": "string",
                     "fa_icon": "far calendar",
@@ -380,130 +507,25 @@
                 "show_hidden": {
                     "type": "boolean",
                     "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
-                },
-                "platform": {
-                    "type": "string",
-                    "default": "ILLUMINA",
-                    "description": "\"Sequencing platform identifier for BAM read group header",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "extendReads": {
-                    "type": "integer",
-                    "description": "Defines how much the reads should be extended",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "bw_resolution": {
-                    "type": "integer",
-                    "description": "bw_resolution (expressed in base pairs) for genome coverage calculation (default 1).",
-                    "default": 1,
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "normalizeUsing": {
-                    "type": "string",
-                    "description": "Method selecte to perform the normalizazion",
-                    "default": "RPKM",
-                    "enum": ["RPKM", "CPM", "BPM", "RPGC"],
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "effectiveGenomeSize": {
-                    "type": "integer",
-                    "description": "Estimated genome size to performing the normalization",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "ignoreForNormalization": {
-                    "type": "string",
-                    "description": "A list of space-delimited chromosome names containing those chromosomes that should be excluded for computing the normalization",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "keep_regions_bed": {
-                    "type": "string",
-                    "description": "A list of regions that will be kept in the output after filtering the alignment with samtools using -L option in addition to the flag and quality threshold filters",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "q_score": {
-                    "type": "integer",
-                    "default": 1,
-                    "description": "skip alignments with MAPQ smaller than 'value' (1 default)",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "flag": {
-                    "type": "integer",
-                    "default": 1540,
-                    "description": "If set filter reads based on specific flags. Flags represent various properties of a read, such as whether it's mapped, paired, or properly aligned (default 1540)",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "region": {
-                    "type": "string",
-                    "description": "Region of the genome to limit the operation to - this is useful when testing parameters to reduce the computing time. The format is chr:start:end, for example \u2013region chr10 or \u2013region chr10:456700:891000.",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "numberOfSamples": {
-                    "type": "integer",
-                    "default": 500000,
-                    "description": "The number of bins that are sampled from the genome, for which the overlapping number of reads is computed. (Default: 500000)",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "binsize": {
-                    "type": "integer",
-                    "description": "Deeptools multiBamSummary bam bin size (Default 50000).",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "corr_method": {
-                    "type": "string",
-                    "default": "spearman",
-                    "enum": ["pearson", "spearman"],
-                    "description": "Deeptools Correlation Plot statistical calculation method",
-                    "fa_icon": "fas fa-bars"
-                },
-                "fragment_size": {
-                    "type": "integer",
-                    "default": 100,
-                    "description": "Fragment size parameter for single-end data. When set to a positive value, it enables the --extendReads option in DeepTools, extending reads to the specified length. This parameter is only used for single-end data processing and does not affect paired-end data analysis.",
-                    "fa_icon": "fas fa-align-justify",
-                    "hidden": true
-                },
-                "chrom_sizes": {
-                    "type": "string",
-                    "description": "Optionally provide chromosome sizes file as input",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "fai": {
-                    "type": "string",
-                    "description": "Optionally provide FASTA index (.fai) file as input",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "gtf": {
-                    "type": "string",
-                    "fa_icon": "fas fa-align-justify",
-                    "description": "Path to GTF annotation file."
-                },
-                "plotfingerprint": {
-                    "type": "boolean",
-                    "description": "Enable deepTools plotFingerprint analysis for quality control assessment",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "gene_bed": {
-                    "type": "string",
-                    "description": "Path to BED file containing gene intervals. This will be created from the GTF file if not specified.",
-                    "fa_icon": "fas fa-align-justify"
-                },
-                "tss_bed": {
-                    "type": "string",
-                    "fa_icon": "fas fa-align-justify",
-                    "description": "Path to BED file containing TSS regions"
                 }
             }
         }
     },
     "allOf": [
         {
-            "$ref": "#/$defs/deeptools_bigwigcompare_options"
-        },
-        {
             "$ref": "#/$defs/input_output_options"
         },
         {
+            "$ref": "#/$defs/pre_processing"
+        },
+        {
+            "$ref": "#/$defs/analysis_workflow"
+        },
+        {
             "$ref": "#/$defs/reference_genome_options"
+        },
+        {
+            "$ref": "#/$defs/deeptools_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

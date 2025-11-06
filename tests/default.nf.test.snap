@@ -3,11 +3,11 @@
         "content": [
             {
                 "BWAMEM1_MEM": {
-                    "bwa": "0.7.18-r1243-dirty",
-                    "samtools": 1.21
+                    "bwa": "0.7.19-r1273",
+                    "samtools": "1.22.1"
                 },
                 "BWA_INDEX": {
-                    "bwa": "0.7.18-r1243-dirty"
+                    "bwa": "0.7.19-r1273"
                 },
                 "DEEPTOOLS_BAMCOVERAGE": {
                     "deeptools": "3.5.5"
@@ -28,25 +28,25 @@
                     "bedtools": "2.30.0"
                 },
                 "PICARD_MARKDUPLICATES": {
-                    "picard": "3.3.0"
+                    "picard": "3.4.0"
                 },
                 "SAMTOOLS_FAIDX_CHROM_SIZES": {
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
                 },
                 "SAMTOOLS_FAIDX_FAI": {
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": 1.21
+                    "samtools": "1.22.1"
                 },
                 "TRIMGALORE": {
                     "trimgalore": "0.6.10",
@@ -134,7 +134,6 @@
                 "multiqc/multiqc_plots/pdf",
                 "multiqc/multiqc_plots/pdf/deeptools_correlation_plot.pdf",
                 "multiqc/multiqc_plots/pdf/deeptools_pca_plot.pdf",
-                "multiqc/multiqc_plots/pdf/fastqc-status-check-heatmap.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_adapter_content_plot.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_per_base_n_content_plot.pdf",
                 "multiqc/multiqc_plots/pdf/fastqc_per_base_sequence_quality_plot.pdf",
@@ -161,7 +160,6 @@
                 "multiqc/multiqc_plots/png",
                 "multiqc/multiqc_plots/png/deeptools_correlation_plot.png",
                 "multiqc/multiqc_plots/png/deeptools_pca_plot.png",
-                "multiqc/multiqc_plots/png/fastqc-status-check-heatmap.png",
                 "multiqc/multiqc_plots/png/fastqc_adapter_content_plot.png",
                 "multiqc/multiqc_plots/png/fastqc_per_base_n_content_plot.png",
                 "multiqc/multiqc_plots/png/fastqc_per_base_sequence_quality_plot.png",
@@ -188,7 +186,6 @@
                 "multiqc/multiqc_plots/svg",
                 "multiqc/multiqc_plots/svg/deeptools_correlation_plot.svg",
                 "multiqc/multiqc_plots/svg/deeptools_pca_plot.svg",
-                "multiqc/multiqc_plots/svg/fastqc-status-check-heatmap.svg",
                 "multiqc/multiqc_plots/svg/fastqc_adapter_content_plot.svg",
                 "multiqc/multiqc_plots/svg/fastqc_per_base_n_content_plot.svg",
                 "multiqc/multiqc_plots/svg/fastqc_per_base_sequence_quality_plot.svg",
@@ -262,18 +259,18 @@
                 "single_tracks/deeptools/CTRL004_S4.q1.RPKM.bigWig"
             ],
             [
-                "CTRL004_S2.q1.bam:md5,b9434efe07680fad02317a524c01912e",
-                "CTRL004_S2.q1.bam.bai:md5,02e56342a3342c645c7279bbd7503de9",
-                "CTRL004_S3.q1.bam:md5,b5c2287e03aa86307d2093360ececc88",
-                "CTRL004_S3.q1.bam.bai:md5,6fe090a3d234c9f5b201fa5b71fea770",
-                "CTRL004_S4.q1.bam:md5,3d09f8827b6f28ec31ff82402240b1b1",
-                "CTRL004_S4.q1.bam.bai:md5,0c58f891cafe6c277b905c63fdeed475",
-                "CTRL004_S2.md.bam:md5,86ae52443e978421d4f78e557680c900",
-                "CTRL004_S2.md.bam.bai:md5,6e40b06ce02da78f71e9529a718c8279",
-                "CTRL004_S3.md.bam:md5,37404dd5908eb6099f536a9d2e234fa8",
-                "CTRL004_S3.md.bam.bai:md5,917818fd2dbf40d36fb31da7048b3588",
-                "CTRL004_S4.md.bam:md5,142375498418fc724946a5d78dbe2f06",
-                "CTRL004_S4.md.bam.bai:md5,9912f3676040d13ad2de07dcc46a077f",
+                "CTRL004_S2.q1.bam:md5,75af1f70ee216aeae11ec9d44c0d389a",
+                "CTRL004_S2.q1.bam.bai:md5,0395edd7cdc1b5ab211340ffe513b7f7",
+                "CTRL004_S3.q1.bam:md5,1f77bb237d2ba1bc208e387fbc0ba64e",
+                "CTRL004_S3.q1.bam.bai:md5,f0a9d76811e924c65bea9475ece4ec75",
+                "CTRL004_S4.q1.bam:md5,6d2da5044281b48bf51a495a9616dfed",
+                "CTRL004_S4.q1.bam.bai:md5,5eed25dfcec9288b7055c9f9f3a49c68",
+                "CTRL004_S2.md.bam:md5,1d6294c910db5f1f5735d35a81187089",
+                "CTRL004_S2.md.bam.bai:md5,46c317e2bcf3d8a4a1291e72a2695e28",
+                "CTRL004_S3.md.bam:md5,93c44d4f2004c0861b0967fc13728389",
+                "CTRL004_S3.md.bam.bai:md5,e199757f0a201eeafa77a496ce83e485",
+                "CTRL004_S4.md.bam:md5,125b2de5b7ba25803349fa2ee6173b5d",
+                "CTRL004_S4.md.bam.bai:md5,ee960fb6e3a75e4bec2845c779b1bf04",
                 "chr22.fa.fai:md5,6d0b824b29dd8593c2b7575ddc345ece",
                 "chr22.fa.sizes:md5,3b8cd381d92f11c1a6cd64a01a5c4b66",
                 "deeptools_correlation_plot.txt:md5,12bfd9694ca8122209d849713e025a3c",
@@ -308,22 +305,22 @@
                 "samtools_alignment_plot.txt:md5,353a0f2972f2408242f42f8e44f99877",
                 "CTRL004_S2.flagstat:md5,fad1bb26917ecee7ef6d28812b61b928",
                 "CTRL004_S2.idxstats:md5,e5c53300abc273b1a20805a1d7e7d235",
-                "CTRL004_S2.stats:md5,ee0a15ae364d7c4bfbe9d805ed551edb",
+                "CTRL004_S2.stats:md5,97e35f6b4bc4d9c340064533391c9ec9",
                 "CTRL004_S2.flagstat:md5,f3912e1e64470466a6d59a17e4caba7f",
                 "CTRL004_S2.idxstats:md5,e4ae0ecb49f541d7383faedaa5fe1b7e",
-                "CTRL004_S2.stats:md5,e5ceeec09767eb9a6ce55b60af75aec7",
+                "CTRL004_S2.stats:md5,a89e78d828911c854aa7eb91b2700329",
                 "CTRL004_S3.flagstat:md5,05d91f0a4ebcf96528e3b7444584fc47",
                 "CTRL004_S3.idxstats:md5,0ad887ad7b3cf66e838ad35ba6d76e9a",
-                "CTRL004_S3.stats:md5,b92b1fb9d3e5f773a08d3be55f1ff0c6",
+                "CTRL004_S3.stats:md5,47cc5e8d95105032891bb9d4d746e098",
                 "CTRL004_S3.flagstat:md5,5fb6e7089f258cf830c696a94db8dc03",
                 "CTRL004_S3.idxstats:md5,f2579ac16a56827dfef970b89800b1bd",
-                "CTRL004_S3.stats:md5,6433056be54a3c4b30125e614ead91c2",
+                "CTRL004_S3.stats:md5,32dc14147841fb0c30980a8024990d50",
                 "CTRL004_S4.flagstat:md5,5817d6521822ba867a04f2a76b942ba3",
                 "CTRL004_S4.idxstats:md5,195e6d54c8debb71891652d2dca53804",
-                "CTRL004_S4.stats:md5,3326b697b2e7aa33b98c8ce931af768e",
+                "CTRL004_S4.stats:md5,92812a2816231611a72a995469017133",
                 "CTRL004_S4.flagstat:md5,2e264c45875aa7032731c593146604fa",
                 "CTRL004_S4.idxstats:md5,62457dcfcceb6a1bb01cfedc8d2953fb",
-                "CTRL004_S4.stats:md5,0f5446f0ab21e430b1431973ae87317f",
+                "CTRL004_S4.stats:md5,eb3d84774962a3d4d93431ea35c971a9",
                 "CTRL004_S2.q1.RPKM.bigWig:md5,c7f86a12d6a1d4d6669fbc036329461e",
                 "CTRL004_S3.q1.RPKM.bigWig:md5,d91ece6c70d0cf0ffdf53af0a2fc2a7a",
                 "CTRL004_S4.q1.RPKM.bigWig:md5,3f577b60cda8c49654610eb7179977bc"
@@ -333,6 +330,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2025-10-28T14:31:46.800686182"
+        "timestamp": "2025-11-06T12:23:44.709651414"
     }
 }

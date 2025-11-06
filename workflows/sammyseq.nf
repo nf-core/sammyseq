@@ -127,25 +127,20 @@ workflow SAMMYSEQ {
     }
 
     //
-    // Combine fractions by expID
+    // Combine fractions by experimentalID
     //
 
     if(params.combine_fractions){
-        merged_reads = CAT_FRACTIONS(//INPUT_CHECK.out.reads_to_merge,
-                                    //INPUT_CHECK.out.reads
-                                    ch_starter
-                                    )//.out.merged_reads
+        merged_reads = CAT_FRACTIONS(ch_starter) //.out.merged_reads
+        ch_versions = ch_versions.mix(CAT_FRACTIONS.out.versions.first())
+        return
     } else {
         //merged_reads = INPUT_CHECK.out.reads
         merged_reads = ch_starter
     }
 
-    if (params.stopAt == 'CAT_FRACTIONS') {
-        return
-    }
-
     ///
-    //  TRIMMING!
+    //  TRIMMING
     //
 
     ch_trimmed= Channel.empty()
@@ -356,7 +351,7 @@ if (params.stopAt == 'ALIGNMENT') {
         )
 
         ch_comparison_results = GENERATE_COMPARISONS.out.results
-
+        ch_versions = ch_versions.mix(GENERATE_COMPARISONS.out.versions)
     //
     // DIFFERENTIAL SOLUBILITY ANALYSIS
     //

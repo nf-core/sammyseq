@@ -2,9 +2,9 @@
 // Genome binning subworkflow with keep_regions handling
 //
 
-include { GUNZIP as GUNZIP_KEEP_REGIONS_BED } from '../../modules/nf-core/gunzip/main'
-include { BEDTOOLS_MAKEWINDOWS              } from '../../modules/nf-core/bedtools/makewindows/main'
-include { BEDTOOLS_INTERSECT                } from '../../modules/nf-core/bedtools/intersect/main'
+include { GUNZIP as GUNZIP_KEEP_REGIONS_BED } from '../../../modules/nf-core/gunzip/main'
+include { BEDTOOLS_MAKEWINDOWS              } from '../../../modules/nf-core/bedtools/makewindows/main'
+include { BEDTOOLS_INTERSECT                } from '../../../modules/nf-core/bedtools/intersect/main'
 
 workflow GENOME_BINNING {
 
@@ -42,7 +42,7 @@ workflow GENOME_BINNING {
             .combine(ch_keep_regions_bed)
             .map { bed1, bed2 ->
                 tuple([id: "${bed2.simpleName}_filtered"], bed1, bed2)
-            }
+        }
 
         BEDTOOLS_INTERSECT(
             ch_intersection_input,

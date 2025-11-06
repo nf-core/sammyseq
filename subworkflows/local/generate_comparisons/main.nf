@@ -130,16 +130,16 @@ workflow GENERATE_COMPARISONS {
             comparisons_merge_ch.map { meta, f1, f2 -> [meta - [id: meta.id], f1, f2, meta.id] },
             chrom_sizes
         )
-        emit:
         ch_comparison_results = RTWOSAMPLESMLE.out.results
+        ch_versions = ch_versions.mix(RTWOSAMPLESMLE.out.versions)
     } else if (module_name == 'bigwigcompare') {
         def blacklist_ch = params.blacklist
             ? Channel.value([[:], file(params.blacklist)])
             : Channel.value([[:], []])
 
         DEEPTOOLS_BIGWIGCOMPARE(comparisons_merge_ch, blacklist_ch)
-        emit:
         ch_comparison_results = DEEPTOOLS_BIGWIGCOMPARE.out.output
+        ch_versions = ch_versions.mix(DEEPTOOLS_BIGWIGCOMPARE.out.versions)
     }
 
     emit:
