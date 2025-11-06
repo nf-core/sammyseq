@@ -3,8 +3,8 @@
         "content": [
             {
                 "BWAMEM1_MEM": {
-                    "bwa": "0.7.18-r1243-dirty",
-                    "samtools": 1.21
+                    "bwa": "0.7.19-r1273",
+                    "samtools": "1.22.1"
                 },
                 "BWA_INDEX": {
                     "bwa": "0.7.19-r1273"
@@ -259,18 +259,18 @@
                 "single_tracks/deeptools/CTRL004_S4.q1.RPKM.bigWig"
             ],
             [
-                "CTRL004_S2.q1.bam:md5,187ba538d79ef0c0914e38e7263ca352",
-                "CTRL004_S2.q1.bam.bai:md5,8133fc8ee31bf4cab9f3ee6f7ca8f48b",
-                "CTRL004_S3.q1.bam:md5,6084d41ffe976feec46aaf5916b8a84b",
-                "CTRL004_S3.q1.bam.bai:md5,64eccc0d16f5ed964b69acbf79168ef8",
-                "CTRL004_S4.q1.bam:md5,265243b42f06dafa3e0a1e89848fa7b4",
-                "CTRL004_S4.q1.bam.bai:md5,62749a6de415495288b88f7deb8b4907",
-                "CTRL004_S2.md.bam:md5,d0154eed319077e8554c847d15a5b96e",
-                "CTRL004_S2.md.bam.bai:md5,e0560e17eab0c850e17acbf894a12118",
-                "CTRL004_S3.md.bam:md5,63b6a48d2409961b639660abb8407dab",
-                "CTRL004_S3.md.bam.bai:md5,917818fd2dbf40d36fb31da7048b3588",
-                "CTRL004_S4.md.bam:md5,68902ccc123ca0c686d7716a1bbd7d36",
-                "CTRL004_S4.md.bam.bai:md5,9912f3676040d13ad2de07dcc46a077f",
+                "CTRL004_S2.q1.bam:md5,75af1f70ee216aeae11ec9d44c0d389a",
+                "CTRL004_S2.q1.bam.bai:md5,0395edd7cdc1b5ab211340ffe513b7f7",
+                "CTRL004_S3.q1.bam:md5,1f77bb237d2ba1bc208e387fbc0ba64e",
+                "CTRL004_S3.q1.bam.bai:md5,f0a9d76811e924c65bea9475ece4ec75",
+                "CTRL004_S4.q1.bam:md5,6d2da5044281b48bf51a495a9616dfed",
+                "CTRL004_S4.q1.bam.bai:md5,5eed25dfcec9288b7055c9f9f3a49c68",
+                "CTRL004_S2.md.bam:md5,1d6294c910db5f1f5735d35a81187089",
+                "CTRL004_S2.md.bam.bai:md5,46c317e2bcf3d8a4a1291e72a2695e28",
+                "CTRL004_S3.md.bam:md5,93c44d4f2004c0861b0967fc13728389",
+                "CTRL004_S3.md.bam.bai:md5,e199757f0a201eeafa77a496ce83e485",
+                "CTRL004_S4.md.bam:md5,125b2de5b7ba25803349fa2ee6173b5d",
+                "CTRL004_S4.md.bam.bai:md5,ee960fb6e3a75e4bec2845c779b1bf04",
                 "chr22.fa.fai:md5,6d0b824b29dd8593c2b7575ddc345ece",
                 "chr22.fa.sizes:md5,3b8cd381d92f11c1a6cd64a01a5c4b66",
                 "deeptools_correlation_plot.txt:md5,12bfd9694ca8122209d849713e025a3c",
@@ -330,6 +330,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2025-11-04T14:00:32.716957228"
+        "timestamp": "2025-11-06T12:23:44.709651414"
     }
 }
