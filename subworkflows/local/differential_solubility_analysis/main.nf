@@ -17,6 +17,7 @@ workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {
     compare_groups
 
     main:
+    ch_versions = Channel.empty()
 
     //
     // Generate correct CSV samplesheet for differential analysis
@@ -53,6 +54,7 @@ workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {
         comparison,
         solubility_threshold
     )
+    ch_versions = ch_versions.mix(DIFFERENTIAL_ENRICHMENT.out.versions)
 
     emit:
     all_bins          = DIFFERENTIAL_ENRICHMENT.out.all_bins
@@ -61,5 +63,5 @@ workflow DIFFERENTIAL_SOLUBILITY_ANALYSIS {
     bed_regions       = DIFFERENTIAL_ENRICHMENT.out.bed_regions
     gene_lists        = DIFFERENTIAL_ENRICHMENT.out.gene_lists
     report            = DIFFERENTIAL_ENRICHMENT.out.report
-    versions          = DIFFERENTIAL_ENRICHMENT.out.versions
+    versions          = ch_versions
 }
