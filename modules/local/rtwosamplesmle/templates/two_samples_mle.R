@@ -4,28 +4,13 @@
 # Rscript /path/to/make_twosample_mle_spp.R sample_bam control_bam chromsizes_file mle_output_file"
 
 ## LIBRARIES
-
 require(Rcpp)
 require(data.table)
 require(spp)
 require(rtracklayer)
 
 ################################################
-# FUNCTIONS
-################################################
-
-# sortbychr <- function(x, chrcol="chr", stcol="start", endcol=NULL, chrorder=paste("chr", c(seq(22), "X", "Y"), sep="")) {
-#         if (!(is.null(endcol))) {
-#                 x <- x[order(x[,endcol]),]
-#         }
-#         x <- x[order(x[,stcol]),]
-#         chrs <- ordered(x[,chrcol], levels=chrorder)
-#         # chrs <- ordered(tmp, levels=paste("chr", c(seq(22), "X", "Y"), sep=""))
-#         x <- x[order(chrs),]
-# }
-
-################################################
-## PARAMS
+## PARAMETERS
 ################################################
 
 # ip_file <- args[1]
@@ -39,7 +24,7 @@ chromsizes_file <- "${chromsizes_file}"
 mle_output_file <- "${output_mle_name}_mle.bigWig"
 
 ################################################
-# DEFAULT PARAMETERS
+# DEFAULT VALUES
 ################################################
 
 remove_anomalies <- TRUE #changed from FALSE
@@ -63,13 +48,10 @@ if (debug_mode){
 
 print("first part")
 chromsizes <- fread(chromsizes_file, data.table = FALSE)
-#chromsizes <- sortbychr(chromsizes, chrcol="V1", stcol="V2", chrorder=paste("chr", c(seq(19), "X", "Y"), sep=""))
-#chrs <- as.character(sub('chr', '', chromsizes[, 1]))
 chrs <- chromsizes[, 1]
 rownames(chromsizes) <- chrs
 
-### Import the data
-
+### Import data
 ip    <- read.bam.tags(ip_file)
 input <- read.bam.tags(input_file)
 
@@ -123,33 +105,13 @@ export.bw(gr.mle, mle_output_file)
 
 
 ################################################
-################################################
-## R SESSION INFO                             ##
-################################################
+## VERSIONS FILE
 ################################################
 
-# sink(paste(output_prefix, "R_sessionInfo.log", sep = '.'))
-# print(sessionInfo())
-# sink()
+r.version <- strsplit(version[['version.string']], ' ')[[1]][3]
+spp.version <- as.character(packageVersion('spp'))
 
-################################################
-################################################
-## VERSIONS FILE                              ##
-################################################
-################################################
-
-# r.version <- strsplit(version[['version.string']], ' ')[[1]][3]
-# deseq2.version <- as.character(packageVersion('DESeq2'))
-
-# writeLines(
-#     c(
-#         '"${task.process}":',
-#         paste('    r-base:', r.version),
-#         paste('    bioconductor-deseq2:', deseq2.version)
-#     ),
-# 'versions.yml')
-
-################################################
-################################################
-################################################
-################################################
+writeLines(c('"${task.process}":',
+    paste('    r-base:', r.version),
+    paste('    r-spp:', spp.version)
+), 'versions.yml')

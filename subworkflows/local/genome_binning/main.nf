@@ -42,7 +42,7 @@ workflow GENOME_BINNING {
             .combine(ch_keep_regions_bed)
             .map { bed1, bed2 ->
                 tuple([id: "${bed2.simpleName}_filtered"], bed1, bed2)
-            }
+        }
 
         BEDTOOLS_INTERSECT(
             ch_intersection_input,
