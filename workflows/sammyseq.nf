@@ -39,6 +39,7 @@ include { BIGWIG_PLOT_DEEPTOOLS               } from '../subworkflows/local/bigw
 include { DEEPTOOLS_QC                        } from '../subworkflows/local/deeptools_qc'
 include { GENERATE_COMPARISONS                } from '../subworkflows/local/generate_comparisons'
 include { DIFFERENTIAL_SOLUBILITY_ANALYSIS    } from '../subworkflows/local/differential_solubility_analysis'
+include { COMPARTMENTALIZATION_ANALYSIS       } from '../subworkflows/local/compartmentalization_anaylsis'
 
 
 /*
@@ -318,7 +319,7 @@ if (params.stopAt == 'ALIGNMENT') {
         error "Cannot specify both --comparison_file and --comparison parameters. Please use only one method."
     }
 
-    if (params.comparison_file || params.comparison) {
+    if (params.comparison_file || params.comparison || params.compartmentalization_analysis) {
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
             params.keep_regions_bed,
@@ -335,7 +336,7 @@ if (params.stopAt == 'ALIGNMENT') {
     // Generate comparisons
     //
 
-    if (params.comparison_file || params.comparison) {
+    if (params.comparison_file || params.comparison ) {
 
         ch_comparison_results = Channel.empty()
 
@@ -375,6 +376,19 @@ if (params.stopAt == 'ALIGNMENT') {
 
             ch_versions = ch_versions.mix(DIFFERENTIAL_SOLUBILITY_ANALYSIS.out.versions)
         }
+    }
+
+    //
+    // COMPARTMENTALIZATION ANALYSIS
+    //
+
+    if (params.compartmentalization_analysis) {
+
+        COMPARTMENTALIZATION_ANALYSIS(
+            DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+            GENOME_BINNING.out.binned_genome,
+            params.outdir
+        )
     }
 
     //
