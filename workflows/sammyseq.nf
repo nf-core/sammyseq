@@ -336,7 +336,7 @@ if (params.stopAt == 'ALIGNMENT') {
     // Generate comparisons
     //
 
-    if (params.comparison_file || params.comparison ) {
+    if (params.comparison_file || params.comparison) {
 
         ch_comparison_results = Channel.empty()
 
