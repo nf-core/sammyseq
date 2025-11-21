@@ -127,11 +127,7 @@
         },
         {
             "@id": "main.nf",
-            "@type": [
-                "File",
-                "SoftwareSourceCode",
-                "ComputationalWorkflow"
-            ],
+            "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
             "creator": [
                 {
                     "@id": "https://orcid.org/0000-0002-2168-5059"
@@ -154,30 +150,21 @@
                 "ngs",
                 "sequencing"
             ],
-            "license": [
-                "MIT"
-            ],
+            "license": ["MIT"],
             "maintainer": [
                 {
                     "@id": "https://orcid.org/0000-0002-2168-5059"
                 }
             ],
-            "name": [
-                "nf-core/sammyseq"
-            ],
+            "name": ["nf-core/sammyseq"],
             "programmingLanguage": {
                 "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow"
             },
             "sdPublisher": {
                 "@id": "https://nf-co.re/"
             },
-            "url": [
-                "https://github.com/nf-core/sammyseq",
-                "https://nf-co.re/sammyseq/dev/"
-            ],
-            "version": [
-                "1.0dev"
-            ]
+            "url": ["https://github.com/nf-core/sammyseq", "https://nf-co.re/sammyseq/dev/"],
+            "version": ["1.0dev"]
         },
         {
             "@id": "https://w3id.org/workflowhub/workflow-ro-crate#nextflow",

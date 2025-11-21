@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/yaml-schema.json
+name: "combine_compartments"
+description: Combine per-chromosome compartment BED and BedGraph files into genome-wide files per sample
+keywords:
+  - compartmentalization
+  - merge
+  - bed
+  - bedgraph
+  - genomics
+tools:
+  - coreutils:
+      description: GNU core utilities for basic file, shell and text manipulation
+      homepage: https://www.gnu.org/software/coreutils/
+      documentation: https://www.gnu.org/software/coreutils/manual/
+      tool_dev_url: https://git.savannah.gnu.org/cgit/coreutils.git
+      licence: ["GPL-3.0-or-later"]
+
+input:
+  - sample_id:
+      type: string
+      description: Sample identifier
+  - bed_files:
+      type: file
+      description: List of per-chromosome compartment BED files
+      pattern: "*_compartments.bed"
+  - bedgraph_files:
+      type: file
+      description: List of per-chromosome eigenvector BedGraph files
+      pattern: "*_comp_eigenvector.bedgraph"
+
+output:
+  - combined_beds:
+      type: file
+      description: |
+        Combined BED file with all chromosomes for the sample
+        Structure: [ sample_id, bed ]
+      pattern: "*_combined_compartments.bed"
+  - combined_bedgraphs:
+      type: file
+      description: |
+        Combined BedGraph file with all chromosomes for the sample
+        Structure: [ sample_id, bedgraph ]
+      pattern: "*_combined_compartments_eigen.bedgraph"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+
+authors:
+  - "@ugoiannacchero"
+maintainers:
+  - "@daisymut"

@@ -39,7 +39,7 @@ include { BIGWIG_PLOT_DEEPTOOLS               } from '../subworkflows/local/bigw
 include { DEEPTOOLS_QC                        } from '../subworkflows/local/deeptools_qc'
 include { GENERATE_COMPARISONS                } from '../subworkflows/local/generate_comparisons'
 include { DIFFERENTIAL_SOLUBILITY_ANALYSIS    } from '../subworkflows/local/differential_solubility_analysis'
-include { COMPARTMENTALIZATION_ANALYSIS       } from '../subworkflows/local/compartmentalization_anaylsis'
+include { COMPARTMENTALIZATION_ANALYSIS       } from '../subworkflows/local/compartmentalization_analysis'
 
 
 /*
@@ -312,7 +312,7 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     //
-    // GENOME BINNING: Run only if comparison_file or comparison is provided
+    // GENOME BINNING: Run only if comparison_file or comparison or compartmentalization_anaylsis is provided
     //
 
     if (params.comparison_file && params.comparison) {
@@ -384,11 +384,19 @@ if (params.stopAt == 'ALIGNMENT') {
 
     if (params.compartmentalization_analysis) {
 
+        if (!params.gtf) {
+            exit 1, "ERROR: The --gtf parameter must be provided when --compartmentalization_analysis is enabled."
+        }
+
         COMPARTMENTALIZATION_ANALYSIS(
             DEEPTOOLS_BAMCOVERAGE.out.bigwig,
-            GENOME_BINNING.out.binned_genome,
-            params.outdir
+            ch_genome_bins,                      
+            PREPARE_GENOME.out.chrom_sizes,      
+            params.outdir,
+            params.binsize,
+            PREPARE_GENOME.out.gtf
         )
+        
     }
 
     //
