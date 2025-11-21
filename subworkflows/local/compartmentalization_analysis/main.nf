@@ -58,13 +58,12 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
         }
 
     //
-    // Split binned genome by chromosome
+    // MODULE: Split binned genome by chromosome
     //
     CHROMOSOME_SPLIT(
         ch_bed_with_meta,
         chrom_sizes
     )
-    ch_versions = ch_versions.mix(CHROMOSOME_SPLIT.out.versions)
 
     //
     // Transpose to get one item per chromosome file
