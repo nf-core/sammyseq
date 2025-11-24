@@ -1150,7 +1150,7 @@ generate_files <- function(sub_objs, chr) {
     bed_data <- df_tp_chronly[, c('seqnames', 'start', 'end', 'subcomps_vect', 'zero', 'strand', 'start', 'end', 'subcolor_vect')]
 
     # Modify colors for A and B compartments
-    bed_data$subcolor_vect <- ifelse(substr(bed_data$subcomps_vect, 1, 1) == "A", "207,207,207", "69,117,180" )
+    bed_data$subcolor_vect <- ifelse(substr(bed_data$subcomps_vect, 1, 1) == "A", "207,207,207", "69,117,180")
 
     bed_file <- paste0(ctrl, "_", chr, "_compartments.bed")
     header_bedfile <- paste0('track name="', ctrl, '" description="', ctrl, ' (Emission ordered)" visibility=1 itemRgb="On"')
