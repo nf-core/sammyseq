@@ -44,7 +44,7 @@ process GENERATE_CONSENSUS {
             if (a[bin] == n) comp = "A"
             else if (b[bin] == n) comp = "B"
             else comp = "NA"
-            color = (comp == "A") ? "207,207,207" : (comp == "B") ? "69,117,180" : "200,200,200"
+            color = (comp == "A") ? "207,207,207" : (comp == "B") ? "69,117,180" : "255,255,255"
             print bin "\\t" comp "\\t" fields[bin] "\\t" color
         }
     }' | sort -k1,1V -k2,2n >> ${sample_group}_consensus_strict.bed
