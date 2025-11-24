@@ -59,7 +59,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
         }
 
     //
-    // MODULE: Split binned genome by chromosome
+    // Split binned genome by chromosome
     //
     CHROMOSOME_SPLIT(
         ch_bed_with_meta,
@@ -147,7 +147,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
         }
     
     //
-    // Group combined BEDs by sample_group (e.g., all tumor samples together)
+    // Group combined BEDs by sample_group
     //
     ch_consensus_input = ch_beds_with_group
         .map { group, patient, bed -> [group, bed] }
