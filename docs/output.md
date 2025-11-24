@@ -178,15 +178,19 @@ This analysis uses computeMatrix in reference-point mode to generate coverage pr
 
 ### Compartmentalization Analysis
 
-When `--compartmentalization_analysis` is enabled, a module is triggered to infer A/B chromatin compartments from SAMMY-seq signal tracks. The analysis is based on fixed size genomic binning, performed per chromosome using bedtools makewindows, which divides the genome into windows of a defined size (default 50000) set by the `--binsize` parameter. To restrict the analysis to specific chromosomes, a BED file with only the chromosomes to include can be provided via the `--keep_regions_bed` parameter. The `--gtf` parameter is also required, as gene annotations are used in downstream steps. Each fraction is identified using the `experimentalID` column in the samplesheet allowing fractions of the same sample to be analyzed together. The Compartments calling is based on CALDER2 algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are combined into a single compartment BED and a single BedGraph file with eigenvalues for each sample.
+When `--compartmentalization_analysis` is enabled, a module is triggered to infer A/B chromatin compartments from SAMMY-seq signal tracks. The analysis is based on fixed size genomic binning, performed per chromosome using bedtools makewindows, which divides the genome into windows of a defined size (default 50000) set by the `--binsize` parameter. To restrict the analysis to specific chromosomes, a BED file with only the chromosomes to include can be provided via the `--keep_regions_bed` parameter. The `--gtf` parameter is also required, as gene annotations are used in downstream steps. Each fraction is identified using the `experimentalID` column in the samplesheet allowing fractions of the same sample to be analyzed together. The Compartments calling is based on CALDER2 algorithm, which builds a correlation matrix across genomic bins and applies eigenvector decomposition to classify each bin as either A (open) or B (closed) compartment. After compartment calling, results from all analyzed chromosomes are combined into a single compartment BED and a single BedGraph file with eigenvalues for each sample. Consensus compartment profiles are then generated across biological replicates within each `sample_group`. A majority consensus assigns the most frequent compartment call (A or B) across replicates to each genomic bin, marking ties as NA, while a strict consensus annotates only bins where all replicates unanimously agree on the same compartment call, marking all other bins as NA.
 
 <details markdown="1"><summary>Output files</summary>
 
 - `compartments/`
   - `<sample>_combined_compartments.bed`: BED file with genomic bins annotated as A or B compartments for each sample. Results are combined from all analyzed chromosomes.
   - `<sample>_combined_compartments.bedGraph`: BedGraph file with PC1 eigenvector values for each genomic bin.
+- `compartments/consensus/`
+  - `<sample_group>_consensus_majority.bed`: BED file with majority consensus compartment calls across replicates
+  - `<sample_group>_consensus_strict.bed`: BED file with strict consensus compartment calls (unanimous agreement only)
 
 </details>
+
 
 ### Comparisons
 
