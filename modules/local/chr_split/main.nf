@@ -1,4 +1,4 @@
-process CHROMOSOME_SPLIT {
+process CHR_SPLIT {
     tag "$meta.id"
     label 'process_low'
 

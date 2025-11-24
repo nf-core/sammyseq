@@ -1,5 +1,6 @@
-process GENERATE_CONSENSUS {
-    tag "$sample_group"
+process BUILD_CONSENSUS {
+    tag "$sample_group consensus - ${bed_files.size()} replicates"
+    label 'process_low'
 
     input:
     tuple val(sample_group), path(bed_files)

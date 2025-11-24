@@ -1,30 +1,13 @@
 #!/usr/bin/env Rscript
 
 suppressMessages({
-    require(optparse)
-    require(data.table)
-    require(doParallel)
-    require(GenomicRanges)
-    require(factoextra)
     require(parallel)
+    require(data.table)
+    require(GenomicRanges)
     require(rtracklayer)
-    require(ggplot2)
-    require(R.utils)
-    require(R.oo)
-    require(R.methodsS3)
-    require(maptools)
     require(patchwork)
-    require(sp)
-    require(dendextend)
     require(Gviz)
     require(CALDER)
-    require(ape)
-    require(fitdistrplus)
-    require(igraph)
-    require(Matrix)
-    require(rARPACK)
-    require(fields)
-    require(strawr)
 })
 
 ## https://community.seqera.io/t/source-another-r-script-in-the-bin-directory/1059

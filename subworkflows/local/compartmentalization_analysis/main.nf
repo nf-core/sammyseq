@@ -2,10 +2,10 @@
 // Run genome compartmentalization analysis
 //
 
-include { CHROMOSOME_SPLIT         } from '../../../modules/local/chromosome_split/main'
-include { CHR_COMPARTMENTS_CALLING } from '../../../modules/local/chr_compartments_calling/main'
-include { CHR_COMBINE_COMPARTMENTS } from '../../../modules/local/chr_combine_compartments/main'
-include { GENERATE_CONSENSUS       } from '../../../modules/local/generate_consensus/main'
+include { CHR_SPLIT                    } from '../../../modules/local/chr_split/main'
+include { CHR_COMPARTMENTS_CALLING     } from '../../../modules/local/chr_compartments_calling/main'
+include { CHR_COMBINE_COMPARTMENTS     } from '../../../modules/local/chr_combine_compartments/main'
+include { BUILD_CONSENSUS              } from '../../../modules/local/build_consensus/main'
 
 workflow COMPARTMENTALIZATION_ANALYSIS {
 
@@ -61,7 +61,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     // Split binned genome by chromosome
     //
-    CHROMOSOME_SPLIT(
+    CHR_SPLIT(
         ch_bed_with_meta,
         chrom_sizes
     )
@@ -69,7 +69,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     // Transpose to get one item per chromosome file
     //
-    ch_chromBeds = CHROMOSOME_SPLIT.out.beds
+    ch_chromBeds = CHR_SPLIT.out.beds
         .transpose()
         .map { meta, chr_bed ->
             def chr_name = chr_bed.baseName
@@ -156,7 +156,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     // Generate majority and strict consensus
     //
-    GENERATE_CONSENSUS(
+    BUILD_CONSENSUS(
         ch_consensus_input
     )
 
@@ -165,7 +165,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     bedgraph_files         = CHR_COMPARTMENTS_CALLING.out.bedgraph_files     // channel: [ patient, bedgraph ]
     combined_beds          = CHR_COMBINE_COMPARTMENTS.out.combined_beds      // channel: [ patient, bed ]
     combined_bedgraphs     = CHR_COMBINE_COMPARTMENTS.out.combined_bedgraphs // channel: [ patient, bedgraph ]
-    consensus_majority     = GENERATE_CONSENSUS.out.consensus_majority       // channel: [ path(bed) ]
-    consensus_strict       = GENERATE_CONSENSUS.out.consensus_strict         // channel: [ path(bed) ]
+    consensus_majority     = BUILD_CONSENSUS.out.consensus_majority          // channel: [ path(bed) ]
+    consensus_strict       = BUILD_CONSENSUS.out.consensus_strict            // channel: [ path(bed) ]
     versions               = ch_versions                                     // channel: [ versions.yml ]
 }

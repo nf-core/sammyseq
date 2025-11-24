@@ -1,10 +1,8 @@
 process CHR_COMPARTMENTS_CALLING {
     tag "${patient}_${meta.chromosome}"
     label 'process_medium'
-    errorStrategy 'terminate'
-    maxRetries 0
 
-    container 'docker.io/ciuki97/sammy_subcompartments_env:latest'
+    container 'docker.io/ciuki97/chr_compartments_calling:1.0.0'
     conda "${moduleDir}/environment.yml"
 
     input:
