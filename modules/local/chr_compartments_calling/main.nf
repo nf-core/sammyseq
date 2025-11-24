@@ -1,10 +1,11 @@
-process COMPARTMENTS_CALLING {
+process CHR_COMPARTMENTS_CALLING {
     tag "${patient}_${meta.chromosome}"
     label 'process_medium'
     errorStrategy 'terminate'
     maxRetries 0
 
     container 'docker.io/ciuki97/sammy_subcompartments_env:latest'
+    conda "${moduleDir}/environment.yml"
 
     input:
     tuple val(meta), path(chr_bed), val(patient), path(csv)
@@ -18,5 +19,5 @@ process COMPARTMENTS_CALLING {
 
     script:
     def args = task.ext.args ?: ''
-    template 'compartments_calling.R'
+    template 'chr_compartments_calling.R'
 }

@@ -2,10 +2,10 @@
 // Run genome compartmentalization analysis
 //
 
-include { CHROMOSOME_SPLIT     } from '../../../modules/local/chromosome_split/main'
-include { COMPARTMENTS_CALLING } from '../../../modules/local/compartments_calling/main'
-include { COMBINE_COMPARTMENTS } from '../../../modules/local/combine_compartments/main'
-include { GENERATE_CONSENSUS   } from '../../../modules/local/generate_consensus/main'
+include { CHROMOSOME_SPLIT         } from '../../../modules/local/chromosome_split/main'
+include { CHR_COMPARTMENTS_CALLING } from '../../../modules/local/chr_compartments_calling/main'
+include { CHR_COMBINE_COMPARTMENTS } from '../../../modules/local/chr_combine_compartments/main'
+include { GENERATE_CONSENSUS       } from '../../../modules/local/generate_consensus/main'
 
 workflow COMPARTMENTALIZATION_ANALYSIS {
 
@@ -90,24 +90,24 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     // Call compartments for each chromosome/sample combination
     //
-    COMPARTMENTS_CALLING(
+    CHR_COMPARTMENTS_CALLING(
         ch_chromSampleTuples,
         binsize,
         gtf
     )
-    ch_versions = ch_versions.mix(COMPARTMENTS_CALLING.out.versions.first())
+    ch_versions = ch_versions.mix(CHR_COMPARTMENTS_CALLING.out.versions.first())
 
     //
     // Group BED files by sample
     //
-    ch_beds_by_sample = COMPARTMENTS_CALLING.out.bed_files
+    ch_beds_by_sample = CHR_COMPARTMENTS_CALLING.out.bed_files
         .map { patient, bed -> [patient, bed] }
         .groupTuple()
 
     //
     // Group BedGraph files by sample
     //
-    ch_bedgraphs_by_sample = COMPARTMENTS_CALLING.out.bedgraph_files
+    ch_bedgraphs_by_sample = CHR_COMPARTMENTS_CALLING.out.bedgraph_files
         .map { patient, bedgraph -> [patient, bedgraph] }
         .groupTuple()
 
@@ -120,10 +120,10 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     // Merge all chromosomes per sample
     //
-    COMBINE_COMPARTMENTS(
+    CHR_COMBINE_COMPARTMENTS(
         ch_combine_input
     )
-    ch_versions = ch_versions.mix(COMBINE_COMPARTMENTS.out.versions.first())
+    ch_versions = ch_versions.mix(CHR_COMBINE_COMPARTMENTS.out.versions.first())
 
     //
     // Extract sample_group from original tracks
@@ -137,7 +137,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     // Add sample_group to combined beds
     //
-    ch_beds_with_group = COMBINE_COMPARTMENTS.out.combined_beds
+    ch_beds_with_group = CHR_COMBINE_COMPARTMENTS.out.combined_beds
         .combine(ch_sample_groups)
         .filter { patient_bed, bed, patient_group, group -> 
             patient_bed == patient_group 
@@ -161,11 +161,11 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     )
 
     emit:
-    bed_files              = COMPARTMENTS_CALLING.out.bed_files          // channel: [ patient, bed ]
-    bedgraph_files         = COMPARTMENTS_CALLING.out.bedgraph_files     // channel: [ patient, bedgraph ]
-    combined_beds          = COMBINE_COMPARTMENTS.out.combined_beds      // channel: [ patient, bed ]
-    combined_bedgraphs     = COMBINE_COMPARTMENTS.out.combined_bedgraphs // channel: [ patient, bedgraph ]
-    consensus_majority     = GENERATE_CONSENSUS.out.consensus_majority   // channel: [ path(bed) ]
-    consensus_strict       = GENERATE_CONSENSUS.out.consensus_strict     // channel: [ path(bed) ]
-    versions               = ch_versions                                 // channel: [ versions.yml ]
+    bed_files              = CHR_COMPARTMENTS_CALLING.out.bed_files          // channel: [ patient, bed ]
+    bedgraph_files         = CHR_COMPARTMENTS_CALLING.out.bedgraph_files     // channel: [ patient, bedgraph ]
+    combined_beds          = CHR_COMBINE_COMPARTMENTS.out.combined_beds      // channel: [ patient, bed ]
+    combined_bedgraphs     = CHR_COMBINE_COMPARTMENTS.out.combined_bedgraphs // channel: [ patient, bedgraph ]
+    consensus_majority     = GENERATE_CONSENSUS.out.consensus_majority       // channel: [ path(bed) ]
+    consensus_strict       = GENERATE_CONSENSUS.out.consensus_strict         // channel: [ path(bed) ]
+    versions               = ch_versions                                     // channel: [ versions.yml ]
 }

@@ -1,4 +1,4 @@
-process COMBINE_COMPARTMENTS {
+process CHR_COMBINE_COMPARTMENTS {
     tag "$sample_id"
     label 'process_low'
 
