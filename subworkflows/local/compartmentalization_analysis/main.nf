@@ -159,7 +159,6 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     GENERATE_CONSENSUS(
         ch_consensus_input
     )
-    ch_versions = ch_versions.mix(GENERATE_CONSENSUS.out.versions.first())
 
     emit:
     bed_files              = COMPARTMENTS_CALLING.out.bed_files          // channel: [ patient, bed ]
