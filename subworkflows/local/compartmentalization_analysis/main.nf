@@ -5,6 +5,7 @@
 include { CHROMOSOME_SPLIT     } from '../../../modules/local/chromosome_split/main'
 include { COMPARTMENTS_CALLING } from '../../../modules/local/compartments_calling/main'
 include { COMBINE_COMPARTMENTS } from '../../../modules/local/combine_compartments/main'
+include { GENERATE_CONSENSUS   } from '../../../modules/local/generate_consensus/main'
 
 workflow COMPARTMENTALIZATION_ANALYSIS {
 
@@ -124,10 +125,52 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     )
     ch_versions = ch_versions.mix(COMBINE_COMPARTMENTS.out.versions.first())
 
+    // =====================================================================
+    // NEW: Generate consensus compartments by sample_group
+    // =====================================================================
+    
+    //
+    // Extract sample_group from original tracks
+    //
+    ch_sample_groups = ch_compartmentTracks
+        .map { experimentalID, fraction, sample_group, bigwig -> 
+            [experimentalID, sample_group] 
+        }
+        .unique()
+    
+    //
+    // Add sample_group to combined beds
+    //
+    ch_beds_with_group = COMBINE_COMPARTMENTS.out.combined_beds
+        .combine(ch_sample_groups)
+        .filter { patient_bed, bed, patient_group, group -> 
+            patient_bed == patient_group 
+        }
+        .map { patient_bed, bed, patient_group, group -> 
+            [group, patient_bed, bed] 
+        }
+    
+    //
+    // Group combined BEDs by sample_group (e.g., all tumor samples together)
+    //
+    ch_consensus_input = ch_beds_with_group
+        .map { group, patient, bed -> [group, bed] }
+        .groupTuple()
+    
+    //
+    // Generate majority and strict consensus
+    //
+    GENERATE_CONSENSUS(
+        ch_consensus_input
+    )
+    ch_versions = ch_versions.mix(GENERATE_CONSENSUS.out.versions.first())
+
     emit:
-    bed_files            = COMPARTMENTS_CALLING.out.bed_files       // channel: [ patient, bed ]
-    bedgraph_files       = COMPARTMENTS_CALLING.out.bedgraph_files  // channel: [ patient, bedgraph ]
-    combined_beds        = COMBINE_COMPARTMENTS.out.combined_beds   // channel: [ patient, bed ]
-    combined_bedgraphs   = COMBINE_COMPARTMENTS.out.combined_bedgraphs // channel: [ patient, bedgraph ]
-    versions             = ch_versions                              // channel: [ versions.yml ]
+    bed_files              = COMPARTMENTS_CALLING.out.bed_files          // channel: [ patient, bed ]
+    bedgraph_files         = COMPARTMENTS_CALLING.out.bedgraph_files     // channel: [ patient, bedgraph ]
+    combined_beds          = COMBINE_COMPARTMENTS.out.combined_beds      // channel: [ patient, bed ]
+    combined_bedgraphs     = COMBINE_COMPARTMENTS.out.combined_bedgraphs // channel: [ patient, bedgraph ]
+    consensus_majority     = GENERATE_CONSENSUS.out.consensus_majority   // channel: [ path(bed) ]
+    consensus_strict       = GENERATE_CONSENSUS.out.consensus_strict     // channel: [ path(bed) ]
+    versions               = ch_versions                                 // channel: [ versions.yml ]
 }
