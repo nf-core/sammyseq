@@ -125,10 +125,6 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     )
     ch_versions = ch_versions.mix(COMBINE_COMPARTMENTS.out.versions.first())
 
-    // =====================================================================
-    // NEW: Generate consensus compartments by sample_group
-    // =====================================================================
-    
     //
     // Extract sample_group from original tracks
     //
