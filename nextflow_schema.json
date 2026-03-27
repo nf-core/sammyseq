@@ -98,8 +98,8 @@
                 "comparison": {
                     "type": "string",
                     "fa_icon": "fas fa-percentage",
-                    "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\" or \"S2SvsS3,S2LvsS3\")",
-                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3))*$"
+                    "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\", \"S3vsS2S\")",
+                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3|S3vsS2|S3vsS2S|S3vsS2L)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3|S3vsS2|S3vsS2S|S3vsS2L))*$"
                 },
                 "comparison_file": {
                     "type": "string",

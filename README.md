@@ -40,7 +40,7 @@ Here is an outline of the analysis steps:
 6. Create single track profiles in bigwig format ([`deeptools bamCoverage`](https://deeptools.readthedocs.io/en/latest/))
 7. (Optional) Perform chromatin compartmentalization analysis to identify A/B compartments across chromosomes ([`CALDER2`](https://github.com/CSOgroup/CALDER2)).
 8. (Optional) Generate pairwise comparison tracks in bigWig format ([`spp`](https://github.com/hms-dbmi/spp)) or ([`deeptools bigwigCompare`](https://deeptools.readthedocs.io/en/develop/content/tools/bigwigCompare.html)).
-9. (Optional) Identify differentially enriched solubility regions as described in [Wang et al., 2024 ](https://doi.org/10.1038/s41594-025-01622-5).
+9. (Optional) Identify differentially enriched solubility regions as described in [Wang et al., 2025 ](https://doi.org/10.1038/s41594-025-01622-5).
 10. Generate an analysis report by collecting all generated QC and statistics ([`MultiQC`](http://multiqc.info/))
 
 <p align="center">

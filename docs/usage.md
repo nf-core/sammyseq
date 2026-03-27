@@ -141,6 +141,8 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
     S2SvsS4  - Compare S2S fraction vs S4 fraction
     S2LvsS4  - Compare S2L fraction vs S4 fraction
     S4vsS3   - Compare S4 fraction vs S3 fraction
+    S3vsS2S  - Compare S3 fraction vs S2S fraction
+    S3vsS2L  - Compare S3 fraction vs S2L fraction
 
 > [!NOTE]
 > For 3f-SAMMYseq protocols (S2, S3, S4), valid comparisons are:
@@ -148,6 +150,7 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
     S2vsS3   - Compare S2 fraction vs S3 fraction
     S2vsS4   - Compare S2 fraction vs S4 fraction
     S4vsS3   - Compare S4 fraction vs S3 fraction
+    S3vsS2   - Compare S3 fraction vs S2 fraction
 
 The pipeline will automatically create comparisons only between fractions from the same `experimentalID` (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
 
