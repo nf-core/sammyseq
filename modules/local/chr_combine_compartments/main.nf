@@ -36,7 +36,7 @@ process CHR_COMBINE_COMPARTMENTS {
     """
     touch ${sample_id}_combined_compartments.bed
     touch ${sample_id}_combined_compartments_eigen.bedgraph
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         coreutils: \$(sort --version | head -n1 | sed 's/^.* //g')

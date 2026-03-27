@@ -390,13 +390,13 @@ if (params.stopAt == 'ALIGNMENT') {
 
         COMPARTMENTALIZATION_ANALYSIS(
             DEEPTOOLS_BAMCOVERAGE.out.bigwig,
-            ch_genome_bins,                      
-            PREPARE_GENOME.out.chrom_sizes,      
+            ch_genome_bins,
+            PREPARE_GENOME.out.chrom_sizes,
             params.outdir,
             params.binsize,
             PREPARE_GENOME.out.gtf
         )
-        
+
     }
 
     //

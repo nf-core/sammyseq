@@ -18,15 +18,15 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     gtf              // path: GTF file
 
     main:
-    
+
     ch_versions = Channel.empty()
-    
+
     //
     // Extract track information from BigWig files
     //
     ch_compartmentTracks = bigwig_tracks
-        .map { meta, bigwig -> 
-            [meta.experimentalID, meta.fraction, meta.sample_group, bigwig] 
+        .map { meta, bigwig ->
+            [meta.experimentalID, meta.fraction, meta.sample_group, bigwig]
         }
 
     //
@@ -54,7 +54,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     // Create meta for BED file
     //
     ch_bed_with_meta = binned_genome
-        .map { bed -> 
+        .map { bed ->
             [ [id: bed.baseName], bed ]
         }
 
@@ -129,30 +129,30 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     // Extract sample_group from original tracks
     //
     ch_sample_groups = ch_compartmentTracks
-        .map { experimentalID, fraction, sample_group, bigwig -> 
-            [experimentalID, sample_group] 
+        .map { experimentalID, fraction, sample_group, bigwig ->
+            [experimentalID, sample_group]
         }
         .unique()
-    
+
     //
     // Add sample_group to combined beds
     //
     ch_beds_with_group = CHR_COMBINE_COMPARTMENTS.out.combined_beds
         .combine(ch_sample_groups)
-        .filter { patient_bed, bed, patient_group, group -> 
-            patient_bed == patient_group 
+        .filter { patient_bed, bed, patient_group, group ->
+            patient_bed == patient_group
         }
-        .map { patient_bed, bed, patient_group, group -> 
-            [group, patient_bed, bed] 
+        .map { patient_bed, bed, patient_group, group ->
+            [group, patient_bed, bed]
         }
-    
+
     //
     // Group combined BEDs by sample_group
     //
     ch_consensus_input = ch_beds_with_group
         .map { group, patient, bed -> [group, bed] }
         .groupTuple()
-    
+
     //
     // Generate majority and strict consensus
     //
