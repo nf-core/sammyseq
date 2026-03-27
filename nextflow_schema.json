@@ -330,7 +330,7 @@
                 "bigwigcompare_pseudocount": {
                     "type": "number",
                     "description": "A small number to avoid x/0. Only useful together with \u2013operation log2 or \u2013operation ratio.",
-                    "default": 1e-14,
+                    "default": 1,
                     "fa_icon": "fas fa-chart-bar"
                 },
                 "bigwigcompare_operation": {
