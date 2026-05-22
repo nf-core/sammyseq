@@ -397,36 +397,36 @@ subanno_maker <- function( subcomp_gr, patient ){
 
 }
 
-removing_sammynocov_bins <- function( keeping_bins1, sammy_dist_objs, patients ){
+removing_sammynocov_bins <- function( keeping_bins1, sammy_dist_objs, patients, bins_gr ){
 
-    all_removing_bins1 <- c()
-        for( patient in patients ){
+    all_removing_bins0 <- c()
 
-            all_removing_bins1 <- c(
-                all_removing_bins1,
-                sammy_dist_objs[[ patient ]]
-            )
+    # instead of looping through the list of distance matrices, we loop through the list of sammy_dist_objs to extract the removing_bins1 for each patient and concatenate them in a single vector
+    for( i in seq_along(patients) ){
+        all_removing_bins0 <- c(
+            all_removing_bins0,
+            sammy_dist_objs[[ i ]]
+        )
+    }
 
-        }
-        all_removing_bins1 <- as.numeric( unique( all_removing_bins1 ) )
+    # saved bins are 0-based, we need to convert them to 1-based to match the keeping_bins1
+    all_removing_bins1 <- as.numeric( unique( all_removing_bins0 ) ) + 1
 
-        keeping_bins1 <- keeping_bins1[ !( keeping_bins1 %in% all_removing_bins1 ) ]
-        bins_gr <- bins_gr[ keeping_bins1 ]
+    # we filter the keeping_bins1 to remove all bins with no coverage in all fractions in at least one patient
+    keeping_bins1_updated <- keeping_bins1[ !( keeping_bins1 %in% all_removing_bins1 ) ]
+    bins_gr_updated <- bins_gr[ keeping_bins1_updated ]
 
-        return( bins_gr )
-
+    # print the number of bins removed and the number of bins kept
+    return( list( keeping_bins1 = keeping_bins1_updated, bins_gr = bins_gr_updated ) )
 }
 
 ### Wrapper to call subcompartments and return objects containing all the informations
 call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file, binsize, chr, genes_gr, keeping_bins1 = "all", sublevel = "sub.8", sub_colors = c( "B.2.2" = "#4575b4", "B.2.1" = "#74add1", "B.1.2" = "#abd9e9", "B.1.1" = "#e0f3f8", "A.1.1" = "#fee090", "A.1.2" = "#fdae61", "A.2.1" = "#f46d43", "A.2.2" = "#d73027" ), cores = 4, n.comp = 10, const.comp = 5 ){
 
-
     ## If a list of bins to analyzed has not been passed, use all genes in bins_gr
     if( keeping_bins1[ 1 ] == "all" ){
-
         keeping_bins1 <- seq( 1, length( bins_gr ) )
         print( "No bin removed" )
-
     }
 
     ## Proceed with compartment calculation
@@ -474,12 +474,15 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
     })
 
-    ## Make a list of bins with no coverage in at list one sample
-    bins_gr <- removing_sammynocov_bins(
-        keeping_bins1,
-        sammy_dist_objs,
-        patients
+    # save the list of bins with no coverage in all fractions in at least one patient to remove them from the analysis
+    filtering_results <- removing_sammynocov_bins(
+        keeping_bins1 = keeping_bins1,
+        sammy_dist_objs = sammy_dist_objs,
+        patients = patients,
+        bins_gr = bins_gr
     )
+    keeping_bins1 <- filtering_results$keeping_bins1
+    bins_gr        <- filtering_results$bins_gr
 
     ## Calculate sub compartments
     sub_objs <- mclapply( patients, mc.cores = cores, function( patient ){
@@ -492,7 +495,12 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
         ### Remove from matrix bins with no coverage in all fractions in at least one sample
         sammy_dist_fullmat <- sammy_dist_obj[[ "dist_mat" ]]
-        sammy_dist_mat <- sammy_dist_fullmat[ keeping_bins1, keeping_bins1 ]
+
+        # CORREZIONE: Poiché dist_mat ha come rownames stringhe 0-based (es. "0", "1"),
+        # convertiamo il keeping_bins1 (1-based) in stringhe 0-based per fare un subsetting perfetto.
+        keeping_bins0_char <- as.character( keeping_bins1 - 1 )
+        sammy_dist_mat <- sammy_dist_fullmat[ keeping_bins0_char, keeping_bins0_char ]
+
         print( "Removed from the analysis bin with no coverage in all fraction in at least one patient" )
 
         rm( sammy_dist_obj )
@@ -548,7 +556,6 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
             save( sammy_blocks_trend, file = sammy_blockstrend_file )
             print( "Correlation matrix saved" )
 
-
         } else{
 
             print( "Blocks trend file exists" )
@@ -569,7 +576,6 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
             const.comp = const.comp
         )
 
-
         print( "Calculated subcompartments" )
 
         ## Transfrom subcompartment in a GRanges object to plot it with Givz
@@ -584,26 +590,24 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         ## Subcompartment object
         subcomp_anno <- subanno_maker( subcomp_gr, patient )
 
-            return(
-
-                list(
-                    sammy_blocks = sammy_blocks,
-                    sammy_blocks_trend = sammy_blocks_trend,
-                    subcompartment_obj = subcompartment_obj,
-                    annotrack = subcomp_anno,
-                    gr = subcomp_gr
-                )
-
+        return(
+            list(
+                sammy_blocks = sammy_blocks,
+                sammy_blocks_trend = sammy_blocks_trend,
+                subcompartment_obj = subcompartment_obj,
+                annotrack = subcomp_anno,
+                gr = subcomp_gr
             )
+        )
 
-        })
-        names( sub_objs ) <- patients
+    })
+    names( sub_objs ) <- patients
 
     save( sub_objs, file = subs_file )
 
     return( sub_objs )
-
 }
+
 ##############################################################
 # UTILITIES.R
 ##############################################################
