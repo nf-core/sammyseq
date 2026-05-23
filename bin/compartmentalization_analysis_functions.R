@@ -330,7 +330,6 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 # SAMMY_SUBCOMPARTMENTS.R
 ####################################################
 
-## FUNCTIONS
 ### It takes tracks in input and calculate the euclidean distance matrix
 my_read.SAMMY.calder <- function( tracks, track_names, bins_gr,  keeping_bins = "all", metric = "euclidean", cores = 4 ){
 
@@ -346,19 +345,14 @@ my_read.SAMMY.calder <- function( tracks, track_names, bins_gr,  keeping_bins = 
     keeping_bins <- track_matrix_info[[ "keeping_bins" ]]
 
     ## Annotate the bins with 0 coverage in all fractions
-    ## They will be removed in all other samples
     bws_df <- as.data.frame( bws_dtable )
     rownames( bws_df ) <- as.character( keeping_bins )
 
     removing_bins1 <- rownames( bws_df[ ( rowSums( bws_dtable ) == 0 ), ] )
-    print( "Bins with no coverage annotated" )
 
     ## Calculate eucledean distance between pairs of points (i.e., bins)
-    ## Each point is define in the n-dimensional space, where n is 3,4, or 6 based on the number of fractions or Chip-seq experiments
     dist_mat <- as.matrix( dist( bws_dtable, method = metric ) )
     rownames( dist_mat ) <- colnames( dist_mat ) <- keeping_bins
-
-    print( "Distance matrix made" )
 
     return( list( dist_mat = dist_mat, removing_bins1 = removing_bins1 ) )
 
@@ -427,8 +421,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         print( "No bin removed" )
     }
 
-    # PHASE 1: Scan all patients to identify bins with zero coverage across fractions
-    print( "Scanning profiles across all patients to identify zero coverage bins" )
+    # remove bins with zero coverage in all fractions in at least one patient
     sammy_removing_lists <- mclapply( patients, mc.cores = cores, function( patient ){
         sammy_files <- tracks_db[ which( tracks_db$Patient_name == patient ), "File" ]
         names( sammy_files ) <- tracks_db[ which( tracks_db$Patient_name == patient ), "Fraction" ]
@@ -444,7 +437,9 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         keeping_bins <- track_matrix_info[[ "keeping_bins" ]]
         bws_df <- as.data.frame( bws_dtable )
         rownames( bws_df ) <- as.character( keeping_bins )
-        removing_bins1 <- rownames( bws_df[ ( rowSums( bws_dtable ) == 0 ), ] )
+        
+        # remove bins with zero coverage in all fractions in at least one patient
+        removing_bins1 <- rownames( bws_df[ ( rowSums( bws_dtable >= 0.1 ) == 0 ), ] )
         return( removing_bins1 )
     })
 
@@ -484,7 +479,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
         sammy_dist_mat <- sammy_dist_obj[[ "dist_mat" ]]
 
-        # Subset the distance matrix to keep only the bins with coverage in all fractions in all patients
+        # Subset the distance matrix to keep only the globally filtered bins
         keeping_bins1_char <- as.character( keeping_bins1 )
         valid_bins <- keeping_bins1_char[ keeping_bins1_char %in% rownames( sammy_dist_mat ) ]
         sammy_dist_mat <- sammy_dist_mat[ valid_bins, valid_bins ]
