@@ -326,7 +326,7 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 
 }
 
-##############################################################
+####################################################
 # SAMMY_SUBCOMPARTMENTS.R
 ####################################################
 
@@ -496,10 +496,10 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         ### Remove from matrix bins with no coverage in all fractions in at least one sample
         sammy_dist_fullmat <- sammy_dist_obj[[ "dist_mat" ]]
 
-        # CORREZIONE: Poiché dist_mat ha come rownames stringhe 0-based (es. "0", "1"),
-        # convertiamo il keeping_bins1 (1-based) in stringhe 0-based per fare un subsetting perfetto.
+        # Subset matrix using 0-based character indices matching the global filter
         keeping_bins0_char <- as.character( keeping_bins1 - 1 )
-        sammy_dist_mat <- sammy_dist_fullmat[ keeping_bins0_char, keeping_bins0_char ]
+        valid_bins <- keeping_bins0_char[ keeping_bins0_char %in% rownames( sammy_dist_fullmat ) ]
+        sammy_dist_mat <- sammy_dist_fullmat[ valid_bins, valid_bins ]
 
         print( "Removed from the analysis bin with no coverage in all fraction in at least one patient" )
 
