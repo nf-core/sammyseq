@@ -326,12 +326,11 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 
 }
 
-####################################################
+##############################################################
 # SAMMY_SUBCOMPARTMENTS.R
 ####################################################
-
 ### It takes tracks in input and calculate the euclidean distance matrix
-my_read.SAMMY.calder <- function( tracks, track_names, bins_gr,  keeping_bins = "all", metric = "euclidean", cores = 4 ){
+my_read.SAMMY.calder <- function( tracks, track_names, bins_gr, keeping_bins = "all", metric = "euclidean", cores = 4 ){
 
     track_matrix_info <- make_tracks_matrix(
         tracks = tracks,
@@ -344,18 +343,26 @@ my_read.SAMMY.calder <- function( tracks, track_names, bins_gr,  keeping_bins = 
     bws_dtable <- track_matrix_info[[ "bws_dtable" ]]
     keeping_bins <- track_matrix_info[[ "keeping_bins" ]]
 
-    ## Annotate the bins with 0 coverage in all fractions
+    ## Annotate the bins: 
+    ## Rimuoviamo il bin se NON ha segnale in tutte e 3 le repliche 
+    ## (ovvero se la somma dei bin che hanno segnale < 0 è minore del numero totale di repliche)
     bws_df <- as.data.frame( bws_dtable )
     rownames( bws_df ) <- as.character( keeping_bins )
 
-    removing_bins1 <- rownames( bws_df[ ( rowSums( bws_dtable ) == 0 ), ] )
+    # Logica: un bin viene annotato da rimuovere se il numero di repliche con segnale > 0 
+    # è inferiore al numero totale di repliche (ncol(bws_dtable))
+    has_signal <- bws_dtable > 0
+    removing_bins1 <- rownames( bws_df[ rowSums(has_signal) < ncol(bws_dtable), ] )
+    
+    print( paste("Bins annotated for removal (missing signal in one or more fractions):", length(removing_bins1)) )
 
     ## Calculate eucledean distance between pairs of points (i.e., bins)
     dist_mat <- as.matrix( dist( bws_dtable, method = metric ) )
     rownames( dist_mat ) <- colnames( dist_mat ) <- keeping_bins
 
-    return( list( dist_mat = dist_mat, removing_bins1 = removing_bins1 ) )
+    print( "Distance matrix made" )
 
+    return( list( dist_mat = dist_mat, removing_bins1 = removing_bins1 ) )
 }
 
 ### Function to extract gr object from subcompartment obj for selected subcompartment call
@@ -393,22 +400,24 @@ subanno_maker <- function( subcomp_gr, patient ){
 
 removing_sammynocov_bins <- function( keeping_bins1, sammy_dist_objs, patients, bins_gr ){
 
-    all_removing_bins1 <- c()
+    all_removing_bins0 <- c()
 
-    # Extract all the bins with zero coverage in all fractions in at least one patient
+    # instead of looping through the list of distance matrices, we loop through the list of sammy_dist_objs to extract the removing_bins1 for each patient and concatenate them in a single vector
     for( i in seq_along(patients) ){
-        all_removing_bins1 <- c(
-            all_removing_bins1,
+        all_removing_bins0 <- c(
+            all_removing_bins0,
             sammy_dist_objs[[ i ]]
         )
     }
 
-    all_removing_bins1 <- as.numeric( unique( all_removing_bins1 ) )
+    # saved bins are 0-based, we need to convert them to 1-based to match the keeping_bins1
+    all_removing_bins1 <- as.numeric( unique( all_removing_bins0 ) ) + 1
 
-    # Filter the keeping_bins1 and bins_gr to remove all bins with zero coverage in all fractions in at least one patient
+    # we filter the keeping_bins1 to remove all bins with no coverage in all fractions in at least one patient
     keeping_bins1_updated <- keeping_bins1[ !( keeping_bins1 %in% all_removing_bins1 ) ]
     bins_gr_updated <- bins_gr[ keeping_bins1_updated ]
 
+    # print the number of bins removed and the number of bins kept
     return( list( keeping_bins1 = keeping_bins1_updated, bins_gr = bins_gr_updated ) )
 }
 
@@ -421,32 +430,55 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         print( "No bin removed" )
     }
 
-    # remove bins with zero coverage in all fractions in at least one patient
-    sammy_removing_lists <- mclapply( patients, mc.cores = cores, function( patient ){
-        sammy_files <- tracks_db[ which( tracks_db$Patient_name == patient ), "File" ]
-        names( sammy_files ) <- tracks_db[ which( tracks_db$Patient_name == patient ), "Fraction" ]
-        
-        track_matrix_info <- make_tracks_matrix(
-            tracks = sammy_files,
-            track_names = names( sammy_files ),
-            bins_gr = bins_gr,
-            keeping_bins = keeping_bins1,
-            cores = 1
-        )
-        bws_dtable <- track_matrix_info[[ "bws_dtable" ]]
-        keeping_bins <- track_matrix_info[[ "keeping_bins" ]]
-        bws_df <- as.data.frame( bws_dtable )
-        rownames( bws_df ) <- as.character( keeping_bins )
-        
-        # remove bins with zero coverage in all fractions in at least one patient
-        removing_bins1 <- rownames( bws_df[ ( rowSums( bws_dtable >= 0.1 ) == 0 ), ] )
-        return( removing_bins1 )
+    ## Proceed with compartment calculation
+    print( "Calling subcompartments" )
+
+    sammy_dist_objs <- mclapply( patients, mc.cores = cores, function( patient ){
+
+        print( paste0( "Analysing: ", patient ) )
+
+        ### Load files from a database containing for each row patient_name, fraction and file path
+        sammy_files <- tracks_db[
+            which( tracks_db$Patient_name == patient ),
+            "File" ]
+        names( sammy_files ) <- tracks_db[
+            which( tracks_db$Patient_name == patient ),
+            "Fraction" ]
+
+        print( "Got file info" )
+
+        ### Make the distance matrix
+        sammy_distobj_file <- paste0( patient, "_distance-matrix___", chr, '_', binsize, ".Rdata" )
+
+        if( !file.exists( sammy_distobj_file ) ){
+
+            sammy_dist_obj <- my_read.SAMMY.calder(
+                tracks = sammy_files,
+                track_names = names( sammy_files ),
+                bins_gr = bins_gr,
+                keeping_bins = keeping_bins1,
+                cores = cores
+            )
+
+            print( "Saving matrix..." )
+            save( sammy_dist_obj, file = sammy_distobj_file )
+            print( "Matrix saved" )
+
+        } else{
+
+            print( "Distance matrix already exists" )
+            load( sammy_distobj_file )
+
+        }
+
+        return( sammy_dist_obj[[ "removing_bins1" ]] )
+
     })
 
-    # Filter the keeping_bins1 and bins_gr to remove all bins with zero coverage in all fractions in at least one patient
+    # save the list of bins with no coverage in all fractions in at least one patient to remove them from the analysis
     filtering_results <- removing_sammynocov_bins(
         keeping_bins1 = keeping_bins1,
-        sammy_dist_objs = sammy_removing_lists,
+        sammy_dist_objs = sammy_dist_objs,
         patients = patients,
         bins_gr = bins_gr
     )
@@ -458,33 +490,22 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
         print( paste( "Analysing patient", patient ) )
 
-        sammy_files <- tracks_db[ which( tracks_db$Patient_name == patient ), "File" ]
-        names( sammy_files ) <- tracks_db[ which( tracks_db$Patient_name == patient ), "Fraction" ]
-
-        ### Load or create the distance matrix using the globally filtered bin list
+        ### Load the previously created distance matrix
         sammy_distobj_file <- paste0( patient, "_distance-matrix___", chr, '_', binsize, ".Rdata" )
+        load( sammy_distobj_file )
 
-        if( !file.exists( sammy_distobj_file ) ){
-            sammy_dist_obj <- my_read.SAMMY.calder(
-                tracks = sammy_files,
-                track_names = names( sammy_files ),
-                bins_gr = bins_gr,
-                keeping_bins = keeping_bins1,
-                cores = 1
-            )
-            save( sammy_dist_obj, file = sammy_distobj_file )
-        } else {
-            load( sammy_distobj_file )
-        }
+        ### Remove from matrix bins with no coverage in all fractions in at least one sample
+        sammy_dist_fullmat <- sammy_dist_obj[[ "dist_mat" ]]
 
-        sammy_dist_mat <- sammy_dist_obj[[ "dist_mat" ]]
+        # CORREZIONE: Poiché dist_mat ha come rownames stringhe 0-based (es. "0", "1"),
+        # convertiamo il keeping_bins1 (1-based) in stringhe 0-based per fare un subsetting perfetto.
+        keeping_bins0_char <- as.character( keeping_bins1 - 1 )
+        sammy_dist_mat <- sammy_dist_fullmat[ keeping_bins0_char, keeping_bins0_char ]
 
-        # Subset the distance matrix to keep only the globally filtered bins
-        keeping_bins1_char <- as.character( keeping_bins1 )
-        valid_bins <- keeping_bins1_char[ keeping_bins1_char %in% rownames( sammy_dist_mat ) ]
-        sammy_dist_mat <- sammy_dist_mat[ valid_bins, valid_bins ]
+        print( "Removed from the analysis bin with no coverage in all fraction in at least one patient" )
 
         rm( sammy_dist_obj )
+        rm( sammy_dist_fullmat )
 
         ### Make the correlation matrix
         sammy_corrmat_file <- paste0( patient, "_corr-matrix___", chr, '_', binsize, ".Rdata" )
