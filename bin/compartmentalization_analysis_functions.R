@@ -329,8 +329,10 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 ##############################################################
 # SAMMY_SUBCOMPARTMENTS.R
 ####################################################
+
+## FUNCTIONS
 ### It takes tracks in input and calculate the euclidean distance matrix
-my_read.SAMMY.calder <- function( tracks, track_names, bins_gr, keeping_bins = "all", metric = "euclidean", cores = 4 ){
+my_read.SAMMY.calder <- function( tracks, track_names, bins_gr,  keeping_bins = "all", metric = "euclidean", cores = 4 ){
 
     track_matrix_info <- make_tracks_matrix(
         tracks = tracks,
@@ -343,26 +345,23 @@ my_read.SAMMY.calder <- function( tracks, track_names, bins_gr, keeping_bins = "
     bws_dtable <- track_matrix_info[[ "bws_dtable" ]]
     keeping_bins <- track_matrix_info[[ "keeping_bins" ]]
 
-    ## Annotate the bins: 
-    ## Rimuoviamo il bin se NON ha segnale in tutte e 3 le repliche 
-    ## (ovvero se la somma dei bin che hanno segnale < 0 è minore del numero totale di repliche)
+    ## Annotate the bins with 0 coverage in all fractions
+    ## They will be removed in all other samples
     bws_df <- as.data.frame( bws_dtable )
     rownames( bws_df ) <- as.character( keeping_bins )
 
-    # Logica: un bin viene annotato da rimuovere se il numero di repliche con segnale > 0 
-    # è inferiore al numero totale di repliche (ncol(bws_dtable))
-    has_signal <- bws_dtable > 0
-    removing_bins1 <- rownames( bws_df[ rowSums(has_signal) < ncol(bws_dtable), ] )
-    
-    print( paste("Bins annotated for removal (missing signal in one or more fractions):", length(removing_bins1)) )
+    removing_bins1 <- rownames( bws_df[ ( rowSums( bws_dtable ) == 0 ), ] )
+    print( "Bins with no coverage annotated" )
 
     ## Calculate eucledean distance between pairs of points (i.e., bins)
+    ## Each point is define in the n-dimensional space, where n is 3,4, or 6 based on the number of fractions or Chip-seq experiments
     dist_mat <- as.matrix( dist( bws_dtable, method = metric ) )
     rownames( dist_mat ) <- colnames( dist_mat ) <- keeping_bins
 
     print( "Distance matrix made" )
 
     return( list( dist_mat = dist_mat, removing_bins1 = removing_bins1 ) )
+
 }
 
 ### Function to extract gr object from subcompartment obj for selected subcompartment call
@@ -399,35 +398,36 @@ subanno_maker <- function( subcomp_gr, patient ){
 }
 
 removing_sammynocov_bins <- function( keeping_bins1, sammy_dist_objs, patients, bins_gr ){
-
+    ## take the list of bins with no coverage in all fractions and remove them from the analysis
     all_removing_bins0 <- c()
-
-    # instead of looping through the list of distance matrices, we loop through the list of sammy_dist_objs to extract the removing_bins1 for each patient and concatenate them in a single vector
-    for( i in seq_along(patients) ){
-        all_removing_bins0 <- c(
-            all_removing_bins0,
-            sammy_dist_objs[[ i ]]
-        )
+        for( i in seq_along(patients) ){
+            
+            all_removing_bins0 <- c(
+                all_removing_bins0,
+                sammy_dist_objs[[ i ]]
+            )
+        
     }
-
-    # saved bins are 0-based, we need to convert them to 1-based to match the keeping_bins1
+    # CALDER uses 0-based indices, so we need to add 1 to the bins to remove to match the keeping_bins1 which are 1-based
     all_removing_bins1 <- as.numeric( unique( all_removing_bins0 ) ) + 1
+    # Remove from the keeping_bins1 the bins with no coverage in all fractions in at least one patient
+    keeping_bins1_filtered <- keeping_bins1[ !( keeping_bins1 %in% all_removing_bins1 ) ]
+    bins_gr_filtered <- bins_gr[ keeping_bins1_filtered ]
 
-    # we filter the keeping_bins1 to remove all bins with no coverage in all fractions in at least one patient
-    keeping_bins1_updated <- keeping_bins1[ !( keeping_bins1 %in% all_removing_bins1 ) ]
-    bins_gr_updated <- bins_gr[ keeping_bins1_updated ]
+    return( list( keeping_bins1 = keeping_bins1_filtered, bins_gr = bins_gr_filtered ) )
 
-    # print the number of bins removed and the number of bins kept
-    return( list( keeping_bins1 = keeping_bins1_updated, bins_gr = bins_gr_updated ) )
 }
 
 ### Wrapper to call subcompartments and return objects containing all the informations
 call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file, binsize, chr, genes_gr, keeping_bins1 = "all", sublevel = "sub.8", sub_colors = c( "B.2.2" = "#4575b4", "B.2.1" = "#74add1", "B.1.2" = "#abd9e9", "B.1.1" = "#e0f3f8", "A.1.1" = "#fee090", "A.1.2" = "#fdae61", "A.2.1" = "#f46d43", "A.2.2" = "#d73027" ), cores = 4, n.comp = 10, const.comp = 5 ){
 
+
     ## If a list of bins to analyzed has not been passed, use all genes in bins_gr
     if( keeping_bins1[ 1 ] == "all" ){
+
         keeping_bins1 <- seq( 1, length( bins_gr ) )
         print( "No bin removed" )
+
     }
 
     ## Proceed with compartment calculation
@@ -475,15 +475,16 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
     })
 
-    # save the list of bins with no coverage in all fractions in at least one patient to remove them from the analysis
-    filtering_results <- removing_sammynocov_bins(
-        keeping_bins1 = keeping_bins1,
-        sammy_dist_objs = sammy_dist_objs,
-        patients = patients,
-        bins_gr = bins_gr
+    ## Make a list of bins with no coverage in at list one sample
+    filtered_data <- removing_sammynocov_bins(
+        keeping_bins1,
+        sammy_dist_objs,
+        patients,
+        bins_gr
     )
-    keeping_bins1 <- filtering_results$keeping_bins1
-    bins_gr        <- filtering_results$bins_gr
+
+    keeping_bins1 <- filtered_data$keeping_bins1
+    bins_gr <- filtered_data$bins_gr
 
     ## Calculate sub compartments
     sub_objs <- mclapply( patients, mc.cores = cores, function( patient ){
@@ -496,12 +497,9 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
         ### Remove from matrix bins with no coverage in all fractions in at least one sample
         sammy_dist_fullmat <- sammy_dist_obj[[ "dist_mat" ]]
-
-        # CORREZIONE: Poiché dist_mat ha come rownames stringhe 0-based (es. "0", "1"),
-        # convertiamo il keeping_bins1 (1-based) in stringhe 0-based per fare un subsetting perfetto.
+        ## CALDER uses 0-based indices, so we need to add 1 to the bins to remove to match the keeping_bins1 which are 1-based
         keeping_bins0_char <- as.character( keeping_bins1 - 1 )
         sammy_dist_mat <- sammy_dist_fullmat[ keeping_bins0_char, keeping_bins0_char ]
-
         print( "Removed from the analysis bin with no coverage in all fraction in at least one patient" )
 
         rm( sammy_dist_obj )
@@ -557,6 +555,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
             save( sammy_blocks_trend, file = sammy_blockstrend_file )
             print( "Correlation matrix saved" )
 
+
         } else{
 
             print( "Blocks trend file exists" )
@@ -577,6 +576,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
             const.comp = const.comp
         )
 
+
         print( "Calculated subcompartments" )
 
         ## Transfrom subcompartment in a GRanges object to plot it with Givz
@@ -591,24 +591,26 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         ## Subcompartment object
         subcomp_anno <- subanno_maker( subcomp_gr, patient )
 
-        return(
-            list(
-                sammy_blocks = sammy_blocks,
-                sammy_blocks_trend = sammy_blocks_trend,
-                subcompartment_obj = subcompartment_obj,
-                annotrack = subcomp_anno,
-                gr = subcomp_gr
-            )
-        )
+            return(
 
-    })
-    names( sub_objs ) <- patients
+                list(
+                    sammy_blocks = sammy_blocks,
+                    sammy_blocks_trend = sammy_blocks_trend,
+                    subcompartment_obj = subcompartment_obj,
+                    annotrack = subcomp_anno,
+                    gr = subcomp_gr
+                )
+
+            )
+
+        })
+        names( sub_objs ) <- patients
 
     save( sub_objs, file = subs_file )
 
     return( sub_objs )
-}
 
+}
 ##############################################################
 # UTILITIES.R
 ##############################################################
@@ -939,7 +941,7 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 
 
 ### Import a set of tracks and arrange in a matrix (dtable, columns are the tracks and rows are the genomic bins)
-make_tracks_matrix <- function( tracks, track_names, bins_gr, keeping_bins = "all", cores = 4 ){
+make_tracks_matrix <- function( tracks, track_names, bins_gr, keeping_bins = "all", bins_gr, cores = 4 ){
 
     genome <- as.character( genome( bins_gr ) )
 
@@ -954,7 +956,7 @@ make_tracks_matrix <- function( tracks, track_names, bins_gr, keeping_bins = "al
     print( "Tracks imported" )
 
     ## Keep bins not having NA row in Hi-C
-    after_bins_selected <- bins_selector( bws, track_names, keeping_bins, cores )
+    after_bins_selected <- bins_selector( bws, track_names, keeping_bins, bins_gr, cores )
 
     bws <- after_bins_selected[[ "bws" ]]
     keeping_bins <- after_bins_selected[[ "keeping_bins" ]]
@@ -1010,7 +1012,7 @@ import_and_rebin__bw <- function( files, bin_list, genome, names, cores = 10 ){
 }
 
 ### Select the bin to discard from a set of tracks imported in a GRange object list
-bins_selector <- function( bws, track_names, keeping_bins, cores = 4 ){
+bins_selector <- function( bws, track_names, keeping_bins, bins_gr, cores = 4 ){
 
     if( keeping_bins[ 1 ] == "all" ){
 
@@ -1137,11 +1139,10 @@ generate_files <- function(sub_objs, chr) {
     prvbin <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Bin"]])
     prvblock <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Block"]])
 
-    df_eigenvect <- data.frame()
-    for (i in seq_len(nrow(prvbin))) {
-      partdf <- prvblock[prvblock$block == as.integer(prvbin$block[i]), c("block", "pc1")]
-      df_eigenvect <- rbind(df_eigenvect, partdf)
-    }
+    df_eigenvect <- merge(prvbin[, c("block", "chr", "bin")], 
+                          prvblock[, c("block", "pc1")], 
+                          by = "block", all.x = TRUE)
+    df_eigenvect <- df_eigenvect[order(df_eigenvect$bin), ]
 
     df_tp_chronly_eigenvect <- cbind(df_tp_chronly, df_eigenvect)
     write.table(df_tp_chronly_eigenvect,
@@ -1152,6 +1153,7 @@ generate_files <- function(sub_objs, chr) {
     # Generate the BED file
     df_tp_chronly$strand <- gsub("\\*", "\\.", df_tp_chronly$strand)
     df_tp_chronly$zero <- 0
+    df_tp_chronly$start <- df_tp_chronly$start - 1
     bed_data <- df_tp_chronly[, c('seqnames', 'start', 'end', 'subcomps_vect', 'zero', 'strand', 'start', 'end', 'subcolor_vect')]
 
     # Modify colors for A and B compartments
@@ -1171,6 +1173,7 @@ generate_files <- function(sub_objs, chr) {
 
     # Generate the bedGraph file for eigenvectors
     bedgraph_data <- df_tp_chronly_eigenvect[, c('seqnames', 'start', 'end', 'pc1')]
+    bedgraph_data$start <- bedgraph_data$start - 1
     bedgraph_file <- paste0(ctrl, "_", chr, "_comp_eigenvector.bedgraph")
     header_bedgraph <- paste0('track type=bedGraph name="', ctrl, '_eigenvector" description="', ctrl, ' eigenvector" visibility=full color=200,100,0 altColor=0,100,200 priority=20')
 
