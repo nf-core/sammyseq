@@ -401,12 +401,12 @@ removing_sammynocov_bins <- function( keeping_bins1, sammy_dist_objs, patients, 
     ## take the list of bins with no coverage in all fractions and remove them from the analysis
     all_removing_bins0 <- c()
         for( i in seq_along(patients) ){
-            
+
             all_removing_bins0 <- c(
                 all_removing_bins0,
                 sammy_dist_objs[[ i ]]
             )
-        
+
     }
     # CALDER uses 0-based indices, so we need to add 1 to the bins to remove to match the keeping_bins1 which are 1-based
     all_removing_bins1 <- as.numeric( unique( all_removing_bins0 ) ) + 1
@@ -1139,8 +1139,8 @@ generate_files <- function(sub_objs, chr) {
     prvbin <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Bin"]])
     prvblock <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Block"]])
 
-    df_eigenvect <- merge(prvbin[, c("block", "chr", "bin")], 
-                          prvblock[, c("block", "pc1")], 
+    df_eigenvect <- merge(prvbin[, c("block", "chr", "bin")],
+                          prvblock[, c("block", "pc1")],
                           by = "block", all.x = TRUE)
     df_eigenvect <- df_eigenvect[order(df_eigenvect$bin), ]
 
