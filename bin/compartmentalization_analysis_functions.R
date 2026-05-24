@@ -941,7 +941,7 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 
 
 ### Import a set of tracks and arrange in a matrix (dtable, columns are the tracks and rows are the genomic bins)
-make_tracks_matrix <- function( tracks, track_names, bins_gr, keeping_bins = "all", bins_gr, cores = 4 ){
+make_tracks_matrix <- function( tracks, track_names, bins_gr, keeping_bins = "all", cores = 4 ){
 
     genome <- as.character( genome( bins_gr ) )
 
@@ -1125,6 +1125,8 @@ rgb_str <- function(hex) {
 
 # Function to generate TSV and BED files
 generate_files <- function(sub_objs, chr) {
+  old_scipen <- options(scipen = 999)
+  on.exit(options(old_scipen))
   for (ctrl in names(sub_objs)) {
     df_tp <- as.data.frame(sub_objs[[ctrl]][["gr"]])
     df_tp_chronly <- df_tp[df_tp$seqnames == chr,]
