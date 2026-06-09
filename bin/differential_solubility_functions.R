@@ -328,7 +328,7 @@ Bins_selector <- function(combination, allmixeddf_grobj, fraction1 = "S2S", frac
     prvdftest_gr <- makeGRangesFromDataFrame(prvdftest, keep.extra.columns = TRUE)
 
     # Apply statistical testing
-    up_down_to_ztest_grr <- prvdftest_gr[abs(mcols(prvdftest_gr)$cohen.estimate) >= 3]
+    up_down_to_ztest_grr <- prvdftest_gr[abs(mcols(prvdftest_gr)$cohen.estimate) >= 2] # huge
 
     cat("Statistical testing completed. Regions passing threshold:", length(up_down_to_ztest_grr), "\n")
 
