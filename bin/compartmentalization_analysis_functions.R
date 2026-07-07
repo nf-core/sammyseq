@@ -626,7 +626,7 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
     return( sub_objs )
 
 }
-        
+
 ##############################################################
 # UTILITIES.R
 ##############################################################
