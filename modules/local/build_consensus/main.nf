@@ -26,7 +26,7 @@ process BUILD_CONSENSUS {
             if (a[bin] > b[bin]) comp = "A"
             else if (b[bin] > a[bin]) comp = "B"
             else comp = "NA"
-            color = (comp == "A") ? "207,207,207" : (comp == "B") ? "69,117,180" : "255,255,255"
+            color = (comp == "A") ? "90,149,143" : (comp == "B") ? "224,170,88" : "255,255,255"
             print bin "\\t" comp "\\t" fields[bin] "\\t" color
         }
     }' | sort -k1,1V -k2,2n >> ${sample_group}_consensus_majority.bed
@@ -45,7 +45,7 @@ process BUILD_CONSENSUS {
             if (a[bin] == n) comp = "A"
             else if (b[bin] == n) comp = "B"
             else comp = "NA"
-            color = (comp == "A") ? "207,207,207" : (comp == "B") ? "69,117,180" : "255,255,255"
+            color = (comp == "A") ? "90,149,143" : (comp == "B") ? "224,170,88" : "255,255,255"
             print bin "\\t" comp "\\t" fields[bin] "\\t" color
         }
     }' | sort -k1,1V -k2,2n >> ${sample_group}_consensus_strict.bed

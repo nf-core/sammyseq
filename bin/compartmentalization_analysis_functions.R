@@ -565,6 +565,23 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
 
         print( "Trend per block calculated" )
 
+        ### Eigenvector calculation
+        bin_eigenvector <- drop(CALDER::get_PCs(sammy_corr_mat, which = 1))
+
+        all_bins_as_blocks <- setNames(
+            as.list(rownames(sammy_corr_mat)),
+            seq_len(nrow(sammy_corr_mat))
+        )
+
+        bin_eigenvector <- set_sign_from_genedens(
+            pc1 = bin_eigenvector,
+            genes_gr = genes_gr,
+            bins_gr = bins_gr,
+            blocks = all_bins_as_blocks
+        )
+
+        print( "Bin-level eigenvector calculated" )
+
         ### Call subcompartments
         subcompartment_obj <- get.subcompartment.calder(
             T = sammy_blocks_trend,
@@ -576,10 +593,9 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
             const.comp = const.comp
         )
 
-
         print( "Calculated subcompartments" )
 
-        ## Transfrom subcompartment in a GRanges object to plot it with Givz
+        ## Transform subcompartment in a GRanges object to plot
         subcomp_gr <- subgr_extractor(
             subcompartment_bin = subcompartment_obj$Bin,
             bins_gr = bins_gr,
@@ -591,26 +607,26 @@ call_subcompartments_sammy <- function( patients, tracks_db, bins_gr, subs_file,
         ## Subcompartment object
         subcomp_anno <- subanno_maker( subcomp_gr, patient )
 
-            return(
-
-                list(
-                    sammy_blocks = sammy_blocks,
-                    sammy_blocks_trend = sammy_blocks_trend,
-                    subcompartment_obj = subcompartment_obj,
-                    annotrack = subcomp_anno,
-                    gr = subcomp_gr
-                )
-
+        return(
+            list(
+                sammy_blocks = sammy_blocks,
+                sammy_blocks_trend = sammy_blocks_trend,
+                subcompartment_obj = subcompartment_obj,
+                annotrack = subcomp_anno,
+                gr = subcomp_gr,
+                bin_eigenvector = bin_eigenvector
             )
+        )
 
-        })
-        names( sub_objs ) <- patients
+    })
+    names( sub_objs ) <- patients
 
     save( sub_objs, file = subs_file )
 
     return( sub_objs )
 
 }
+        
 ##############################################################
 # UTILITIES.R
 ##############################################################
@@ -912,7 +928,7 @@ get.subcompartment.calder <- function( T, blocks, chr, genes_gr, bins_gr, n.comp
 
     H.k2.ord <- dendextend::rotate(x=H.k2, order=ord.block)
 
-    ## vector of
+    ## vector of subcompartment labels for each block
     AB.sub<-CALDER::get_cluser_levels(H.k2.ord, k_clusters=Inf, balanced_4_clusters=FALSE)$cluster_labels
 
     AB.sub.dt<-data.table::data.table(
@@ -1156,36 +1172,26 @@ generate_files <- function(sub_objs, chr) {
     df_tp_chronly$strand <- gsub("\\*", "\\.", df_tp_chronly$strand)
     df_tp_chronly$zero <- 0
     df_tp_chronly$start <- df_tp_chronly$start - 1
-    bed_data <- df_tp_chronly[, c('seqnames', 'start', 'end', 'subcomps_vect', 'zero', 'strand', 'start', 'end', 'subcolor_vect')]
 
-    # Modify colors for A and B compartments
-    bed_data$subcolor_vect <- ifelse(substr(bed_data$subcomps_vect, 1, 1) == "A", "207,207,207", "69,117,180")
+    bed_data <- df_tp_chronly[, c('seqnames', 'start', 'end', 'subcomps_vect', 'zero', 'strand', 'start', 'end', 'subcolor_vect')]
+    bed_data$subcolor_vect <- ifelse(substr(bed_data$subcomps_vect, 1, 1) == "A", "90,149,143", "224,170,88")
 
     bed_file <- paste0(ctrl, "_", chr, "_compartments.bed")
     header_bedfile <- paste0('track name="', ctrl, '" description="', ctrl, ' (Emission ordered)" visibility=1 itemRgb="On"')
-
     writeLines(header_bedfile, bed_file)
-    write.table(bed_data,
-                bed_file,
-                append = TRUE,
-                quote = FALSE,
-                sep = "\t",
-                row.names = FALSE,
-                col.names = FALSE)
+    write.table(bed_data, bed_file, append = TRUE, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
 
     # Generate the bedGraph file for eigenvectors
-    bedgraph_data <- df_tp_chronly_eigenvect[, c('seqnames', 'start', 'end', 'pc1')]
-    bedgraph_data$start <- bedgraph_data$start - 1
-    bedgraph_file <- paste0(ctrl, "_", chr, "_comp_eigenvector.bedgraph")
-    header_bedgraph <- paste0('track type=bedGraph name="', ctrl, '_eigenvector" description="', ctrl, ' eigenvector" visibility=full color=200,100,0 altColor=0,100,200 priority=20')
+    bedgraph_data <- data.frame(
+        seqnames = df_tp_chronly$seqnames,
+        start    = df_tp_chronly$start,
+        end      = df_tp_chronly$end,
+        score    = sub_objs[[ctrl]][["bin_eigenvector"]]
+    )
 
+    bedgraph_file <- paste0(ctrl, "_", chr, "_comp_eigenvector.bedgraph")
+    header_bedgraph <- paste0('track type=bedGraph name="', ctrl, '_eigenvector" description="', ctrl, ' eigenvector" visibility=full color=90,149,143 altColor=224,170,88 priority=20')
     writeLines(header_bedgraph, bedgraph_file)
-    write.table(bedgraph_data,
-                bedgraph_file,
-                append = TRUE,
-                quote = FALSE,
-                sep = "\t",
-                row.names = FALSE,
-                col.names = FALSE)
-  }
+    write.table(bedgraph_data, bedgraph_file, append = TRUE, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
+        }
 }
