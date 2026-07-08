@@ -1142,7 +1142,7 @@ rgb_str <- function(hex) {
 generate_files <- function(sub_objs, chr, binsize = 50000) {
   old_scipen <- options(scipen = 999)
   on.exit(options(old_scipen))
-  
+
   for (ctrl in names(sub_objs)) {
     df_tp <- as.data.frame(sub_objs[[ctrl]][["gr"]])
     df_tp_chronly <- df_tp[df_tp$seqnames == chr,]
@@ -1183,7 +1183,7 @@ generate_files <- function(sub_objs, chr, binsize = 50000) {
         chrom       = df_tp_chronly$seqnames,
         chromStart  = df_tp_chronly$start_0based,
         chromEnd    = df_tp_chronly$end,
-        name        = df_tp_chronly$subcomps_vect, 
+        name        = df_tp_chronly$subcomps_vect,
         score       = df_tp_chronly$zero,
         strand      = df_tp_chronly$strand,
         thickStart  = df_tp_chronly$start_0based,
