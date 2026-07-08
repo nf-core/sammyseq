@@ -1161,14 +1161,11 @@ generate_files <- function(sub_objs, chr, binsize = 50000) {
                           prvblock[, c("block", "pc1")],
                           by = "block", all.x = TRUE)
 
-    # Calcoliamo l'indice del bin in modo dinamico per fare un merge sicuro
     df_tp_chronly$bin <- (df_tp_chronly$start - 1) %/% as.numeric(binsize)
 
-    # Uniformiamo i nomi dei cromosomi (rimuovendo "chr" se presente) per evitare mismatch
     df_tp_chronly$chr_join <- gsub("chr", "", df_tp_chronly$seqnames)
     df_eigenvect$chr_join  <- gsub("chr", "", df_eigenvect$chr)
 
-    # Merge sicuro basato su cromosoma e ID del bin
     df_tp_chronly_eigenvect <- merge(df_tp_chronly, df_eigenvect, by = c("chr_join", "bin"), all.x = TRUE)
     df_tp_chronly_eigenvect <- df_tp_chronly_eigenvect[order(df_tp_chronly_eigenvect$bin), ]
 
