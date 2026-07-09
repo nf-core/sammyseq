@@ -1138,7 +1138,11 @@ rgb_str <- function(hex) {
   return(rgb_col)
 }
 
-# Function to generate TSV and BED files (binsize inserito come parametro opzionale)
+######################################################
+# BED AND BEDGRAPHS
+######################################################
+
+# Function to generate TSV and BED files 
 generate_files <- function(sub_objs, chr, binsize = 50000) {
   old_scipen <- options(scipen = 999)
   on.exit(options(old_scipen))
@@ -1161,10 +1165,11 @@ generate_files <- function(sub_objs, chr, binsize = 50000) {
                           prvblock[, c("block", "pc1")],
                           by = "block", all.x = TRUE)
 
-    df_tp_chronly$bin <- (df_tp_chronly$start - 1) %/% as.numeric(binsize)
+    df_tp_chronly$bin <- as.integer(seq_len(nrow(df_tp_chronly)) - 1)
+    df_tp_chronly$chr_join <- as.character(gsub("chr", "", df_tp_chronly$seqnames))
 
-    df_tp_chronly$chr_join <- gsub("chr", "", df_tp_chronly$seqnames)
-    df_eigenvect$chr_join  <- gsub("chr", "", df_eigenvect$chr)
+    df_eigenvect$bin <- as.integer(df_eigenvect$bin)
+    df_eigenvect$chr_join  <- as.character(gsub("chr", "", df_eigenvect$chr))
 
     df_tp_chronly_eigenvect <- merge(df_tp_chronly, df_eigenvect, by = c("chr_join", "bin"), all.x = TRUE)
     df_tp_chronly_eigenvect <- df_tp_chronly_eigenvect[order(df_tp_chronly_eigenvect$bin), ]
