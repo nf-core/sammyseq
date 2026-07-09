@@ -1206,7 +1206,7 @@ generate_files <- function(sub_objs, chr, binsize = 50000) {
     )
 
     bedgraph_data <- bedgraph_data[!is.na(bedgraph_data$score), ]
-    
+
     bedgraph_file <- paste0(ctrl, "_", chr, "_comp_eigenvector.bedgraph")
     header_bedgraph <- paste0('track type=bedGraph name="', ctrl, '_eigenvector" description="', ctrl, ' eigenvector" visibility=full color=90,149,143 altColor=224,170,88 priority=20')
     writeLines(header_bedgraph, bedgraph_file)
