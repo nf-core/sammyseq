@@ -1126,6 +1126,7 @@ set_sign_from_genedens <- function( pc1, genes_gr, bins_gr, blocks ){
 
 }
 
+
 ######################################################
 # BED AND BEDGRAPHS
 ######################################################
@@ -1136,10 +1137,6 @@ rgb_str <- function(hex) {
   return(rgb_col)
 }
 
-######################################################
-# BED AND BEDGRAPHS
-######################################################
-
 # Function to generate TSV and BED files
 generate_files <- function(sub_objs, chr, binsize = 50000) {
   old_scipen <- options(scipen = 999)
@@ -1147,7 +1144,8 @@ generate_files <- function(sub_objs, chr, binsize = 50000) {
 
   for (ctrl in names(sub_objs)) {
     df_tp <- as.data.frame(sub_objs[[ctrl]][["gr"]])
-    df_tp_chronly <- df_tp[df_tp$seqnames == chr,]
+    df_tp_chronly <- df_tp[df_tp$seqnames == chr, ]
+    df_tp_chronly <- df_tp_chronly[order(df_tp_chronly$start), ]
 
     # Generate the compartments TSV file
     write.table(df_tp_chronly,
@@ -1155,22 +1153,23 @@ generate_files <- function(sub_objs, chr, binsize = 50000) {
                 sep = "\t",
                 row.names = FALSE)
 
-    # Generate the eigenvectors TSV file
     prvbin <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Bin"]])
+    prvbin_chr <- prvbin[prvbin$chr == chr, ]
+    prvbin_chr <- prvbin_chr[order(as.integer(as.character(prvbin_chr$bin))), ]
+
     prvblock <- as.data.frame(sub_objs[[ctrl]][["subcompartment_obj"]][["Block"]])
 
-    df_eigenvect <- merge(prvbin[, c("block", "chr", "bin")],
+    df_eigenvect <- merge(prvbin_chr[, c("block", "bin")],
                           prvblock[, c("block", "pc1")],
                           by = "block", all.x = TRUE)
+    df_eigenvect <- df_eigenvect[order(as.integer(as.character(df_eigenvect$bin))), ]
 
-    df_tp_chronly$bin <- as.integer(seq_len(nrow(df_tp_chronly)) - 1)
-    df_tp_chronly$chr_join <- as.character(gsub("chr", "", df_tp_chronly$seqnames))
+    df_tp_chronly$bin_calder <- as.character(df_eigenvect$bin)
+    df_eigenvect$bin_calder  <- as.character(df_eigenvect$bin)
 
-    df_eigenvect$bin <- as.integer(df_eigenvect$bin)
-    df_eigenvect$chr_join  <- as.character(gsub("chr", "", df_eigenvect$chr))
-
-    df_tp_chronly_eigenvect <- merge(df_tp_chronly, df_eigenvect, by = c("chr_join", "bin"), all.x = TRUE)
-    df_tp_chronly_eigenvect <- df_tp_chronly_eigenvect[order(df_tp_chronly_eigenvect$bin), ]
+    df_tp_chronly_eigenvect <- merge(df_tp_chronly, df_eigenvect[, c("bin_calder", "pc1")], by = "bin_calder", all.x = TRUE)
+    df_tp_chronly_eigenvect <- df_tp_chronly_eigenvect[order(df_tp_chronly_eigenvect$start), ]
+    df_tp_chronly_eigenvect$bin_calder <- NULL
 
     write.table(df_tp_chronly_eigenvect,
                 paste0(ctrl, "_", chr, "_compartments_eigenvector.tsv"),
