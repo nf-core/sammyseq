@@ -1142,7 +1142,7 @@ rgb_str <- function(hex) {
 # BED AND BEDGRAPHS
 ######################################################
 
-# Function to generate TSV and BED files 
+# Function to generate TSV and BED files
 generate_files <- function(sub_objs, chr, binsize = 50000) {
   old_scipen <- options(scipen = 999)
   on.exit(options(old_scipen))

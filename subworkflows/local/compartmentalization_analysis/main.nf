@@ -106,7 +106,7 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     // Group BedGraph files by sample
     //
-    
+
     ch_bedgraphs_by_sample = CHR_COMPARTMENTS_CALLING.out.bedgraph_files
         .groupTuple(by: 0)
 
