@@ -102,14 +102,14 @@ workflow COMPARTMENTALIZATION_ANALYSIS {
     //
     ch_beds_by_sample = CHR_COMPARTMENTS_CALLING.out.bed_files
         .map { patient, bed -> [patient, bed] }
-        .groupTuple()
+        .groupTuple(size: ch_chromBeds.count())
 
     //
     // Group BedGraph files by sample
     //
     ch_bedgraphs_by_sample = CHR_COMPARTMENTS_CALLING.out.bedgraph_files
         .map { patient, bedgraph -> [patient, bedgraph] }
-        .groupTuple()
+        .groupTuple(size: ch_chromBeds.count())
 
     //
     // Combine BED and BedGraph channels for same sample

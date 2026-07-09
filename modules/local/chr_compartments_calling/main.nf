@@ -1,6 +1,6 @@
 process CHR_COMPARTMENTS_CALLING {
     tag "${patient}_${meta.chromosome}"
-    label 'process_medium'
+    label 'process_low'
 
     container 'docker.io/ciuki97/chr_compartments_calling:1.0.0'
     conda "${moduleDir}/environment.yml"
