@@ -739,8 +739,6 @@ cor.trend.blocks<-function(A,blocks,lag=4,trans.atanh=TRUE,scale=TRUE,const=1+1E
 
 }
 
-#distinguish_uniques è necessario
-
 distinguish_uniques <- function( mat, sum = 1e-15 ){
 
     umat <- unique( mat )
@@ -1202,7 +1200,7 @@ generate_files <- function(sub_objs, chr, binsize = 50000) {
     writeLines(header_bedfile, bed_file)
     write.table(bed_data, bed_file, append = TRUE, quote = FALSE, sep = "\t", row.names = FALSE, col.names = FALSE)
 
-    # Generate the bedGraph file for eigenvectors usando pc1 dal merge sicuro
+    # Generate the bedGraph file
     bedgraph_data <- data.frame(
         seqnames = df_tp_chronly_eigenvect$seqnames,
         start    = df_tp_chronly_eigenvect$start - 1,
