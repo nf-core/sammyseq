@@ -64,6 +64,10 @@
 
   > Kharchenko PK, Tolstorukov MY, Park PJ "Design and analysis of ChIP-seq experiments for DNA-binding proteins" Nat. Biotech. doi:10.1038/nbt.1508
 
+- [CALDER2](https://github.com/CSOgroup/CALDER2)
+
+  > Liu, Y., Nanni, L., Sungalee, S. et al. Systematic inference and comparison of multi-scale chromatin sub-compartments connects spatial organization to cell phenotypes. Nat Commun 12, 2439 (2021). doi:10.1038/s41467-021-22666-3
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)
