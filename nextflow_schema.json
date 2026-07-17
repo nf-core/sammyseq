@@ -457,6 +457,10 @@
                     "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
                 },
+                "skip_deeptools_qc": {
+                    "type": "boolean",
+                    "description": "Skip deeptools correlation analysis between all tracks"
+                },
                 "skip_multiqc": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",

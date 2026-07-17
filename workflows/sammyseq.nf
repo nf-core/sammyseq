@@ -273,24 +273,37 @@ if (params.stopAt == 'ALIGNMENT') {
         return
     }
 
+
+// Initialise so downstream (MultiQC) is safe when QC is skipped
+ch_dt_corrmatrix       = Channel.empty()
+ch_dt_pcadata          = Channel.empty()
+ch_dt_fpmatrix_global  = Channel.empty()
+ch_dt_fpmetrics_global = Channel.empty()
+ch_dt_fpmatrix_region  = Channel.empty()
+ch_dt_fpmetrics_region = Channel.empty()
+
+if (!params.skip_deeptools_qc) {
     DEEPTOOLS_QC (
-    FILTER_BAM_SAMTOOLS.out.bam,
-    FILTER_BAM_SAMTOOLS.out.bai,
-    DEEPTOOLS_BAMCOVERAGE.out.bigwig,
-    params.corr_method,
-    params.blacklist ? PREPARE_GENOME.out.blacklist : Channel.value(tuple([ id:'no_blacklist' ], []))
+        FILTER_BAM_SAMTOOLS.out.bam,
+        FILTER_BAM_SAMTOOLS.out.bai,
+        DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+        params.corr_method,
+        params.blacklist ? PREPARE_GENOME.out.blacklist : Channel.value(tuple([ id:'no_blacklist' ], []))
     )
-    ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
-    ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
+    ch_dt_corrmatrix = DEEPTOOLS_QC.out.correlation_matrix
+    ch_dt_pcadata    = DEEPTOOLS_QC.out.pca_data
+
     if (params.plotfingerprint) {
-        ch_dt_fpmatrix_global = DEEPTOOLS_QC.out.fingerprint_matrix_global
+        ch_dt_fpmatrix_global  = DEEPTOOLS_QC.out.fingerprint_matrix_global
         ch_dt_fpmetrics_global = DEEPTOOLS_QC.out.fingerprint_metrics_global
         if (params.region) {
-            ch_dt_fpmatrix_region = DEEPTOOLS_QC.out.fingerprint_matrix_region
+            ch_dt_fpmatrix_region  = DEEPTOOLS_QC.out.fingerprint_matrix_region
             ch_dt_fpmetrics_region = DEEPTOOLS_QC.out.fingerprint_metrics_region
         }
     }
     ch_versions = ch_versions.mix(DEEPTOOLS_QC.out.versions)
+}
+
 
         if (params.tss_bed) {
         ch_bw_by_sample = DEEPTOOLS_BAMCOVERAGE.out.bigwig
@@ -451,12 +464,12 @@ if (params.stopAt == 'ALIGNMENT') {
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.idxstats.collect{it[1]}.ifEmpty([]))
 
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.correlation_matrix.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.pca_data.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_dt_corrmatrix.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_dt_pcadata.collect{it[1]}.ifEmpty([]))
 
     if (params.plotfingerprint) {
-        ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_matrix_global.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_metrics_global.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_dt_fpmatrix_global.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_dt_fpmetrics_global.collect{it[1]}.ifEmpty([]))
     }
 
     if (params.tss_bed) {
