@@ -5,7 +5,7 @@ suppressMessages({
     library(rtracklayer)
     library(GenomicRanges)
     library(GenomeInfoDb)
-    library(preprocessCore)
+    library(limma)
     library(effsize)
     library(dplyr)
     library(GenomicFeatures)
@@ -162,7 +162,7 @@ for (current_ratio in selected_ratios) {
 
     gr1 <- GenomicRanges::makeGRangesFromDataFrame(bindf, keep.extra.columns = TRUE)
     gr1_names <- names(gr1@elementMetadata)
-    S4Vectors::mcols(gr1) <- preprocessCore::normalize.quantiles(as.matrix(S4Vectors::mcols(gr1)))
+    S4Vectors::mcols(gr1) <- limma::normalizeQuantiles(as.matrix(S4Vectors::mcols(gr1)))
     names(gr1@elementMetadata) <- gr1_names
     allmixeddf_grobj <- GenomicRanges::sort(gr1)
     unique_groups <- unique(Sample_groups)
@@ -310,7 +310,7 @@ writeLines(
     paste('    bioconductor-rtracklayer:', as.character(packageVersion('rtracklayer'))),
     paste('    bioconductor-genomicranges:', as.character(packageVersion('GenomicRanges'))),
     paste('    bioconductor-genomeinfodb:', as.character(packageVersion('GenomeInfoDb'))),
-    paste('    bioconductor-preprocesscore:', as.character(packageVersion('preprocessCore'))),
+    paste('    bioconductor-limma:', as.character(packageVersion('limma'))),
     paste('    r-effsize:', as.character(packageVersion('effsize'))),
     paste('    r-dplyr:', as.character(packageVersion('dplyr'))),
     paste('    bioconductor-genomicfeatures:', as.character(packageVersion('GenomicFeatures'))),

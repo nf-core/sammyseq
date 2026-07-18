@@ -2,7 +2,7 @@ process CHR_COMPARTMENTS_CALLING {
     tag "${patient}_${meta.chromosome}"
     label 'process_medium'
 
-    container 'docker.io/ciuki97/chr_compartments_calling:1.0.0'
+    container 'docker.io/daisymbuti/sammyr:v0.0.2'
     conda "${moduleDir}/environment.yml"
 
     input:

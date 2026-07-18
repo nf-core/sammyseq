@@ -1,17 +1,20 @@
----
 # yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/environment-schema.json
 channels:
   - conda-forge
   - bioconda
   - r
 dependencies:
-  - r-base=4.1.3
-  - r-data.table=1.14.8
-  - bioconductor-genomeinfodb=1.30.1
-  - bioconductor-genomicranges=1.46.1
-  - bioconductor-preprocesscore=1.56.0
-  - bioconductor-rtracklayer=1.54.0
+  - r-base=4.3.3
+  - r-calder2=0.7
+  - r-patchwork=1.3.2
+  - bioconductor-gviz=1.46.1
+  - bioconductor-limma=3.58.1
+  - bioconductor-rtracklayer=1.62.0
+  - bioconductor-genomicranges=1.54.1
+  - bioconductor-genomeinfodb=1.38.1
+  - bioconductor-genomicfeatures=1.54.1
+  - r-data.table=1.17.8
+  - r-dplyr=1.1.4
   - r-effsize=0.8.1
-  - r-dplyr=1.1.2
-  - bioconductor-genomicfeatures=1.46.1
-  - r-bsda=1.2.1
+  - r-bsda=1.2.2
+  - procps-ng

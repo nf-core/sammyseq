@@ -8,3 +8,13 @@ dependencies:
   - r-calder2=0.7
   - r-patchwork=1.3.2
   - bioconductor-gviz=1.46.1
+  - bioconductor-limma=3.58.1
+  - bioconductor-rtracklayer=1.62.0
+  - bioconductor-genomicranges=1.54.1
+  - bioconductor-genomeinfodb=1.38.1
+  - bioconductor-genomicfeatures=1.54.1
+  - r-data.table=1.17.8
+  - r-dplyr=1.1.4
+  - r-effsize=0.8.1
+  - r-bsda=1.2.2
+  - procps-ng
