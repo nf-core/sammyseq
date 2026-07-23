@@ -2,7 +2,7 @@ process CHR_COMPARTMENTS_CALLING {
     tag "${patient}_${meta.chromosome}"
     label 'process_medium'
 
-    container 'ghcr.io/daisymut/sammyr:0.0.0.9000'
+    container 'ghcr.io/daisymut/sammyr:0.0.0.9001'
     // conda "${moduleDir}/environment.yml"
 
     input:

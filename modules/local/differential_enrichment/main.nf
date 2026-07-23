@@ -1,6 +1,6 @@
 process DIFFERENTIAL_ENRICHMENT {
     tag "${contrast_data[0]}vs${contrast_data[1]}"
-    container 'ghcr.io/daisymut/sammyr:0.0.0.9000'
+    container 'ghcr.io/daisymut/sammyr:0.0.0.9001'
     // conda "${moduleDir}/environment.yml"
     label 'process_high'
 
