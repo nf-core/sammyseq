@@ -2,8 +2,8 @@ process CHR_COMPARTMENTS_CALLING {
     tag "${patient}_${meta.chromosome}"
     label 'process_medium'
 
-    container 'docker.io/daisymbuti/sammyr:v0.0.2'
-    conda "${moduleDir}/environment.yml"
+    container 'ghcr.io/daisymut/sammyr:0.0.0.9000'
+    // conda "${moduleDir}/environment.yml"
 
     input:
     tuple val(meta), path(chr_bed), val(patient), path(csv)

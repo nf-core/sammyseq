@@ -1,19 +1,15 @@
 #!/usr/bin/env Rscript
 
 suppressMessages({
-    require(parallel)
-    require(data.table)
-    require(GenomicRanges)
-    require(rtracklayer)
-    require(patchwork)
-    require(Gviz)
-    require(CALDER)
+    library(parallel)
+    library(data.table)
+    library(GenomicRanges)
+    library(rtracklayer)
+    library(patchwork)
+    library(Gviz)
+    library(CALDER)
+    library(sammyR)
 })
-
-## https://community.seqera.io/t/source-another-r-script-in-the-bin-directory/1059
-path <- Sys.getenv("PATH") |> strsplit(":")
-bin_path <- tail(path[[1]], n=1)
-source(file.path(bin_path, "compartmentalization_analysis_functions.R"))
 
 options(ucscChromosomeNames=FALSE)
 
@@ -52,8 +48,9 @@ sub_objs <- call_subcompartments_sammy(
 generate_files(sub_objs, chromosome)
 
 # Write versions
-r_version <- paste(R.Version()[c("major", "minor")], collapse = ".")
+pkgs <- c("sammyR", "CALDER", "GenomicRanges", "rtracklayer", "Gviz", "data.table")
 writeLines(c(
-    '"${task.process}":',
-    paste0('    r-base: "', r_version, '"')
+  '"${task.process}":',
+  paste0('    r-base: "', paste(R.Version()[c("major","minor")], collapse="."), '"'),
+  vapply(pkgs, function(p) paste0('    ', p, ': ', as.character(packageVersion(p))), character(1))
 ), "versions.yml")

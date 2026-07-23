@@ -3,16 +3,9 @@
 suppressMessages({
     library(data.table)
     library(rtracklayer)
-    library(GenomicRanges)
-    library(GenomeInfoDb)
+    library(sammyR)
     library(limma)
-    library(effsize)
-    library(dplyr)
-    library(GenomicFeatures)
-    library(BSDA)
 })
-
-source("${projectDir}/bin/differential_solubility_functions.R")
 
 ################################################
 ################################################
@@ -312,8 +305,8 @@ writeLines(
     paste('    bioconductor-genomeinfodb:', as.character(packageVersion('GenomeInfoDb'))),
     paste('    bioconductor-limma:', as.character(packageVersion('limma'))),
     paste('    r-effsize:', as.character(packageVersion('effsize'))),
-    paste('    r-dplyr:', as.character(packageVersion('dplyr'))),
+    # paste('    r-dplyr:', as.character(packageVersion('dplyr'))),
     paste('    bioconductor-genomicfeatures:', as.character(packageVersion('GenomicFeatures'))),
-    paste('    r-bsda:', as.character(packageVersion('BSDA')))
+    paste('    r-sammyr:', as.character(packageVersion('sammyR')))
     ),
 'versions.yml')
