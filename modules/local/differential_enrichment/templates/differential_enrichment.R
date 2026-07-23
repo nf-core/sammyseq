@@ -55,7 +55,7 @@ id_col    <- which(colnames(comp_db) == 'experimental_id')
 group_col <- which(colnames(comp_db) == 'sample_group')
 
 ################################################
-## FUNCTIONS                                  ##
+## SETUP                                      ##
 ################################################
 
 # Check if specified groups exist in the data
@@ -66,49 +66,6 @@ missing_groups <- setdiff(specified_groups, available_groups)
 if (length(missing_groups) > 0) {
     stop("ERROR: Groups [", paste(missing_groups, collapse = ", "), "] not found in data!\\n",
         "Available groups: [", paste(available_groups, collapse = ", "), "]\\n")
-}
-
-# metadata addition function
-add_metadata <- function(df, comparison_name, current_ratio, fraction, direction) {
-    df[['comparison']] <- comparison_name
-    df[['ratio']] <- current_ratio
-    df[['fraction']] <- fraction
-    df[['direction']] <- direction
-    return(df)
-}
-
-# save bins data to CSV in a structured way
-save_bins_data <- function(data_list, current_ratio, comparison_name, file_suffix, g1 = NULL, g2 = NULL) {
-    if (length(data_list)) {
-        df <- do.call(rbind, data_list)
-        if (grepl("all_bins", file_suffix, ignore.case = TRUE)) {
-            cols_to_remove <- c('fraction', 'direction')
-            available_cols <- colnames(df)
-            cols_to_keep <- setdiff(available_cols, cols_to_remove)
-            df <- df[, cols_to_keep]
-        } else {
-            base_cols <- c('seqnames', 'start', 'end', 'ratio', 'comparison', 'fraction', 'direction')
-            essential_stats_cols <- c()
-            if (!is.null(g1) && !is.null(g2)) {
-                essential_stats_cols <- c(
-                    paste0(g1, "_serrx2_lower"), paste0(g1, "_serrx2_upper"),
-                    paste0(g1, "_mean"), paste0(g1, "_serrX2"),
-                    paste0(g2, "_serrx2_lower"), paste0(g2, "_serrx2_upper"),
-                    paste0(g2, "_mean"), paste0(g2, "_serrX2"),
-                    "delta",
-                    "cohen.estimate",
-                    "cohen.magnitude"
-                )}
-            essential_cols <- c(base_cols, essential_stats_cols)
-            available_cols <- colnames(df)
-            cols_to_keep <- intersect(essential_cols, available_cols)
-            df <- df[, cols_to_keep]
-        }
-        output_file <- paste0(current_ratio, "_", comparison_name, "_", file_suffix, ".csv")
-        write.csv(df, file = output_file, quote = FALSE, row.names = FALSE)
-    } else {
-        cat("No", file_suffix, "data found for", comparison_name, "\\n")
-    }
 }
 
 # Setup gene annotation
