@@ -1,7 +1,7 @@
 lint:
   multiqc_config:
     - report_comment
-nf_core_version: 4.0.2
+nf_core_version: 4.0.3
 repository_type: pipeline
 template:
   author: Margherita Mutarelli, Lucio Di Filippo
