@@ -201,7 +201,6 @@ Alternatively, `--comparison_maker bigwigcompare` uses [deepTools](https://deept
 <summary>Output files</summary>
 
 - `comparisons/spp_mle/`
-
   - `<sample1>.md_VS_<sample2>.md.bw`
 
 - `comparisons/deeptools_bigwigcompare_bigwig/`
@@ -225,20 +224,16 @@ When a GTF file is provided using `--gtf`, the pipeline processes protein-coding
 <summary>Output files</summary>
 
 - `differential_solubility/csv/`
-
   - `*_all_bins_complete.csv`: Complete analysis results for all genomic bins
   - `*_selected_bins_filtered.csv`: Filtered results containing only significantly different bins
 
 - `differential_solubility/rdata/`
-
   - `*_analysis.rds`: Complete R analysis objects for further downstream analysis
 
 - `differential_solubility/regions/`
-
   - `*_regions.bed`: BED files containing coordinates of significantly different regions by category (up/down regulation per fraction)
 
 - `differential_solubility/genes/`
-
   - `*_genes.txt`: Gene lists overlapping with significantly different regions (when GTF annotation is provided)
 
 - `differential_solubility/reports/`
