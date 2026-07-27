@@ -96,6 +96,14 @@ CTRL004_S4,/home/sammy/test_data/CTRL004_S4_chr22only.fq.gz,,CTRL004,S4,CTRL
 | `sample_group`   | Identifier used to group samples that belong to the same biological condition condition.                                                                                               |
 |                  |
 
+### Compartmentalization Analysis
+
+The compartmentalization analysis can be enabled by setting the `--compartmentalization_analysis` parameter and requires the `--gtf` parameter for gene annotations.
+
+The signal profiles from all fractions of the same sample (as defined by the `experimentalID` field in the samplesheet) are integrated to identify chromatin compartments. The genome is divided into fixed-size windows (controlled by the `--binsize` parameter, default: 50000 bp), and the signal from all fractions in each window is combined into a correlation matrix. By applying principal component analysis (PCA), the first eigenvector (PC1) of this matrix is used to classify genomic regions as belonging to the active (A) or inactive (B) compartment, following strategies analogous to Hi-C analysis. This enables the detection of large-scale chromatin reorganizations, such as regions switching between active and inactive states across different biological conditions.
+
+The analysis is performed chromosome-by-chromosome using the [`CALDER2`](https://github.com/CSOgroup/CALDER2) algorithm, and results are then combined into genome-wide compartment annotations for each sample. The analysis is performed chromosome-by-chromosome using the CALDER2 algorithm, and results are then combined into genome-wide compartment annotations for each sample. Consensus profiles are then generated across biological replicates within each `sample_group`. A majority consensus assigns the most frequent compartment call across replicates to each bin (ties are marked as NA), while a strict consensus annotates only bins where all replicates unanimously agree (all other bins are marked as NA).
+
 ### Pairwise comparisons
 
 The pipeline offers two different methods for generating these comparisons, selected with the `--comparison_maker` parameter.
@@ -133,6 +141,8 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
     S2SvsS4  - Compare S2S fraction vs S4 fraction
     S2LvsS4  - Compare S2L fraction vs S4 fraction
     S4vsS3   - Compare S4 fraction vs S3 fraction
+    S3vsS2S  - Compare S3 fraction vs S2S fraction
+    S3vsS2L  - Compare S3 fraction vs S2L fraction
 
 > [!NOTE]
 > For 3f-SAMMYseq protocols (S2, S3, S4), valid comparisons are:
@@ -140,6 +150,7 @@ For 4f-SAMMYseq protocols (S2S, S2L, S3, S4), valid comparisons are:
     S2vsS3   - Compare S2 fraction vs S3 fraction
     S2vsS4   - Compare S2 fraction vs S4 fraction
     S4vsS3   - Compare S4 fraction vs S3 fraction
+    S3vsS2   - Compare S3 fraction vs S2 fraction
 
 The pipeline will automatically create comparisons only between fractions from the same `experimentalID` (biological replicate), ensuring that comparisons are made within the same experimental condition rather than across different replicates.
 

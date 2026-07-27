@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "compartmentalization_analysis"
+description: Perform genome compartmentalization analysis by splitting genome into chromosomes and calling compartments per sample
+keywords:
+  - compartmentalization
+  - chromatin
+  - epigenetics
+  - chromosome
+  - bigwig
+components:
+  - chromosome_split
+  - compartments_calling
+  - combine_compartments
+input:
+  - bigwig_tracks:
+      type: file
+      description: |
+        Channel containing BigWig coverage tracks with metadata
+        Structure: [ meta, bigwig ]
+      pattern: "*.{bigWig,bw}"
+  - binned_genome:
+      type: file
+      description: |
+        BED file containing binned genome intervals (all chromosomes)
+      pattern: "*.bed"
+  - chrom_sizes:
+      type: file
+      description: |
+        File containing chromosome names and sizes (tab-separated)
+      pattern: "*.{txt,sizes,chrom.sizes}"
+  - outdir:
+      type: string
+      description: Output directory path for results
+  - binsize:
+      type: integer
+      description: Bin size used for genome binning (in base pairs)
+  - gtf:
+      type: file
+      description: GTF annotation file for gene features
+      pattern: "*.gtf"
+output:
+  - bed_files:
+      type: file
+      description: |
+        BED files containing compartment assignments per patient and chromosome
+        Structure: [ patient, bed ]
+      pattern: "*_compartments.bed"
+  - bedgraph_files:
+      type: file
+      description: |
+        BedGraph files containing eigenvector values per patient and chromosome
+        Structure: [ patient, bedgraph ]
+      pattern: "*_comp_eigenvector.bedgraph"
+  - combined_beds:
+      type: file
+      description: |
+        Combined BED files with all chromosomes per patient
+        Structure: [ patient, bed ]
+      pattern: "*_combined_compartments.bed"
+  - combined_bedgraphs:
+      type: file
+      description: |
+        Combined BedGraph files with all chromosomes per patient
+        Structure: [ patient, bedgraph ]
+      pattern: "*_combined_compartments_eigen.bedgraph"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+notes:
+  - |
+    The CALDER algorithm may fail with "Non-positive eigenvalues" error for samples
+    with insufficient coverage or when the correlation matrix is singular.
+    Consider using errorStrategy 'ignore' or increasing binsize if this occurs.
+authors:
+  - "@ugoiannacchero"
+maintainers:
+  - "@daisymut"

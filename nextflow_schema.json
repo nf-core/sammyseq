@@ -98,8 +98,8 @@
                 "comparison": {
                     "type": "string",
                     "fa_icon": "fas fa-percentage",
-                    "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\" or \"S2SvsS3,S2LvsS3\")",
-                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3))*$"
+                    "description": "Fraction comparisons per experimentalID (e.g., \"S2SvsS3\", \"S3vsS2S\")",
+                    "pattern": "^(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3|S3vsS2|S3vsS2S|S3vsS2L)(,(S2SvsS3|S2LvsS3|S2SvsS4|S2LvsS4|S2vsS3|S2vsS4|S4vsS3|S3vsS2|S3vsS2S|S3vsS2L))*$"
                 },
                 "comparison_file": {
                     "type": "string",
@@ -133,6 +133,10 @@
                     "fa_icon": "fas fa-balance-scale",
                     "description": "Define comparison order for sample groups in differential solubility analysis using sample_group names from input samplesheet (format: 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'). Default: all groups in samplesheet order.",
                     "errorMessage": "Must follow format 'GroupAvsGroupB' or 'GroupAvsGroupB,GroupAvsGroupC,GroupBvsGroupC'. Group names must match sample_group column in input samplesheet."
+                },
+                "compartmentalization_analysis": {
+                    "type": "boolean",
+                    "description": "When set to true, this parameter activates the compartmentalization analysis workflow"
                 },
                 "stopAt": {
                     "type": "string",
@@ -326,7 +330,7 @@
                 "bigwigcompare_pseudocount": {
                     "type": "number",
                     "description": "A small number to avoid x/0. Only useful together with \u2013operation log2 or \u2013operation ratio.",
-                    "default": 1e-14,
+                    "default": 1,
                     "fa_icon": "fas fa-chart-bar"
                 },
                 "bigwigcompare_operation": {
@@ -452,6 +456,10 @@
                     "fa_icon": "fas fa-people-group",
                     "help_text": "Incoming hook URL for messaging service. Currently, MS Teams and Slack are supported.",
                     "hidden": true
+                },
+                "skip_deeptools_qc": {
+                    "type": "boolean",
+                    "description": "Skip deeptools correlation analysis between all tracks"
                 },
                 "skip_multiqc": {
                     "type": "boolean",

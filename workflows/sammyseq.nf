@@ -39,6 +39,7 @@ include { BIGWIG_PLOT_DEEPTOOLS               } from '../subworkflows/local/bigw
 include { DEEPTOOLS_QC                        } from '../subworkflows/local/deeptools_qc'
 include { GENERATE_COMPARISONS                } from '../subworkflows/local/generate_comparisons'
 include { DIFFERENTIAL_SOLUBILITY_ANALYSIS    } from '../subworkflows/local/differential_solubility_analysis'
+include { COMPARTMENTALIZATION_ANALYSIS       } from '../subworkflows/local/compartmentalization_analysis'
 
 
 /*
@@ -272,24 +273,37 @@ if (params.stopAt == 'ALIGNMENT') {
         return
     }
 
+
+// Initialise so downstream (MultiQC) is safe when QC is skipped
+ch_dt_corrmatrix       = Channel.empty()
+ch_dt_pcadata          = Channel.empty()
+ch_dt_fpmatrix_global  = Channel.empty()
+ch_dt_fpmetrics_global = Channel.empty()
+ch_dt_fpmatrix_region  = Channel.empty()
+ch_dt_fpmetrics_region = Channel.empty()
+
+if (!params.skip_deeptools_qc) {
     DEEPTOOLS_QC (
-    FILTER_BAM_SAMTOOLS.out.bam,
-    FILTER_BAM_SAMTOOLS.out.bai,
-    DEEPTOOLS_BAMCOVERAGE.out.bigwig,
-    params.corr_method,
-    params.blacklist ? PREPARE_GENOME.out.blacklist : Channel.value(tuple([ id:'no_blacklist' ], []))
+        FILTER_BAM_SAMTOOLS.out.bam,
+        FILTER_BAM_SAMTOOLS.out.bai,
+        DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+        params.corr_method,
+        params.blacklist ? PREPARE_GENOME.out.blacklist : Channel.value(tuple([ id:'no_blacklist' ], []))
     )
-    ch_dt_corrmatrix     = DEEPTOOLS_QC.out.correlation_matrix
-    ch_dt_pcadata        = DEEPTOOLS_QC.out.pca_data
+    ch_dt_corrmatrix = DEEPTOOLS_QC.out.correlation_matrix
+    ch_dt_pcadata    = DEEPTOOLS_QC.out.pca_data
+
     if (params.plotfingerprint) {
-        ch_dt_fpmatrix_global = DEEPTOOLS_QC.out.fingerprint_matrix_global
+        ch_dt_fpmatrix_global  = DEEPTOOLS_QC.out.fingerprint_matrix_global
         ch_dt_fpmetrics_global = DEEPTOOLS_QC.out.fingerprint_metrics_global
         if (params.region) {
-            ch_dt_fpmatrix_region = DEEPTOOLS_QC.out.fingerprint_matrix_region
+            ch_dt_fpmatrix_region  = DEEPTOOLS_QC.out.fingerprint_matrix_region
             ch_dt_fpmetrics_region = DEEPTOOLS_QC.out.fingerprint_metrics_region
         }
     }
     ch_versions = ch_versions.mix(DEEPTOOLS_QC.out.versions)
+}
+
 
         if (params.tss_bed) {
         ch_bw_by_sample = DEEPTOOLS_BAMCOVERAGE.out.bigwig
@@ -311,14 +325,14 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     //
-    // GENOME BINNING: Run only if comparison_file or comparison is provided
+    // GENOME BINNING: Run only if comparison_file or comparison or compartmentalization_anaylsis is provided
     //
 
     if (params.comparison_file && params.comparison) {
         error "Cannot specify both --comparison_file and --comparison parameters. Please use only one method."
     }
 
-    if (params.comparison_file || params.comparison) {
+    if (params.comparison_file || params.comparison || params.compartmentalization_analysis) {
         GENOME_BINNING(
             PREPARE_GENOME.out.filtered_bed,
             params.keep_regions_bed,
@@ -378,6 +392,27 @@ if (params.stopAt == 'ALIGNMENT') {
     }
 
     //
+    // COMPARTMENTALIZATION ANALYSIS
+    //
+
+    if (params.compartmentalization_analysis) {
+
+        if (!params.gtf) {
+            exit 1, "ERROR: The --gtf parameter must be provided when --compartmentalization_analysis is enabled."
+        }
+
+        COMPARTMENTALIZATION_ANALYSIS(
+            DEEPTOOLS_BAMCOVERAGE.out.bigwig,
+            ch_genome_bins,
+            PREPARE_GENOME.out.chrom_sizes,
+            params.outdir,
+            params.binsize,
+            PREPARE_GENOME.out.gtf
+        )
+
+    }
+
+    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
@@ -429,12 +464,12 @@ if (params.stopAt == 'ALIGNMENT') {
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.idxstats.collect{it[1]}.ifEmpty([]))
 
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.correlation_matrix.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.pca_data.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_dt_corrmatrix.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_dt_pcadata.collect{it[1]}.ifEmpty([]))
 
     if (params.plotfingerprint) {
-        ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_matrix_global.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_QC.out.fingerprint_metrics_global.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_dt_fpmatrix_global.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_dt_fpmetrics_global.collect{it[1]}.ifEmpty([]))
     }
 
     if (params.tss_bed) {
