@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "genomeblacklistregions"
+description: converts chromosome.sizes in BED format excluding blacklist regions if present
+keywords:
+  - bed
+  - blacklist
+  - bedtools
+  - sort
+tools:
+  - "genomeblacklistregions":
+      description: |
+        "converts chromosome.sizes in BED format excluding blacklist regions if present"
+      licence: ["MIT"]
+input:
+  - sizes:
+      type: file
+      description: |
+        file containing chromosome lengths
+  - blacklist:
+      type: file
+      description: BED/GTF file containing regions to exclude from analysis
+      pattern: "*.{bed,gtf}"
+      ontologies:
+        - edam: "http://edamontology.org/data_3002"
+        - edam: "http://edamontology.org/format_3003"
+      optional: true
+output:
+  bed:
+    - "*.bed":
+        type: file
+        description: BED file containing the windows
+        pattern: "*.bed"
+        ontologies:
+          - edam: http://edamontology.org/format_3003 # BED
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: versions.yml
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@ugoiannacchero"
+  - "@nadiaxaidan"
+maintainers:
+  - "@daisymut"

@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "build_consensus"
+description: Generate majority and strict consensus compartment calls from multiple samples
+keywords:
+  - consensus
+  - compartments
+  - chromatin
+  - genomics
+tools:
+  - awk:
+      description: Pattern scanning and processing language
+      homepage: https://www.gnu.org/software/gawk/
+      documentation: https://www.gnu.org/software/gawk/manual/gawk.html
+      licence: ["GPL-3.0-or-later"]
+  - coreutils:
+      description: GNU core utilities
+      homepage: https://www.gnu.org/software/coreutils/
+      documentation: https://www.gnu.org/software/coreutils/manual/
+      licence: ["GPL-3.0-or-later"]
+
+input:
+  - sample_group:
+      type: string
+      description: Sample group identifier for consensus calling
+      pattern: "^[a-zA-Z0-9_-]+$"
+  - bed_files:
+      type: file
+      description: List of BED files with compartment calls (A/B) to generate consensus from
+      pattern: "*.bed"
+
+output:
+  - consensus_majority:
+      type: file
+      description: BED file with majority consensus (more A or more B across samples)
+      pattern: "*_consensus_majority.bed"
+  - consensus_strict:
+      type: file
+      description: BED file with strict consensus (all A or all B across samples)
+      pattern: "*_consensus_strict.bed"
+
+authors:
+  - "@ugoiannacchero"
+maintainers:
+  - "@daisymut"
