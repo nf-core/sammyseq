@@ -6,7 +6,7 @@ lint:
     - .github/workflows/branch.yml
   multiqc_config:
     - report_comment
-nf_core_version: 4.1.0
+nf_core_version: 4.2.1
 repository_type: pipeline
 template:
   author: Margherita Mutarelli, Lucio Di Filippo
