@@ -6,7 +6,7 @@ lint:
     - .github/workflows/branch.yml
   files_exist:
     - .github/workflows/linting_comment.yml
-nf_core_version: 3.4.1
+nf_core_version: 3.5.1
 repository_type: pipeline
 template:
   author: Margherita Mutarelli, Lucio Di Filippo
