@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: genome_binning
+description: Genome binning subworkflow with keep_regions handling
+keywords:
+  - bed
+  - intersect
+  - makewindows
+  - bedtools
+components:
+  - gunzip
+  - bedtools/makewindows
+  - bedtools/intersect
+input:
+  - genome_filtered_bed:
+      type: file
+      description: |
+        genome bed file already filtered for blacklist
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*{.bed}"
+  - keep_regions_bed_param:
+      type: string
+      description: |
+        list of regions that will be kept in the output after filtering
+        Structure: [ val(string) ]
+  - chrom_sizes:
+      type: file
+      description: |
+        File containing chromosome lengths
+        Structure:
+      pattern: "*.{sizes,txt}"
+output:
+  - binned_genome:
+      type: file
+      description: |
+        binned genome
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*{.bed}"
+  - keep_regions_bed:
+      type: file
+      description: |
+        BED file containing the windows
+        Structure: [ val(meta), path(bed) ]
+      pattern: "*{.bed}"
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ugoiannacchero"
+  - "@rustem-musaev"
+maintainers:
+  - "@daisymut"

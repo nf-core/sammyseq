@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: deeptools_qc
+description: Perform correlation analysis on single tracks bigwig files and optional fingerprint analysis on bam files
+keywords:
+  - deeptools
+  - bam
+  - bigwig
+  - PCA
+  - correlation
+  - fingerprint
+  - cumulative coverage
+##  - plot
+components:
+  - deeptools/multibigwigsummary
+  - deeptools/plotcorrelation
+  - deeptools/plotpca
+  - deeptools/plotfingerprint
+input:
+  - bam:
+      type: file
+      description: |
+        filtered/converted BAM file
+        Structure: [ val(meta), path(bam) ]
+      pattern: "*.{bam}"
+  - bai:
+      type: file
+      description: |
+        BAM index file
+        Structure: [ val(meta), path(bai) ]
+      pattern: "*.{bai}"
+  - bigwig:
+      type: file
+      description: |
+        BigWig file(s) used for correlation and PCA
+        Structure: [ val(meta), path(bigwig) ]
+      pattern: "*.{bigWig,bw}"
+  - corr_method:
+      type: string
+      description: |
+        Correlation coefficient to use for heatmap or scatterplot generation
+        Structure: [ val(string) ]
+      pattern: "{spearman,pearson}"
+  - ch_blacklist:
+      type: file
+      description: |
+        optional BED/GTF file containing regions to exclude from analysis
+        Structure: [ val(meta), path(blacklist) ]
+      pattern: "*.{bed,gtf}"
+output:
+  - correlation_matrix:
+      type: file
+      description: |
+        Tab-separated file containing a matrix of pairwise correlations
+        Structure: [ val(meta), path(correlation_matrix) ]
+      pattern: "*.{plotCorrelation.mat.tab}"
+  - pca_data:
+      type: file
+      description: |
+        Tab-separated file containing data used to generate the PCA plot
+        Structure: [ val(meta), path(pca_data) ]
+      pattern: "*.{plotPCA.tab}"
+  - fingerprint_matrix_global:
+      description: |
+        channel containing the output file summarizing the global read counts per bin
+  - fingerprint_metrics_global:
+      description: |
+        channel containing the file summarizing BAM file quality global metrics
+  - fingerprint_matrix_region:
+      description: |
+        channel containing the output file summarizing the read counts per bin
+  - fingerprint_metrics_region:
+      description: |
+        channel containing the file summarizing BAM file quality metrics
+  - versions:
+      type: file
+      description: |
+        File containing software versions
+        Structure: [ path(versions.yml) ]
+      pattern: "versions.yml"
+authors:
+  - "@ugoiannacchero"
+  - "@nadiaxaidan"
+maintainers:
+  - "@daisymut"

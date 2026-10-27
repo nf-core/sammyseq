@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: "chr_split"
+description: Splits a BED file into separate files per chromosome based on a chromosome sizes file
+keywords:
+  - bed
+  - chromosome
+  - split
+  - filter
+tools:
+  - "awk":
+      description: |
+        "Pattern scanning and processing language for splitting BED files by chromosome"
+      homepage: "https://www.gnu.org/software/gawk/"
+      licence: ["GPL-3.0"]
+input:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1' ]`
+  - bed:
+      type: file
+      description: Input BED file to split by chromosome
+      pattern: "*.bed"
+      ontologies:
+        - edam: "http://edamontology.org/format_3003"
+  - chrom_sizes:
+      type: file
+      description: File containing chromosome names and sizes (tab-separated)
+      pattern: "*.{txt,sizes,chrom.sizes}"
+output:
+  - meta:
+      type: map
+      description: |
+        Groovy Map containing sample information
+        e.g. `[ id:'sample1' ]`
+  - beds:
+      type: file
+      description: BED files split by chromosome (one file per chromosome)
+      pattern: "*.bed"
+      ontologies:
+        - edam: "http://edamontology.org/format_3003"
+authors:
+  - "@ugoiannacchero"
+maintainers:
+  - "@daisymut"
